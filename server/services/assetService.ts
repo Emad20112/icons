@@ -142,7 +142,10 @@ export class AssetService {
 
     // License Filter
     if (filter.licenseSlug) {
-      const lic = Array.from(dbStore.licenses.values()).find(l => l.slug === filter.licenseSlug)
+      const targetSlug = filter.licenseSlug.toLowerCase()
+      const lic = Array.from(dbStore.licenses.values()).find(
+        l => l.slug.toLowerCase() === targetSlug || l.slug.toLowerCase().startsWith(targetSlug)
+      )
       if (lic) {
         items = items.filter(a => a.license_id === lic.id)
       } else {
@@ -207,67 +210,71 @@ export class AssetService {
           ? asset.metadata.keywords.map((k: string) => String(k).toLowerCase())
           : []
 
-        // Exact & Prefix Matches (Highest Priority)
-        if (nameLower === q) score += 200
-        else if (nameLower.startsWith(q)) score += 120
-        else if (nameLower.includes(q)) score += 60
+        let phraseScore = 0
 
-        if (slugLower === q) score += 150
-        else if (slugLower.includes(q)) score += 50
+        // Exact & Prefix Matches (Highest Priority)
+        if (nameLower === q) phraseScore += 200
+        else if (nameLower.startsWith(q)) phraseScore += 120
+        else if (nameLower.includes(q)) phraseScore += 60
+
+        if (slugLower === q) phraseScore += 150
+        else if (slugLower.includes(q)) phraseScore += 50
 
         // Aliases & Arabic/English keywords match
         for (const alias of metadataAliases) {
-          if (alias === q) score += 160
-          else if (alias.includes(q) || q.includes(alias)) score += 80
+          if (alias === q) phraseScore += 160
+          else if (alias.includes(q) || q.includes(alias)) phraseScore += 80
         }
 
         for (const kw of metadataKeywords) {
-          if (kw === q) score += 90
-          else if (kw.includes(q) || q.includes(kw)) score += 50
+          if (kw === q) phraseScore += 90
+          else if (kw.includes(q) || q.includes(kw)) phraseScore += 50
         }
 
         // Tags match
         for (const tag of tags) {
           const tName = tag.name.toLowerCase()
           const tSlug = tag.slug.toLowerCase()
-          if (tName === q || tSlug === q) score += 100
-          else if (tName.includes(q) || tSlug.includes(q)) score += 60
+          if (tName === q || tSlug === q) phraseScore += 100
+          else if (tName.includes(q) || tSlug.includes(q)) phraseScore += 60
         }
 
         // Category match
-        if (catNameLower === q || catSlugLower === q) score += 70
-        else if (catNameLower.includes(q) || catSlugLower.includes(q)) score += 35
+        if (catNameLower === q || catSlugLower === q) phraseScore += 70
+        else if (catNameLower.includes(q) || catSlugLower.includes(q)) phraseScore += 35
 
         // Description match
-        if (descLower.includes(q)) score += 25
+        if (descLower.includes(q)) phraseScore += 25
+
+        let tokenScore = 0
+        let tokenMatches = 0
 
         // Multi-token matches
         if (tokens.length > 1) {
-          let tokenMatches = 0
           for (const token of tokens) {
             let matchedToken = false
             if (nameLower.includes(token)) {
-              score += 35
+              tokenScore += 35
               matchedToken = true
             }
             if (metadataAliases.some(a => a.includes(token))) {
-              score += 30
+              tokenScore += 30
               matchedToken = true
             }
             if (metadataKeywords.some(k => k.includes(token))) {
-              score += 20
+              tokenScore += 20
               matchedToken = true
             }
             if (tagStrings.some(t => t.includes(token))) {
-              score += 25
+              tokenScore += 25
               matchedToken = true
             }
             if (catNameLower.includes(token) || catSlugLower.includes(token)) {
-              score += 15
+              tokenScore += 15
               matchedToken = true
             }
             if (descLower.includes(token)) {
-              score += 10
+              tokenScore += 10
               matchedToken = true
             }
             if (matchedToken) tokenMatches++
@@ -275,15 +282,21 @@ export class AssetService {
 
           // Full tokens coverage bonus
           if (tokenMatches === tokens.length) {
-            score += 50
+            tokenScore += 50
           }
         }
 
-        // Slight quality boost
-        if (score > 0) {
-          if (asset.is_featured) score += 5
-          score += Math.min(10, Math.floor((asset.download_count || 0) / 200))
-          scores.set(asset.id, score)
+        // Determine if this is a genuine match:
+        // Single token queries require phraseScore > 0.
+        // Multi-token queries require phraseScore > 0 OR meeting token coverage threshold.
+        const requiredTokenMatches = tokens.length <= 2 ? tokens.length : tokens.length - 1
+        const isMultiTokenMatch = tokens.length > 1 && tokenMatches >= requiredTokenMatches
+
+        if (phraseScore > 0 || isMultiTokenMatch) {
+          let totalScore = phraseScore + tokenScore
+          if (asset.is_featured) totalScore += 5
+          totalScore += Math.min(10, Math.floor((asset.download_count || 0) / 200))
+          scores.set(asset.id, totalScore)
           return true
         }
 
