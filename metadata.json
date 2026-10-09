@@ -1,0 +1,8 @@
+{
+  "name": "Digital Assets Platform - Foundation",
+  "description": "Production-ready, extensible digital assets platform architecture supporting Icons, Fonts, Illustrations, Logos, and Templates with Vue 3, Nuxt 4, Tailwind CSS, and Supabase.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
