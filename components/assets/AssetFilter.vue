@@ -247,11 +247,18 @@ const showAdvancedFilters = ref(false)
         v-for="cat in categories"
         :key="cat.id"
         type="button"
-        class="rounded-lg px-3 py-1.5 font-medium transition-colors shrink-0 flex items-center gap-1"
+        class="rounded-lg px-3 py-1.5 font-medium transition-colors shrink-0 flex items-center gap-1.5"
         :class="selectedCategory === cat.slug ? 'bg-blue-600 text-white shadow-2xs font-semibold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
         @click="selectCategoryPill(cat.slug)"
       >
-        {{ cat.name }}
+        <span>{{ cat.name }}</span>
+        <span
+          v-if="cat.asset_count !== undefined"
+          class="rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+          :class="selectedCategory === cat.slug ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300'"
+        >
+          {{ cat.asset_count }}
+        </span>
       </button>
     </div>
 

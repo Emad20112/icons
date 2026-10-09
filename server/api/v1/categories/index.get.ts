@@ -18,6 +18,16 @@ export default defineEventHandler(async (event) => {
 
   const activeCategories = Array.from(dbStore.categories.values())
     .filter(c => c.is_active)
+    .map(cat => {
+      // Count PUBLISHED assets in this category
+      const count = Array.from(dbStore.assets.values()).filter(
+        a => a.category_id === cat.id && a.status === 'PUBLISHED'
+      ).length
+      return {
+        ...cat,
+        asset_count: count
+      }
+    })
     .sort((a, b) => a.name.localeCompare(b.name))
 
   return {

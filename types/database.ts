@@ -23,6 +23,7 @@ export interface Category {
   description: string | null
   icon: string | null
   is_active: boolean
+  asset_count?: number
   created_at: string
 }
 
