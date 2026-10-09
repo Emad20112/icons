@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import Container from '../components/layout/Container.vue'
 import Button from '../components/ui/Button.vue'
 import Badge from '../components/ui/Badge.vue'
@@ -9,21 +9,42 @@ import AssetFilter from '../components/assets/AssetFilter.vue'
 import AssetCreateModal from '../components/assets/AssetCreateModal.vue'
 import EmptyState from '../components/common/EmptyState.vue'
 import LoadingState from '../components/common/LoadingState.vue'
+import ErrorState from '../components/common/ErrorState.vue'
 import FoundationStatus from '../components/admin/FoundationStatus.vue'
 import { useAssets } from '../composables/useAssets'
 import { useCategories } from '../composables/useCategories'
 import { useLicenses } from '../composables/useLicenses'
+import { useTags } from '../composables/useTags'
 import { useAuth } from '../composables/useAuth'
 import type { Asset, AssetType, AssetStatus } from '../types/database'
+import type { SortOption } from '../server/services/assetService'
 
 const router = useRouter()
-const { assets, total, isLoading, fetchAssets } = useAssets()
+const route = useRoute()
+const { assets, total, page, totalPages, limit, isLoading, error, fetchAssets } = useAssets()
 const { categories, fetchCategories } = useCategories()
 const { licenses, fetchLicenses } = useLicenses()
-const { role, isAdmin } = useAuth()
+const { tags, fetchTags } = useTags()
+const { role } = useAuth()
 
 const isCreateModalOpen = ref(false)
 const showArchitectureInfo = ref(false)
+
+// Parse initial query state from route
+const initialSearch = (route.query.q as string) || (route.query.search as string) || ''
+const initialCategory = (route.query.category as string) || ''
+const initialLicense = (route.query.license as string) || ''
+const initialType = ((route.query.type as string) || '') as AssetType | ''
+const initialStatus = ((route.query.status as string) || '') as AssetStatus | ''
+const initialSort = ((route.query.sort as string) || (initialSearch ? 'relevance' : 'newest')) as SortOption
+const initialPage = route.query.page ? Math.max(1, Number(route.query.page)) : 1
+
+const initialTags: string[] = []
+if (route.query.tag) {
+  initialTags.push(route.query.tag as string)
+} else if (route.query.tags) {
+  initialTags.push(...(route.query.tags as string).split(',').map(s => s.trim()).filter(Boolean))
+}
 
 const filters = reactive<{
   search: string
@@ -31,25 +52,52 @@ const filters = reactive<{
   selectedCategory: string
   selectedLicense: string
   selectedStatus: AssetStatus | ''
+  selectedTags: string[]
+  selectedSort: SortOption
+  page: number
 }>({
-  search: '',
-  selectedType: '',
-  selectedCategory: '',
-  selectedLicense: '',
-  selectedStatus: ''
+  search: initialSearch,
+  selectedType: initialType,
+  selectedCategory: initialCategory,
+  selectedLicense: initialLicense,
+  selectedStatus: initialStatus,
+  selectedTags: initialTags,
+  selectedSort: initialSort,
+  page: initialPage
 })
+
+async function triggerFetch() {
+  await fetchAssets({
+    search: filters.search,
+    type: filters.selectedType,
+    categorySlug: filters.selectedCategory,
+    licenseSlug: filters.selectedLicense,
+    tagSlugs: filters.selectedTags,
+    status: filters.selectedStatus,
+    sort: filters.selectedSort,
+    page: filters.page,
+    limit: 24
+  })
+
+  // Synchronize state with URL query parameters for shareability
+  const queryParams: Record<string, string> = {}
+  if (filters.search) queryParams.q = filters.search
+  if (filters.selectedCategory) queryParams.category = filters.selectedCategory
+  if (filters.selectedLicense) queryParams.license = filters.selectedLicense
+  if (filters.selectedType) queryParams.type = filters.selectedType
+  if (filters.selectedTags.length > 0) queryParams.tags = filters.selectedTags.join(',')
+  if (filters.selectedSort && filters.selectedSort !== 'newest') queryParams.sort = filters.selectedSort
+  if (filters.page > 1) queryParams.page = String(filters.page)
+
+  router.replace({ query: queryParams }).catch(() => {})
+}
 
 async function loadData() {
   await Promise.all([
     fetchCategories(),
     fetchLicenses(),
-    fetchAssets({
-      search: filters.search,
-      type: filters.selectedType,
-      categorySlug: filters.selectedCategory,
-      licenseSlug: filters.selectedLicense,
-      status: filters.selectedStatus
-    })
+    fetchTags(),
+    triggerFetch()
   ])
 }
 
@@ -60,16 +108,45 @@ onMounted(() => {
   loadData()
 })
 
-// Refetch on filter change or role toggle (to test RLS visibility)
-watch([filters, role], () => {
-  fetchAssets({
-    search: filters.search,
-    type: filters.selectedType,
-    categorySlug: filters.selectedCategory,
-    licenseSlug: filters.selectedLicense,
-    status: filters.selectedStatus
-  })
-}, { deep: true })
+// Reactively re-query on filter change or role toggle
+watch(
+  [
+    () => filters.search,
+    () => filters.selectedType,
+    () => filters.selectedCategory,
+    () => filters.selectedLicense,
+    () => filters.selectedStatus,
+    () => filters.selectedTags,
+    () => filters.selectedSort,
+    role
+  ],
+  () => {
+    filters.page = 1 // Reset to first page when filtering
+    triggerFetch()
+  },
+  { deep: true }
+)
+
+watch(
+  () => filters.page,
+  () => {
+    triggerFetch()
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 400, behavior: 'smooth' })
+    }
+  }
+)
+
+function resetAllFilters() {
+  filters.search = ''
+  filters.selectedCategory = ''
+  filters.selectedLicense = ''
+  filters.selectedType = ''
+  filters.selectedStatus = ''
+  filters.selectedTags = []
+  filters.selectedSort = 'newest'
+  filters.page = 1
+}
 
 function handleAssetSelect(asset: Asset) {
   router.push(`/assets/${asset.id}`)
@@ -78,20 +155,19 @@ function handleAssetSelect(asset: Asset) {
 
 <template>
   <Container>
-    <!-- Top Hero Banner: Phase 0 Foundation -->
+    <!-- Top Hero Banner: Digital Assets Platform & Search Discovery -->
     <div class="mb-8 rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 p-8 text-white shadow-lg relative overflow-hidden">
       <div class="relative z-10 max-w-3xl">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold backdrop-blur-sm border border-blue-400/30 mb-4">
-          <span>Phase 0: Foundation Layer</span>
+          <span>Phase 2: Advanced Search & Discovery</span>
           <span>•</span>
-          <span>PostgreSQL + RLS + Storage</span>
+          <span>PostgreSQL + Full-Text & Relevance</span>
         </div>
         <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
-          Extensible Digital Assets Platform
+          Explore Professional Digital Assets
         </h1>
         <p class="mt-3 text-sm sm:text-base text-slate-300 leading-relaxed">
-          Architected for high scale. Polymorphic assets entity supporting 
-          <strong class="text-white">Icons, Fonts, Illustrations, Logos, and Templates</strong> with decoupled Supabase Storage, strict PostgreSQL Row Level Security, and comprehensive audit trails.
+          Search thousands of modern icons, fonts, illustrations, and logos with instant full-text search, multi-faceted taxonomy filters, and relevance ranking.
         </p>
 
         <div class="mt-6 flex flex-wrap items-center gap-3">
@@ -132,58 +208,128 @@ function handleAssetSelect(asset: Asset) {
       <FoundationStatus />
     </div>
 
-    <!-- Filter & Search Controls -->
+    <!-- Instant Search & Multi-Faceted Filters -->
     <AssetFilter
       v-model:search="filters.search"
       v-model:selected-type="filters.selectedType"
       v-model:selected-category="filters.selectedCategory"
       v-model:selected-license="filters.selectedLicense"
       v-model:selected-status="filters.selectedStatus"
+      v-model:selected-tags="filters.selectedTags"
+      v-model:selected-sort="filters.selectedSort"
       :categories="categories"
       :licenses="licenses"
+      :tags="tags"
+      :loading="isLoading"
+      :total-count="total"
+      @reset="resetAllFilters"
     />
 
-    <!-- Assets Catalog Header -->
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-2">
-        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">
-          Catalog Assets
+    <!-- Results Header & Live Count Feedback -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
+      <div class="flex items-center gap-3">
+        <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <span v-if="filters.search">Results for "{{ filters.search }}"</span>
+          <span v-else-if="filters.selectedCategory">
+            {{ categories.find(c => c.slug === filters.selectedCategory)?.name }} Icons
+          </span>
+          <span v-else>Catalog Assets</span>
         </h2>
-        <Badge variant="secondary">
+        <Badge variant="secondary" class="font-mono text-xs">
           {{ total }} {{ total === 1 ? 'asset' : 'assets' }}
         </Badge>
       </div>
 
-      <div class="text-xs text-slate-500">
-        Active RLS View:
-        <span class="font-semibold text-blue-600 dark:text-blue-400">{{ role }}</span>
-        <span v-if="role === 'USER'" class="ml-1 text-[11px] text-slate-400">(Drafts private to author)</span>
-        <span v-else class="ml-1 text-[11px] text-slate-400">(All statuses accessible)</span>
+      <div class="flex items-center gap-4 text-xs text-slate-500">
+        <span v-if="totalPages > 1" class="font-medium">
+          Page {{ page }} of {{ totalPages }}
+        </span>
+        <div class="border-l border-slate-200 dark:border-slate-800 pl-4">
+          Active Role:
+          <span class="font-semibold text-blue-600 dark:text-blue-400">{{ role }}</span>
+        </div>
       </div>
     </div>
 
-    <!-- Assets Display Grid -->
+    <!-- Loading State -->
     <LoadingState v-if="isLoading" />
 
+    <!-- Error State -->
+    <ErrorState
+      v-else-if="error"
+      title="Failed to load search results"
+      :message="error"
+      action-label="Retry Search"
+      @retry="triggerFetch"
+    />
+
+    <!-- Empty State -->
     <EmptyState
       v-else-if="assets.length === 0"
-      title="No assets matching criteria"
-      description="Try clearing your filters or create a new digital asset."
+      :title="filters.search ? `No assets found for \"${filters.search}\"` : 'No matching assets found'"
+      description="Try checking for typos, clearing active tag filters, or browsing other categories."
     >
       <template #action>
-        <Button size="sm" @click="isCreateModalOpen = true">
-          Create First Asset
-        </Button>
+        <div class="flex gap-2">
+          <Button size="sm" variant="outline" @click="resetAllFilters">
+            Clear all filters
+          </Button>
+          <Button size="sm" variant="primary" @click="isCreateModalOpen = true">
+            Create New Asset
+          </Button>
+        </div>
       </template>
     </EmptyState>
 
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <AssetCard
-        v-for="asset in assets"
-        :key="asset.id"
-        :asset="asset"
-        @select="handleAssetSelect"
-      />
+    <!-- Assets Display Grid -->
+    <div v-else class="space-y-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <AssetCard
+          v-for="asset in assets"
+          :key="asset.id"
+          :asset="asset"
+          @select="handleAssetSelect"
+        />
+      </div>
+
+      <!-- Pagination Navigation -->
+      <div
+        v-if="totalPages > 1"
+        class="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-6"
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="page <= 1"
+          @click="filters.page--"
+        >
+          &larr; Previous Page
+        </Button>
+
+        <div class="flex items-center gap-1">
+          <button
+            v-for="p in totalPages"
+            :key="p"
+            type="button"
+            class="h-8 w-8 rounded-lg text-xs font-semibold transition-colors"
+            :class="p === page
+              ? 'bg-blue-600 text-white shadow-2xs'
+              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'"
+            @click="filters.page = p"
+          >
+            {{ p }}
+          </button>
+        </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="page >= totalPages"
+          @click="filters.page++"
+        >
+          Next Page &rarr;
+        </Button>
+      </div>
     </div>
 
     <!-- Create Asset Modal -->
