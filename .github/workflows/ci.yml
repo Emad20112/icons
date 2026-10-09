@@ -1,0 +1,42 @@
+name: CI / Quality Assurance Pipeline
+
+on:
+  push:
+    branches: [main, master, 'feat/**']
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  validate:
+    name: Lint, Test, Typecheck & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile || pnpm install
+
+      - name: Nuxt Prepare
+        run: pnpm postinstall
+
+      - name: Run Unit & Integration Tests
+        run: pnpm test
+
+      - name: Run Production Build
+        run: pnpm build
+        env:
+          NUXT_PUBLIC_SUPABASE_URL: https://mock-ci.supabase.co
+          NUXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-anon
+          SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-service
