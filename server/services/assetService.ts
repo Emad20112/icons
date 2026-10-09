@@ -5,71 +5,119 @@ import { ValidationError, AuthorizationError, NotFoundError } from '../../lib/er
 import { AuditService } from './auditService'
 import type { Asset, AssetFile, AssetStatus, AssetType, UserRole } from '../../types/database'
 
+export type SortOption = 'relevance' | 'newest' | 'downloads' | 'name_asc' | 'name_desc'
+
 export interface ListAssetsFilter {
   type?: AssetType
   categorySlug?: string
   licenseSlug?: string
+  tagSlugs?: string[] | string
   search?: string
   status?: AssetStatus
   isFeatured?: boolean
+  sort?: SortOption
+  page?: number
   limit?: number
   offset?: number
 }
 
+export interface ListAssetsResponse {
+  assets: Asset[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+  query?: string
+}
+
 export class AssetService {
   /**
-   * List assets respecting Row Level Security (RLS) rules.
+   * List and search assets respecting Row Level Security (RLS) rules,
+   * weighted relevance scoring, multi-faceted filtering, and sorting.
    */
   public static async listAssets(
     filter: ListAssetsFilter,
     currentUserId: string | null,
     currentUserRole: UserRole | null
-  ): Promise<{ assets: Asset[]; total: number }> {
-    // 1. Try Remote Supabase if available
+  ): Promise<ListAssetsResponse> {
+    const page = Math.max(1, Number(filter.page) || 1)
+    const limit = Math.min(100, Math.max(1, Number(filter.limit) || 24))
+    const offset = filter.offset !== undefined ? Number(filter.offset) : (page - 1) * limit
+    const sort = filter.sort || (filter.search?.trim() ? 'relevance' : 'newest')
+
+    // 1. Try Remote Supabase if available and tables are ready
     const admin = getSupabaseAdminClient()
     if (admin) {
-      let query = admin
-        .from('assets')
-        .select(`
-          *,
-          author:profiles(*),
-          category:categories(*),
-          license:licenses(*),
-          files:asset_files(*)
-        `, { count: 'exact' })
+      try {
+        let query = admin
+          .from('assets')
+          .select(`
+            *,
+            author:profiles(*),
+            category:categories(*),
+            license:licenses(*),
+            files:asset_files(*),
+            asset_tags(tag:tags(*))
+          `, { count: 'exact' })
 
-      // Apply RLS filter:
-      if (currentUserRole !== 'ADMIN') {
-        if (currentUserId) {
-          query = query.or(`status.eq.PUBLISHED,author_id.eq.${currentUserId}`)
-        } else {
-          query = query.eq('status', 'PUBLISHED')
+        // Apply RLS filter:
+        if (currentUserRole !== 'ADMIN') {
+          if (currentUserId) {
+            query = query.or(`status.eq.PUBLISHED,author_id.eq.${currentUserId}`)
+          } else {
+            query = query.eq('status', 'PUBLISHED')
+          }
         }
-      }
 
-      if (filter.type) query = query.eq('type', filter.type)
-      if (filter.status && currentUserRole === 'ADMIN') query = query.eq('status', filter.status)
-      if (filter.isFeatured !== undefined) query = query.eq('is_featured', filter.isFeatured)
+        if (filter.type) query = query.eq('type', filter.type)
+        if (filter.status && currentUserRole === 'ADMIN') query = query.eq('status', filter.status)
+        if (filter.isFeatured !== undefined) query = query.eq('is_featured', filter.isFeatured)
 
-      query = query.order('created_at', { ascending: false })
-      if (filter.limit) query = query.limit(filter.limit)
-      if (filter.offset) query = query.range(filter.offset, filter.offset + (filter.limit || 20) - 1)
+        if (filter.search?.trim()) {
+          const cleanQ = filter.search.trim()
+          query = query.or(`name.ilike.%${cleanQ}%,description.ilike.%${cleanQ}%,slug.ilike.%${cleanQ}%`)
+        }
 
-      const { data, count, error } = await query
-      if (!error && data) {
-        return { assets: data as Asset[], total: count || data.length }
+        // Apply sorting
+        if (sort === 'downloads') {
+          query = query.order('download_count', { ascending: false })
+        } else if (sort === 'name_asc') {
+          query = query.order('name', { ascending: true })
+        } else if (sort === 'name_desc') {
+          query = query.order('name', { ascending: false })
+        } else {
+          query = query.order('created_at', { ascending: false })
+        }
+
+        query = query.range(offset, offset + limit - 1)
+
+        const { data, count, error } = await query
+        if (!error && data) {
+          const totalCount = count || data.length
+          return {
+            assets: data as Asset[],
+            total: totalCount,
+            page,
+            limit,
+            totalPages: Math.ceil(totalCount / limit),
+            query: filter.search
+          }
+        }
+      } catch {
+        // Fall through to resilient in-memory search engine
       }
     }
 
-    // 2. In-Memory Store Query with RLS Enforcement
+    // 2. In-Memory Search & Discovery Engine
     let items = dbStore.filterAssetsByRLS(currentUserId, currentUserRole)
 
+    // Type Filter
     if (filter.type) {
       items = items.filter(a => a.type === filter.type)
     }
 
+    // Status Filter (Admins or own assets only)
     if (filter.status) {
-      // If user is requesting specific status, ensure authorized
       if (currentUserRole === 'ADMIN' || filter.status === 'PUBLISHED') {
         items = items.filter(a => a.status === filter.status)
       } else if (currentUserId) {
@@ -77,38 +125,270 @@ export class AssetService {
       }
     }
 
+    // Featured Filter
+    if (filter.isFeatured !== undefined) {
+      items = items.filter(a => a.is_featured === filter.isFeatured)
+    }
+
+    // Category Filter
     if (filter.categorySlug) {
       const cat = Array.from(dbStore.categories.values()).find(c => c.slug === filter.categorySlug)
       if (cat) {
         items = items.filter(a => a.category_id === cat.id)
+      } else {
+        items = []
       }
     }
 
+    // License Filter
     if (filter.licenseSlug) {
       const lic = Array.from(dbStore.licenses.values()).find(l => l.slug === filter.licenseSlug)
       if (lic) {
         items = items.filter(a => a.license_id === lic.id)
+      } else {
+        items = []
       }
     }
 
-    if (filter.search) {
-      const query = filter.search.toLowerCase()
-      items = items.filter(a => 
-        a.name.toLowerCase().includes(query) ||
-        (a.description && a.description.toLowerCase().includes(query)) ||
-        a.slug.toLowerCase().includes(query)
-      )
+    // Tag Filter (Supports multiple comma-separated or array of tags)
+    const tagSlugsList = filter.tagSlugs
+      ? (Array.isArray(filter.tagSlugs) ? filter.tagSlugs : filter.tagSlugs.split(','))
+          .map(s => s.trim().toLowerCase())
+          .filter(Boolean)
+      : []
+
+    if (tagSlugsList.length > 0) {
+      const matchingTagIds = Array.from(dbStore.tags.values())
+        .filter(t => tagSlugsList.includes(t.slug.toLowerCase()))
+        .map(t => t.id)
+
+      if (matchingTagIds.length > 0) {
+        items = items.filter(asset => {
+          const assetTagIds = dbStore.assetTags
+            .filter(at => at.asset_id === asset.id)
+            .map(at => at.tag_id)
+          // Match if asset contains ANY of the filtered tags
+          return matchingTagIds.some(tid => assetTagIds.includes(tid))
+        })
+      } else {
+        items = []
+      }
     }
 
-    const total = items.length
-    const offset = filter.offset || 0
-    const limit = filter.limit || 50
-    const paged = items.slice(offset, offset + limit)
+    // Text Search & Relevance Scoring Pipeline
+    const scores = new Map<string, number>()
+    const rawSearch = filter.search?.trim()
 
-    // Populate relations
+    if (rawSearch) {
+      const q = rawSearch.toLowerCase()
+      const tokens = q.split(/\s+/).filter(t => t.length > 0)
+
+      items = items.filter(asset => {
+        let score = 0
+        const nameLower = asset.name.toLowerCase()
+        const descLower = (asset.description || '').toLowerCase()
+        const slugLower = asset.slug.toLowerCase()
+
+        // Get category info
+        const category = asset.category_id ? dbStore.categories.get(asset.category_id) : null
+        const catNameLower = category ? category.name.toLowerCase() : ''
+        const catSlugLower = category ? category.slug.toLowerCase() : ''
+
+        // Get tags info
+        const assetTagIds = dbStore.assetTags.filter(at => at.asset_id === asset.id).map(at => at.tag_id)
+        const tags = assetTagIds.map(tid => dbStore.tags.get(tid)).filter(Boolean) as any[]
+        const tagStrings = tags.map(t => `${t.name} ${t.slug}`.toLowerCase())
+
+        // Get metadata aliases and keywords
+        const metadataAliases = Array.isArray(asset.metadata?.aliases)
+          ? asset.metadata.aliases.map((a: string) => String(a).toLowerCase())
+          : []
+        const metadataKeywords = Array.isArray(asset.metadata?.keywords)
+          ? asset.metadata.keywords.map((k: string) => String(k).toLowerCase())
+          : []
+
+        // Exact & Prefix Matches (Highest Priority)
+        if (nameLower === q) score += 200
+        else if (nameLower.startsWith(q)) score += 120
+        else if (nameLower.includes(q)) score += 60
+
+        if (slugLower === q) score += 150
+        else if (slugLower.includes(q)) score += 50
+
+        // Aliases & Arabic/English keywords match
+        for (const alias of metadataAliases) {
+          if (alias === q) score += 160
+          else if (alias.includes(q) || q.includes(alias)) score += 80
+        }
+
+        for (const kw of metadataKeywords) {
+          if (kw === q) score += 90
+          else if (kw.includes(q) || q.includes(kw)) score += 50
+        }
+
+        // Tags match
+        for (const tag of tags) {
+          const tName = tag.name.toLowerCase()
+          const tSlug = tag.slug.toLowerCase()
+          if (tName === q || tSlug === q) score += 100
+          else if (tName.includes(q) || tSlug.includes(q)) score += 60
+        }
+
+        // Category match
+        if (catNameLower === q || catSlugLower === q) score += 70
+        else if (catNameLower.includes(q) || catSlugLower.includes(q)) score += 35
+
+        // Description match
+        if (descLower.includes(q)) score += 25
+
+        // Multi-token matches
+        if (tokens.length > 1) {
+          let tokenMatches = 0
+          for (const token of tokens) {
+            let matchedToken = false
+            if (nameLower.includes(token)) {
+              score += 35
+              matchedToken = true
+            }
+            if (metadataAliases.some(a => a.includes(token))) {
+              score += 30
+              matchedToken = true
+            }
+            if (metadataKeywords.some(k => k.includes(token))) {
+              score += 20
+              matchedToken = true
+            }
+            if (tagStrings.some(t => t.includes(token))) {
+              score += 25
+              matchedToken = true
+            }
+            if (catNameLower.includes(token) || catSlugLower.includes(token)) {
+              score += 15
+              matchedToken = true
+            }
+            if (descLower.includes(token)) {
+              score += 10
+              matchedToken = true
+            }
+            if (matchedToken) tokenMatches++
+          }
+
+          // Full tokens coverage bonus
+          if (tokenMatches === tokens.length) {
+            score += 50
+          }
+        }
+
+        // Slight quality boost
+        if (score > 0) {
+          if (asset.is_featured) score += 5
+          score += Math.min(10, Math.floor((asset.download_count || 0) / 200))
+          scores.set(asset.id, score)
+          return true
+        }
+
+        return false
+      })
+    }
+
+    // Apply Sorting
+    items.sort((a, b) => {
+      if (sort === 'relevance' && rawSearch) {
+        const scoreA = scores.get(a.id) || 0
+        const scoreB = scores.get(b.id) || 0
+        if (scoreB !== scoreA) return scoreB - scoreA
+      } else if (sort === 'downloads') {
+        const diff = (b.download_count || 0) - (a.download_count || 0)
+        if (diff !== 0) return diff
+      } else if (sort === 'name_asc') {
+        return a.name.localeCompare(b.name)
+      } else if (sort === 'name_desc') {
+        return b.name.localeCompare(a.name)
+      }
+
+      // Default: newest first
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+
+    const total = items.length
+    const paged = items.slice(offset, offset + limit)
     const enriched = paged.map(asset => this.enrichAsset(asset))
 
-    return { assets: enriched, total }
+    return {
+      assets: enriched,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      query: rawSearch
+    }
+  }
+
+  /**
+   * Get related/similar icons for discovery on the asset details page.
+   * Computes semantic similarity based on shared tags, category, and keywords,
+   * strictly excluding the current asset itself.
+   */
+  public static async getRelatedAssets(
+    assetId: string,
+    limit = 8,
+    currentUserId: string | null = null,
+    currentUserRole: UserRole | null = null
+  ): Promise<Asset[]> {
+    const target = dbStore.assets.get(assetId)
+    if (!target) {
+      return []
+    }
+
+    // Get target tags
+    const targetTagIds = new Set(
+      dbStore.assetTags.filter(at => at.asset_id === target.id).map(at => at.tag_id)
+    )
+
+    // Candidates must be visible under RLS and cannot be the target asset
+    const pool = dbStore.filterAssetsByRLS(currentUserId, currentUserRole)
+      .filter(a => a.id !== target.id && a.type === target.type)
+
+    const scoredCandidates = pool.map(candidate => {
+      let similarityScore = 0
+
+      // 1. Same category bonus
+      if (candidate.category_id && candidate.category_id === target.category_id) {
+        similarityScore += 40
+      }
+
+      // 2. Shared tags bonus (highest weighting)
+      const candTagIds = dbStore.assetTags
+        .filter(at => at.asset_id === candidate.id)
+        .map(at => at.tag_id)
+
+      for (const tid of candTagIds) {
+        if (targetTagIds.has(tid)) {
+          similarityScore += 35
+        }
+      }
+
+      // 3. Name or keywords overlap
+      const targetWords = `${target.name} ${target.slug}`.toLowerCase().split(/[\s-]+/)
+      const candWords = `${candidate.name} ${candidate.slug}`.toLowerCase().split(/[\s-]+/)
+
+      for (const tw of targetWords) {
+        if (tw.length > 2 && candWords.includes(tw)) {
+          similarityScore += 20
+        }
+      }
+
+      return { candidate, similarityScore }
+    })
+
+    scoredCandidates.sort((a, b) => {
+      if (b.similarityScore !== a.similarityScore) {
+        return b.similarityScore - a.similarityScore
+      }
+      return (b.candidate.download_count || 0) - (a.candidate.download_count || 0)
+    })
+
+    return scoredCandidates.slice(0, limit).map(sc => this.enrichAsset(sc.candidate))
   }
 
   /**
