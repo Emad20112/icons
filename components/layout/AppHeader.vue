@@ -35,6 +35,14 @@ const { user, role, isAdmin, availableProfiles, switchRole, selectProfile, logou
             Assets Catalog
           </NuxtLink>
           <NuxtLink
+            to="/tools/image-to-icon"
+            class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors flex items-center gap-1.5"
+            active-class="text-blue-600 dark:text-blue-400 font-semibold"
+          >
+            <span>Image to Icon</span>
+            <span class="rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-1.5 py-0.5">Tool</span>
+          </NuxtLink>
+          <NuxtLink
             to="/admin"
             class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors"
             active-class="text-blue-600 dark:text-blue-400 font-semibold"
