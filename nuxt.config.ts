@@ -2,7 +2,10 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   future: {
-    compatibilityVersion: 4,
+    // The application source lives at the repository root (`pages/`,
+    // `components/`, `layouts/`, etc.). Keep Nuxt on the matching directory
+    // convention until those files are migrated into `app/`.
+    compatibilityVersion: 3,
   },
   devtools: { enabled: false },
 
