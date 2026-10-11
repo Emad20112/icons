@@ -39,7 +39,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     // Private server-only keys (NEVER exposed to client bundle)
-    supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+    supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '',
     securityMaxFileSizeBytes: Number(process.env.SECURITY_MAX_FILE_SIZE_BYTES) || 52428800,
     rateLimitMaxRequests: Number(process.env.SECURITY_RATE_LIMIT_MAX_REQUESTS) || 100,
     rateLimitWindowMs: Number(process.env.SECURITY_RATE_LIMIT_WINDOW_MS) || 60000,
@@ -48,8 +48,8 @@ export default defineNuxtConfig({
     public: {
       appName: process.env.NUXT_PUBLIC_APP_NAME || 'Digital Assets Platform',
       appEnv: process.env.NUXT_PUBLIC_APP_ENV || 'development',
-      supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL || 'https://mock-project.supabase.co',
-      supabaseAnonKey: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.anon-token',
+      supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://mock-project.supabase.co',
+      supabaseAnonKey: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.anon-token',
       storageAssetsBucket: process.env.NUXT_PUBLIC_STORAGE_ASSETS_BUCKET || 'assets',
       storageTempBucket: process.env.NUXT_PUBLIC_STORAGE_TEMP_BUCKET || 'temp-uploads',
     }

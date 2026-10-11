@@ -7,9 +7,9 @@ let cachedAdminClient: SupabaseClient | null = null
 let cachedAnonClient: SupabaseClient | null = null
 
 function getConfig() {
-  let url = process.env.NUXT_PUBLIC_SUPABASE_URL || ''
-  let anonKey = process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  let serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  let url = process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || ''
+  let anonKey = process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || ''
+  let serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || ''
 
   try {
     // If running within Nuxt Nitro runtime

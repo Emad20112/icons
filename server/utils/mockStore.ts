@@ -125,13 +125,28 @@ class InMemoryDatabaseStore {
     }
 
     // 5. Initial Tags
-    const tagSeeds = ['minimal', 'outline', 'solid', 'vector', 'modern', 'dark-mode']
+    const tagSeeds = [
+      { slug: 'minimal', name: 'Minimal' },
+      { slug: 'outline', name: 'Outline' },
+      { slug: 'solid', name: 'Solid' },
+      { slug: 'vector', name: 'Vector' },
+      { slug: 'modern', name: 'Modern' },
+      { slug: 'dark-mode', name: 'Dark Mode' },
+      { slug: 'shopping', name: 'Shopping' },
+      { slug: 'cart', name: 'Cart' },
+      { slug: 'store', name: 'Store' },
+      { slug: 'ecommerce', name: 'Ecommerce' },
+      { slug: 'security', name: 'Security' },
+      { slug: 'cloud', name: 'Cloud' },
+      { slug: 'finance', name: 'Finance' },
+      { slug: 'database', name: 'Database' }
+    ]
     for (let i = 0; i < tagSeeds.length; i++) {
-      const tagId = `t1000000-0000-0000-0000-00000000000${i + 1}`
+      const tagId = `t1000000-0000-0000-0000-0000000000${(i + 1).toString().padStart(2, '0')}`
       this.tags.set(tagId, {
         id: tagId,
-        name: tagSeeds[i].charAt(0).toUpperCase() + tagSeeds[i].slice(1),
-        slug: tagSeeds[i],
+        name: tagSeeds[i].name,
+        slug: tagSeeds[i].slug,
         created_at: new Date().toISOString()
       })
     }
@@ -142,6 +157,8 @@ class InMemoryDatabaseStore {
     const techCatId = 'c1000000-0000-0000-0000-000000000005'
     const uiCatId = 'c1000000-0000-0000-0000-000000000011'
     const bizCatId = 'c1000000-0000-0000-0000-000000000001'
+    const shopCatId = 'c1000000-0000-0000-0000-000000000003'
+    const finCatId = 'c1000000-0000-0000-0000-000000000002'
 
     const initialAssets: Asset[] = [
       {
@@ -149,15 +166,20 @@ class InMemoryDatabaseStore {
         type: 'ICON',
         name: 'Cloud Security Shield',
         slug: 'cloud-security-shield',
-        description: 'Scalable vector security shield with cloud perimeter icon.',
+        description: 'Scalable vector security shield with cloud perimeter icon for firewalls and data protection.',
         status: 'PUBLISHED',
         author_id: adminId,
         license_id: mitId,
         category_id: techCatId,
         is_featured: true,
-        download_count: 342,
+        download_count: 1342,
         favorite_count: 89,
-        metadata: { grid: '24x24', strokeWidth: 2, tags: ['security', 'cloud', 'vector'] },
+        metadata: {
+          grid: '24x24',
+          strokeWidth: 2,
+          aliases: ['cloud shield', 'security shield', 'firewall', 'protection', 'درع أمان', 'حماية سحابية', 'أمان'],
+          keywords: ['security', 'cloud', 'cybersecurity', 'safe', 'حماية', 'سحابة']
+        },
         created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
         updated_at: new Date().toISOString()
       },
@@ -166,16 +188,109 @@ class InMemoryDatabaseStore {
         type: 'ICON',
         name: 'Database Cluster',
         slug: 'database-cluster',
-        description: 'Distributed PostgreSQL relational database cluster glyph.',
+        description: 'Distributed PostgreSQL relational database cluster glyph for storage and backend infrastructure.',
         status: 'PUBLISHED',
         author_id: adminId,
         license_id: cc0Id,
         category_id: techCatId,
         is_featured: true,
-        download_count: 215,
+        download_count: 815,
         favorite_count: 45,
-        metadata: { grid: '24x24', strokeWidth: 2 },
+        metadata: {
+          grid: '24x24',
+          strokeWidth: 2,
+          aliases: ['database', 'sql cluster', 'postgres', 'server', 'قاعدة بيانات', 'خادم بيانات'],
+          keywords: ['data', 'storage', 'backend', 'table', 'بيانات', 'تخزين']
+        },
         created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 'a2000000-0000-0000-0000-000000000001',
+        type: 'ICON',
+        name: 'Shopping Cart',
+        slug: 'shopping-cart',
+        description: 'Streamlined modern shopping cart icon with rolling wheels and handle for e-commerce checkout and retail stores.',
+        status: 'PUBLISHED',
+        author_id: adminId,
+        license_id: mitId,
+        category_id: shopCatId,
+        is_featured: true,
+        download_count: 2420,
+        favorite_count: 580,
+        metadata: {
+          grid: '24x24',
+          strokeWidth: 2,
+          aliases: ['shopping cart', 'cart', 'trolley', 'checkout', 'store', 'buy', 'عربة تسوق', 'سلة تسوق', 'سلة'],
+          keywords: ['ecommerce', 'retail', 'market', 'purchase', 'شراء', 'متجر', 'تسوق']
+        },
+        created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 'a2000000-0000-0000-0000-000000000002',
+        type: 'ICON',
+        name: 'Shopping Bag',
+        slug: 'shopping-bag',
+        description: 'Minimalist shopping tote bag icon for digital storefronts, purchase summaries, and product orders.',
+        status: 'PUBLISHED',
+        author_id: adminId,
+        license_id: cc0Id,
+        category_id: shopCatId,
+        is_featured: false,
+        download_count: 1680,
+        favorite_count: 315,
+        metadata: {
+          grid: '24x24',
+          strokeWidth: 2,
+          aliases: ['shopping bag', 'tote bag', 'order bag', 'bag', 'حقيبة تسوق', 'كيس تسوق'],
+          keywords: ['shopping', 'retail', 'orders', 'fashion', 'boutique', 'تسوق', 'حقيبة']
+        },
+        created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 'a2000000-0000-0000-0000-000000000003',
+        type: 'ICON',
+        name: 'Storefront Market',
+        slug: 'storefront-market',
+        description: 'Commercial storefront building with canopy roof for physical shops, local retail, and marketplace listings.',
+        status: 'PUBLISHED',
+        author_id: adminId,
+        license_id: mitId,
+        category_id: shopCatId,
+        is_featured: false,
+        download_count: 1120,
+        favorite_count: 240,
+        metadata: {
+          grid: '24x24',
+          strokeWidth: 2,
+          aliases: ['storefront', 'shop', 'market', 'outlet', 'متجر', 'دكان', 'محل'],
+          keywords: ['shopping', 'commerce', 'store', 'business', 'تجارة', 'تسوق']
+        },
+        created_at: new Date(Date.now() - 86400000 * 6).toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 'a2000000-0000-0000-0000-000000000004',
+        type: 'ICON',
+        name: 'Credit Card Payment',
+        slug: 'credit-card-payment',
+        description: 'Contactless payment chip credit card icon for checkout billing, subscription management, and banking transactions.',
+        status: 'PUBLISHED',
+        author_id: adminId,
+        license_id: mitId,
+        category_id: finCatId,
+        is_featured: true,
+        download_count: 2890,
+        favorite_count: 690,
+        metadata: {
+          grid: '24x24',
+          strokeWidth: 2,
+          aliases: ['credit card', 'payment', 'checkout', 'billing', 'بطاقة ائتمان', 'دفع إلكتروني', 'فيزا'],
+          keywords: ['finance', 'shopping', 'visa', 'mastercard', 'money', 'أموال', 'دفع']
+        },
+        created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
         updated_at: new Date().toISOString()
       },
       {
@@ -191,7 +306,7 @@ class InMemoryDatabaseStore {
         is_featured: true,
         download_count: 512,
         favorite_count: 120,
-        metadata: { weights: ['Regular', 'SemiBold', 'Bold'], glyphCount: 420 },
+        metadata: { weights: ['Regular', 'SemiBold', 'Bold'], glyphCount: 420, aliases: ['font', 'typeface', 'خط'] },
         created_at: new Date(Date.now() - 86400000).toISOString(),
         updated_at: new Date().toISOString()
       },
@@ -208,7 +323,7 @@ class InMemoryDatabaseStore {
         is_featured: false,
         download_count: 140,
         favorite_count: 32,
-        metadata: { colors: ['#2563EB', '#38BDF8', '#0F172A'] },
+        metadata: { colors: ['#2563EB', '#38BDF8', '#0F172A'], aliases: ['delivery', 'truck', 'شاحنة', 'توصيل'] },
         created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
         updated_at: new Date().toISOString()
       },
@@ -220,12 +335,12 @@ class InMemoryDatabaseStore {
         description: 'Unpublished draft icon for upcoming checkout workflow.',
         status: 'DRAFT',
         author_id: regularUserId,
-        license_id: null, // Drafts may lack license until publication
+        license_id: null,
         category_id: bizCatId,
         is_featured: false,
         download_count: 0,
         favorite_count: 0,
-        metadata: {},
+        metadata: { aliases: ['draft', 'gateway'] },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
@@ -236,46 +351,63 @@ class InMemoryDatabaseStore {
     }
 
     // Associate Tags
-    this.assetTags.push(
-      { asset_id: 'a1000000-0000-0000-0000-000000000001', tag_id: 't1000000-0000-0000-0000-000000000001' },
-      { asset_id: 'a1000000-0000-0000-0000-000000000001', tag_id: 't1000000-0000-0000-0000-000000000004' },
-      { asset_id: 'a1000000-0000-0000-0000-000000000002', tag_id: 't1000000-0000-0000-0000-000000000002' }
-    )
+    const tagMap = new Map<string, string>()
+    for (const [id, t] of this.tags) {
+      tagMap.set(t.slug, id)
+    }
 
-    // Initial Sample Asset Files (SVG representation)
+    const tagAssociations: Array<[string, string[]]> = [
+      ['a1000000-0000-0000-0000-000000000001', ['security', 'cloud', 'vector', 'minimal']],
+      ['a1000000-0000-0000-0000-000000000002', ['database', 'cloud', 'solid']],
+      ['a2000000-0000-0000-0000-000000000001', ['shopping', 'cart', 'ecommerce', 'minimal']],
+      ['a2000000-0000-0000-0000-000000000002', ['shopping', 'store', 'ecommerce', 'outline']],
+      ['a2000000-0000-0000-0000-000000000003', ['store', 'shopping', 'ecommerce']],
+      ['a2000000-0000-0000-0000-000000000004', ['finance', 'shopping', 'ecommerce', 'modern']]
+    ]
+
+    for (const [assetId, slugs] of tagAssociations) {
+      for (const slug of slugs) {
+        const tid = tagMap.get(slug)
+        if (tid) {
+          this.assetTags.push({ asset_id: assetId, tag_id: tid })
+        }
+      }
+    }
+
+    // Initial SVG Asset Files
     const svgContent1 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`
     const svgContent2 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>`
+    const svgCart = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>`
+    const svgBag = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`
+    const svgStore = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>`
+    const svgCard = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>`
 
-    this.assetFiles.set('f1000000-0000-0000-0000-000000000001', {
-      id: 'f1000000-0000-0000-0000-000000000001',
-      asset_id: 'a1000000-0000-0000-0000-000000000001',
-      format: 'SVG',
-      file_path: 'assets/icons/cloud-shield.svg',
-      file_size: svgContent1.length,
-      mime_type: 'image/svg+xml',
-      width: 24,
-      height: 24,
-      metadata: { rawContent: svgContent1 },
-      created_at: new Date().toISOString()
-    })
+    const filesToSeed: Array<{ id: string; asset_id: string; name: string; content: string }> = [
+      { id: 'f1000000-0000-0000-0000-000000000001', asset_id: 'a1000000-0000-0000-0000-000000000001', name: 'cloud-shield.svg', content: svgContent1 },
+      { id: 'f1000000-0000-0000-0000-000000000002', asset_id: 'a1000000-0000-0000-0000-000000000002', name: 'db-cluster.svg', content: svgContent2 },
+      { id: 'f2000000-0000-0000-0000-000000000001', asset_id: 'a2000000-0000-0000-0000-000000000001', name: 'shopping-cart.svg', content: svgCart },
+      { id: 'f2000000-0000-0000-0000-000000000002', asset_id: 'a2000000-0000-0000-0000-000000000002', name: 'shopping-bag.svg', content: svgBag },
+      { id: 'f2000000-0000-0000-0000-000000000003', asset_id: 'a2000000-0000-0000-0000-000000000003', name: 'storefront.svg', content: svgStore },
+      { id: 'f2000000-0000-0000-0000-000000000004', asset_id: 'a2000000-0000-0000-0000-000000000004', name: 'credit-card.svg', content: svgCard }
+    ]
 
-    this.assetFiles.set('f1000000-0000-0000-0000-000000000002', {
-      id: 'f1000000-0000-0000-0000-000000000002',
-      asset_id: 'a1000000-0000-0000-0000-000000000002',
-      format: 'SVG',
-      file_path: 'assets/icons/db-cluster.svg',
-      file_size: svgContent2.length,
-      mime_type: 'image/svg+xml',
-      width: 24,
-      height: 24,
-      metadata: { rawContent: svgContent2 },
-      created_at: new Date().toISOString()
-    })
-
-    // Store in virtual bucket
     const bucket = this.storageBuckets.get('assets')!
-    bucket.set('assets/icons/cloud-shield.svg', { buffer: svgContent1, mimeType: 'image/svg+xml', size: svgContent1.length })
-    bucket.set('assets/icons/db-cluster.svg', { buffer: svgContent2, mimeType: 'image/svg+xml', size: svgContent2.length })
+    for (const f of filesToSeed) {
+      const filePath = `assets/icons/${f.name}`
+      this.assetFiles.set(f.id, {
+        id: f.id,
+        asset_id: f.asset_id,
+        format: 'SVG',
+        file_path: filePath,
+        file_size: f.content.length,
+        mime_type: 'image/svg+xml',
+        width: 24,
+        height: 24,
+        metadata: { rawContent: f.content },
+        created_at: new Date().toISOString()
+      })
+      bucket.set(filePath, { buffer: f.content, mimeType: 'image/svg+xml', size: f.content.length })
+    }
 
     // Initial Audit Log
     this.auditLogs.push({

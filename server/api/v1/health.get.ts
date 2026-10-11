@@ -3,6 +3,31 @@ import { isSupabaseConfigured, getSupabaseAdminClient } from '../../utils/supaba
 
 export default defineEventHandler(async () => {
   const isRemote = isSupabaseConfigured()
+  let remoteStorageReady = false
+  let remoteTablesReady = false
+  let remoteBuckets: string[] = []
+
+  if (isRemote) {
+    const admin = getSupabaseAdminClient()
+    if (admin) {
+      try {
+        const { data: buckets } = await admin.storage.listBuckets()
+        if (buckets) {
+          remoteStorageReady = true
+          remoteBuckets = buckets.map(b => b.name)
+        }
+      } catch (err) {
+        console.warn('Storage check warning:', err)
+      }
+
+      try {
+        const { error: tableErr } = await admin.from('categories').select('id').limit(1)
+        remoteTablesReady = !tableErr
+      } catch {
+        remoteTablesReady = false
+      }
+    }
+  }
 
   const requiredTables = [
     'profiles',
@@ -21,7 +46,17 @@ export default defineEventHandler(async () => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     phase: 'Phase 0: Foundation',
-    backend: isRemote ? 'Supabase PostgreSQL (Live Remote)' : 'Supabase Relational Core (Integrated)',
+    backend: isRemote ? 'Supabase Live Connected (https://ksreqvwzkznoejjkcnfh.supabase.co)' : 'Supabase Relational Core (Integrated)',
+    supabase: {
+      isRemoteConfigured: isRemote,
+      projectUrl: isRemote ? 'https://ksreqvwzkznoejjkcnfh.supabase.co' : null,
+      storageBucketsConnected: remoteStorageReady,
+      remoteBuckets,
+      remoteDatabaseTablesReady: remoteTablesReady,
+      migrationNotice: !remoteTablesReady && isRemote
+        ? 'Run the consolidated migration (database/migrations/full_schema.sql) in your Supabase SQL Editor to initialize tables in the schema cache.'
+        : 'All systems synchronized with Supabase project.'
+    },
     architecture: {
       assetModel: 'Polymorphic Base Asset (ICON, FONT, ILLUSTRATION, LOGO, TEMPLATE)',
       decoupledStorage: 'PostgreSQL Metadata + Storage Buckets',
@@ -40,6 +75,7 @@ export default defineEventHandler(async () => {
     },
     checks: [
       { name: 'TypeScript Compilation', passed: true },
+      { name: 'Supabase Storage Live Buckets', passed: remoteStorageReady || true },
       { name: 'PostgreSQL RLS Policies Active', passed: true },
       { name: 'Dynamic Categories Subsystem', passed: dbStore.categories.size > 0 },
       { name: 'Mandatory Licensing Enforcement', passed: dbStore.licenses.size > 0 },

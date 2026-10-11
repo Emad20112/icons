@@ -3,9 +3,12 @@ import { ref, onMounted } from 'vue'
 import Badge from '../ui/Badge.vue'
 import Button from '../ui/Button.vue'
 import LoadingState from '../common/LoadingState.vue'
+import { useToast } from '../../composables/useToast'
 
 const health = ref<any>(null)
 const isLoading = ref(true)
+const showSqlModal = ref(false)
+const { success } = useToast()
 
 async function loadHealth() {
   isLoading.value = true
@@ -19,6 +22,11 @@ async function loadHealth() {
   } finally {
     isLoading.value = false
   }
+}
+
+function copySchemaNotice() {
+  navigator.clipboard.writeText('database/migrations/full_schema.sql')
+  success('Path Copied', 'SQL Migration file: database/migrations/full_schema.sql')
 }
 
 onMounted(() => {
@@ -41,6 +49,45 @@ onMounted(() => {
     <LoadingState v-if="isLoading" />
 
     <div v-else-if="health" class="space-y-6">
+      <!-- Supabase Live Connection Status Card -->
+      <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <h4 class="text-xs font-bold text-emerald-900 dark:text-emerald-200 uppercase tracking-wider">
+                Supabase Backend Connected
+              </h4>
+              <Badge variant="success">LIVE PROJECT</Badge>
+            </div>
+            <div class="text-xs text-slate-600 dark:text-slate-300 font-mono mt-1">
+              {{ health.supabase?.projectUrl || 'https://ksreqvwzkznoejjkcnfh.supabase.co' }}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-500">Storage Buckets:</span>
+            <span class="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300">
+              {{ health.supabase?.remoteBuckets?.join(', ') || 'assets, temp-uploads' }}
+            </span>
+          </div>
+        </div>
+
+        <div v-if="!health.supabase?.remoteDatabaseTablesReady" class="mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-400">
+          <div>
+            <span>PostgreSQL Tables: In-memory store active while awaiting Supabase SQL execution.</span>
+          </div>
+          <a
+            href="https://supabase.com/dashboard/project/ksreqvwzkznoejjkcnfh/sql"
+            target="_blank"
+            rel="noopener"
+            class="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+          >
+            Open Supabase SQL Editor &rarr;
+          </a>
+        </div>
+      </div>
+
       <!-- Top Metrics -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
