@@ -24,8 +24,7 @@ export function useCategories() {
   async function createCategory(payload: { name: string; description?: string; icon?: string }) {
     const res = await $fetch<{ success: boolean; data: Category }>('/api/v1/categories', {
       method: 'POST',
-      body: payload,
-      headers: { 'x-user-role': role.value }
+      body: payload
     })
     if (res.success) {
       categories.value.push(res.data)

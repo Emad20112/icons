@@ -2,7 +2,9 @@ import { ref, computed } from 'vue'
 import type { Profile, UserRole } from '../types/database'
 
 const currentUser = ref<Profile | null>(null)
-const currentRole = ref<UserRole>('ADMIN')
+// The authoritative role is always the one the server resolved for this session.
+// It is never asserted by the client.
+const currentRole = ref<UserRole | null>(null)
 const availableProfiles = ref<Profile[]>([])
 const isLoading = ref<boolean>(false)
 
@@ -16,7 +18,7 @@ export function useAuth() {
       const res = await $fetch<{ success: boolean; data: Profile | null; role: UserRole; availableProfiles: Profile[] }>('/api/v1/auth/user')
       if (res.success) {
         currentUser.value = res.data
-        currentRole.value = res.role || (res.data?.role ?? 'USER')
+        currentRole.value = res.role ?? res.data?.role ?? null
         availableProfiles.value = res.availableProfiles || []
       }
     } catch (err) {
@@ -62,20 +64,21 @@ export function useAuth() {
     }
   }
 
+  /**
+   * Switches the active session profile. Real role changes require an admin to
+   * update the profile row; the UI can never elevate itself.
+   */
   async function switchRole(role: UserRole) {
-    // Allows toggling role in Phase 0 UI to immediately verify RLS enforcement
-    currentRole.value = role
-    if (currentUser.value) {
-      currentUser.value.role = role
+    const target = availableProfiles.value.find(p => p.role === role)
+    if (target) {
+      await selectProfile(target.id)
     }
   }
 
   async function selectProfile(profileId: string) {
     const target = availableProfiles.value.find(p => p.id === profileId)
     if (target) {
-      currentUser.value = target
-      currentRole.value = target.role
-      // Set session cookie
+      // Re-authenticate as the target profile; the server resolves the role.
       await login(target.email)
     }
   }
@@ -83,7 +86,7 @@ export function useAuth() {
   async function logout() {
     await $fetch('/api/v1/auth/logout', { method: 'POST' })
     currentUser.value = null
-    currentRole.value = 'USER'
+    currentRole.value = null
   }
 
   return {

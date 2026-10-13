@@ -56,9 +56,6 @@ async function handleSubmit() {
         license_id: licenseId.value || null,
         status: status.value,
         is_featured: isFeatured.value,
-      },
-      headers: {
-        'x-user-role': role.value
       }
     })
 
@@ -73,9 +70,6 @@ async function handleSubmit() {
           file_size: svgContent.value.length,
           mime_type: 'image/svg+xml',
           content: svgContent.value.trim()
-        },
-        headers: {
-          'x-user-role': role.value
         }
       })
     }

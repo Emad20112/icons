@@ -31,8 +31,7 @@ export function useLicenses() {
   }) {
     const res = await $fetch<{ success: boolean; data: License }>('/api/v1/licenses', {
       method: 'POST',
-      body: payload,
-      headers: { 'x-user-role': role.value }
+      body: payload
     })
     if (res.success) {
       licenses.value.push(res.data)

@@ -29,9 +29,7 @@ async function loadAssetData(id: string) {
   isLoading.value = true
   errorMessage.value = null
   try {
-    const res = await $fetch<{ success: boolean; data: Asset }>(`/api/v1/assets/${id}`, {
-      headers: { 'x-user-role': role.value }
-    })
+    const res = await $fetch<{ success: boolean; data: Asset }>(`/api/v1/assets/${id}`)
     if (res.success) {
       asset.value = res.data
       // Fetch related icons sharing tags or category
@@ -57,8 +55,7 @@ async function handleStatusChange(newStatus: AssetStatus) {
   try {
     const res = await $fetch<{ success: boolean; data: Asset }>(`/api/v1/assets/${asset.value.id}`, {
       method: 'PATCH',
-      body: { status: newStatus },
-      headers: { 'x-user-role': role.value }
+      body: { status: newStatus }
     })
     if (res.success) {
       asset.value = res.data

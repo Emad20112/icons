@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { getHeader, getCookie } from 'h3'
 import type { H3Event } from 'h3'
 import { dbStore } from './mockStore'
 import type { Profile, UserRole } from '../../types/database'
@@ -80,21 +81,47 @@ export interface AuthContext {
 }
 
 /**
- * Extracts and verifies current session from request headers/cookies.
+ * Anonymous / unauthenticated context. Callers MUST treat a null role as
+ * "no privileges" and must never fall back to an elevated role.
+ */
+function anonymousContext(): AuthContext {
+  return { user: null, role: null, userId: null }
+}
+
+/**
+ * Whether the local dev impersonation surface is enabled.
+ *
+ * The local mock store has no password verification, so allowing the client to
+ * pick an identity is equivalent to letting anyone become an ADMIN. That is only
+ * acceptable in development. The flag must be an explicit opt-in and is ignored
+ * whenever NODE_ENV === 'production'.
+ */
+export function isDevImpersonationEnabled(): boolean {
+  if (process.env.NODE_ENV === 'production') return false
+  return process.env.NUXT_DEV_ALLOW_IMPERSONATION === 'true'
+}
+
+/**
+ * Resolves the current authenticated identity from the request.
+ *
+ * Trust order:
+ *   1. Verified Supabase bearer token (authoritative).
+ *   2. Signed-in session cookie holding the user id.
+ *   3. Dev-only impersonation, gated behind isDevImpersonationEnabled().
+ *
+ * The request is NEVER allowed to assert its own role via headers: a client
+ * supplied role would be an unauthenticated privilege escalation.
  */
 export async function getAuthContext(event: H3Event): Promise<AuthContext> {
   const authHeader = getHeader(event, 'authorization')
-  const simulatedUserId = getHeader(event, 'x-user-id')
-  const simulatedRole = getHeader(event, 'x-user-role') as UserRole | undefined
 
-  // 1. If real Supabase is configured and bearer token is present
+  // 1. If real Supabase is configured and a bearer token is present
   if (isSupabaseConfigured() && authHeader?.startsWith('Bearer ')) {
     const token = authHeader.substring(7)
     const admin = getSupabaseAdminClient()
     if (admin) {
       const { data: { user }, error } = await admin.auth.getUser(token)
       if (!error && user) {
-        // Fetch profile
         const { data: profile } = await admin
           .from('profiles')
           .select('*')
@@ -110,40 +137,33 @@ export async function getAuthContext(event: H3Event): Promise<AuthContext> {
     }
   }
 
-  // 2. Fallback / Test / Preview Authentication Context
-  if (simulatedUserId && dbStore.profiles.has(simulatedUserId)) {
-    const profile = dbStore.profiles.get(simulatedUserId)!
-    return {
-      user: profile,
-      role: simulatedRole || profile.role,
-      userId: profile.id
+  // 2. Signed-in session cookie. The role always comes from the stored
+  //    profile, never from the request.
+  const sessionUserId = getCookie(event, 'session_user_id')
+  if (sessionUserId) {
+    const profile = dbStore.profiles.get(sessionUserId)
+    if (profile) {
+      return {
+        user: profile,
+        role: profile.role,
+        userId: profile.id
+      }
     }
   }
 
-  // Check cookie or default to lead admin for local inspection if requested via query
-  const sessionCookie = getCookie(event, 'session_user_id')
-  if (sessionCookie && dbStore.profiles.has(sessionCookie)) {
-    const profile = dbStore.profiles.get(sessionCookie)!
-    return {
-      user: profile,
-      role: profile.role,
-      userId: profile.id
+  // 3. Dev-only impersonation (explicitly opted in, never in production).
+  //    The selected profile's stored role is used; x-user-role is ignored.
+  if (isDevImpersonationEnabled()) {
+    const impersonatedUserId = getHeader(event, 'x-user-id')
+    const profile = impersonatedUserId ? dbStore.profiles.get(impersonatedUserId) : undefined
+    if (profile) {
+      return {
+        user: profile,
+        role: profile.role,
+        userId: profile.id
+      }
     }
   }
 
-  // Default to Lead Admin in development/preview to allow immediate feature verification
-  const defaultAdmin = dbStore.profiles.get('a0000000-0000-0000-0000-000000000001')
-  if (defaultAdmin) {
-    return {
-      user: defaultAdmin,
-      role: simulatedRole || defaultAdmin.role,
-      userId: defaultAdmin.id
-    }
-  }
-
-  return {
-    user: null,
-    role: null,
-    userId: null
-  }
+  return anonymousContext()
 }

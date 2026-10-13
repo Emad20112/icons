@@ -63,10 +63,7 @@ export function useAssets() {
         query?: string
       }>('/api/v1/assets', {
         params: queryParams,
-        signal: abortController.signal,
-        headers: {
-          'x-user-role': role.value
-        }
+        signal: abortController.signal
       })
 
       // Only update if this request wasn't aborted
@@ -93,38 +90,32 @@ export function useAssets() {
   }
 
   async function getAsset(id: string) {
-    return $fetch<{ success: boolean; data: Asset }>(`/api/v1/assets/${id}`, {
-      headers: { 'x-user-role': role.value }
-    })
+    return $fetch<{ success: boolean; data: Asset }>(`/api/v1/assets/${id}`)
   }
 
   async function getRelatedAssets(id: string, limit = 8) {
     return $fetch<{ success: boolean; data: Asset[] }>(`/api/v1/assets/${id}/related`, {
-      params: { limit },
-      headers: { 'x-user-role': role.value }
+      params: { limit }
     })
   }
 
   async function createAsset(payload: any) {
     return $fetch<{ success: boolean; data: Asset }>('/api/v1/assets', {
       method: 'POST',
-      body: payload,
-      headers: { 'x-user-role': role.value }
+      body: payload
     })
   }
 
   async function updateAsset(id: string, updates: any) {
     return $fetch<{ success: boolean; data: Asset }>(`/api/v1/assets/${id}`, {
       method: 'PATCH',
-      body: updates,
-      headers: { 'x-user-role': role.value }
+      body: updates
     })
   }
 
   async function deleteAsset(id: string) {
     return $fetch<{ success: boolean }>(`/api/v1/assets/${id}`, {
-      method: 'DELETE',
-      headers: { 'x-user-role': role.value }
+      method: 'DELETE'
     })
   }
 
