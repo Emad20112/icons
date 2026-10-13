@@ -10,6 +10,17 @@ import type {
 import { encodeIco } from '../utils/icoEncoder'
 import { createZipArchive } from '../utils/zipEncoder'
 
+/**
+ * Returns a tightly-sliced ArrayBuffer copy of the given bytes.
+ * Required because TypeScript's BlobPart only accepts ArrayBuffer-backed
+ * views, while Uint8Array is typed over the wider ArrayBufferLike.
+ */
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.length)
+  copy.set(bytes)
+  return copy.buffer
+}
+
 export class ImageConverterService {
   /**
    * Loads an image from a URL, Blob, or File and returns an HTMLImageElement
@@ -243,7 +254,7 @@ export class ImageConverterService {
         }
       ])
 
-      const icoBlob = new Blob([icoBytes], { type: 'image/x-icon' })
+      const icoBlob = new Blob([toArrayBuffer(icoBytes)], { type: 'image/x-icon' })
       return {
         blob: icoBlob,
         width: canvas.width,
@@ -301,7 +312,7 @@ export class ImageConverterService {
     }
 
     const icoBytes = encodeIco(frames)
-    const icoBlob = new Blob([icoBytes], { type: 'image/x-icon' })
+    const icoBlob = new Blob([toArrayBuffer(icoBytes)], { type: 'image/x-icon' })
 
     return {
       blob: icoBlob,
@@ -378,7 +389,7 @@ Enjoy your high-resolution custom icons!
     })
 
     const zipBytes = createZipArchive(filesToZip)
-    const zipBlob = new Blob([zipBytes], { type: 'application/zip' })
+    const zipBlob = new Blob([toArrayBuffer(zipBytes)], { type: 'application/zip' })
 
     return {
       blob: zipBlob,

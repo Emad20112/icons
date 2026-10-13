@@ -25,18 +25,16 @@ export default defineEventHandler(async (event) => {
   const filePath = `assets/files/${asset_id}/${format.toLowerCase()}/${cleanName}`
 
   // Decode buffer or handle raw text
-  let fileBuffer: Buffer | string = content
-  if (content.startsWith('data:')) {
-    const base64Data = content.split(',')[1] || content
-    fileBuffer = Buffer.from(base64Data, 'base64')
-  }
+  const fileBuffer: Buffer | string = content.startsWith('data:')
+    ? Buffer.from(content.split(',')[1] || content, 'base64')
+    : content
 
   try {
     // 1. Upload through Storage Service (handles SVG sanitization)
     const uploadResult = await storageService.uploadFile({
       bucket: 'assets',
       path: filePath,
-      file: fileBuffer,
+      file: fileBuffer as Buffer | Uint8Array | Blob,
       mimeType: mime_type
     })
 
