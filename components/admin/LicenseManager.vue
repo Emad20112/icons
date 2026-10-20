@@ -40,9 +40,6 @@ async function handleCreate() {
         redistribution: redistribution.value,
         modification: modification.value,
         attribution_required: attributionRequired.value
-      },
-      headers: {
-        'x-user-role': role.value
       }
     })
     success('License Created', `License "${name.value}" registered successfully`)

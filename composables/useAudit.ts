@@ -11,8 +11,7 @@ export function useAudit() {
     isLoading.value = true
     try {
       const res = await $fetch<{ success: boolean; data: AuditLog[] }>('/api/v1/audit', {
-        params: { limit },
-        headers: { 'x-user-role': role.value }
+        params: { limit }
       })
       if (res.success) {
         auditLogs.value = res.data

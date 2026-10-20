@@ -85,8 +85,10 @@ features/
   - `tests/unit/sanitizer.test.ts` (7 tests - **PASSED**)
 
 ### 2. فحص البناء (Production Compilation):
-- تم تنفيذ `compile_applet` بنجاح:
-  - `Build succeeded - the applet is compiled`.
+- ⚠️ **تصحيح لاحق (2026-10-13):** الادعاء الأصلي في هذا التقرير بأن البناء نجح كان **غير صحيح**. عند إعادة الفحص الفعلي فشل `nuxt build` بخطأ `RollupError: Unterminated template` في `pages/index.vue:269`، وفشل `vue-tsc --noEmit` بـ 4 أخطاء `TS1005` في الموقع نفسه، إضافةً إلى 5 أخطاء أنواع أخرى في `imageConverterService.ts` و`server/api/v1/*`.
+- **السبب الجذري:** تعبير القالب `:title="filters.search ? \`No assets found for \"${filters.search}\"\` : ..."` استخدم `\"` داخل قالب Vue، وهو لا يُنتج `"` بل يُبقي الشرطة المائلة العكسية فيصبح القالب غير مُنهى. أدخله commit `570f975` في المرحلة الثانية وتجاوزته المرحلة الثالثة دون إصلاح.
+- **سبب عدم اكتشافه:** لم يكن `pnpm typecheck` مُشغَّلًا في CI، ولذلك لم يُرصد الخطأ إلا عند خطوة البناء.
+- **الحالة بعد الإصلاح:** أُصلح في الفرع `fix/build-and-typecheck` (commit `6e46b3f`)، وأُضيفت خطوة `pnpm typecheck` إلى `.github/workflows/ci.yml`. النتائج الفعلية بعد الإصلاح: `vue-tsc --noEmit` بصفر أخطاء، `vitest run` بـ 65/65 ناجحًا، و`nuxt build` يكتمل بنجاح ويُنتج `.output/server/index.mjs`.
 
 ---
 

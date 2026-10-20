@@ -1,4 +1,5 @@
-import { AssetService, SortOption } from '../../../services/assetService'
+import { AssetService } from '../../../services/assetService'
+import type { SortOption } from '../../../services/assetService'
 import { getAuthContext } from '../../../utils/supabaseClient'
 import type { AssetType, AssetStatus } from '../../../../types/database'
 

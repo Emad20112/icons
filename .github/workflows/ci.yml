@@ -34,6 +34,9 @@ jobs:
       - name: Run Unit & Integration Tests
         run: pnpm test
 
+      - name: Run TypeScript Type Check
+        run: pnpm typecheck
+
       - name: Run Production Build
         run: pnpm build
         env:

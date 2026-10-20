@@ -266,7 +266,7 @@ function handleAssetSelect(asset: Asset) {
     <!-- Empty State -->
     <EmptyState
       v-else-if="assets.length === 0"
-      :title="filters.search ? `No assets found for \"${filters.search}\"` : 'No matching assets found'"
+      :title="filters.search ? `No assets found for \`${filters.search}\`` : 'No matching assets found'"
       description="Try checking for typos, clearing active tag filters, or browsing other categories."
     >
       <template #action>

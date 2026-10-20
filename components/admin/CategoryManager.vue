@@ -31,9 +31,6 @@ async function handleCreate() {
       body: {
         name: name.value.trim(),
         description: description.value.trim() || null
-      },
-      headers: {
-        'x-user-role': role.value
       }
     })
     success('Category Created', `Dynamic category "${name.value}" added successfully`)
