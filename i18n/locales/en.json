@@ -1,0 +1,264 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "retry": "Retry",
+    "clearAll": "Clear all filters",
+    "cancel": "Cancel",
+    "save": "Save",
+    "search": "Search",
+    "pageOf": "Page {page} of {totalPages}",
+    "assetsCount": "No assets | 1 asset | {count} assets",
+    "noRecords": "No records found",
+    "errorOccurred": "An error occurred",
+    "dismiss": "Dismiss",
+    "close": "Close"
+  },
+  "loadingState": {
+    "assets": "Loading platform assets..."
+  },
+  "header": {
+    "brand": "DigitalAssets",
+    "phaseBadge": "Phase 0",
+    "nav": {
+      "catalog": "Assets Catalog",
+      "imageToIcon": "Image to Icon",
+      "toolBadge": "Tool",
+      "admin": "Admin & Governance",
+      "audit": "Audit Logs"
+    },
+    "role": "Role:",
+    "signIn": "Sign In",
+    "language": "Language",
+    "selectLanguage": "Select language"
+  },
+  "footer": {
+    "brand": "Digital Assets Platform",
+    "phase": "Phase 0: Foundation",
+    "database": "PostgreSQL 16 & Supabase RLS",
+    "schema": "Polymorphic Schema (Icons, Fonts, Illustrations, Logos, Templates)",
+    "storage": "Decoupled Storage",
+    "audit": "Full Audit Trail"
+  },
+  "catalog": {
+    "meta": {
+      "title": "Digital Assets Platform - Explore Assets",
+      "description": "Search thousands of modern icons, fonts, illustrations, and logos with instant full-text search, multi-faceted taxonomy filters, and relevance ranking."
+    },
+    "hero": {
+      "badgePhase": "Phase 2: Advanced Search & Discovery",
+      "badgeStack": "PostgreSQL + Full-Text & Relevance",
+      "title": "Explore Professional Digital Assets",
+      "description": "Search thousands of modern icons, fonts, illustrations, and logos with instant full-text search, multi-faceted taxonomy filters, and relevance ranking.",
+      "createAsset": "Create Digital Asset",
+      "showArchitecture": "View Architecture Health",
+      "hideArchitecture": "Hide Architecture Status",
+      "adminGovernance": "Admin Governance"
+    },
+    "heading": {
+      "resultsFor": "Results for \"{term}\"",
+      "categoryIcons": "{category} Icons",
+      "allAssets": "Catalog Assets",
+      "activeRole": "Active Role:"
+    },
+    "error": {
+      "title": "Failed to load search results",
+      "retry": "Retry Search"
+    },
+    "emptyState": {
+      "searchTitle": "No assets found for \"{term}\"",
+      "title": "No matching assets found",
+      "description": "Try checking for typos, clearing active tag filters, or browsing other categories.",
+      "clearFilters": "Clear all filters",
+      "createAsset": "Create New Asset"
+    },
+    "pagination": {
+      "previous": "Previous Page",
+      "next": "Next Page"
+    }
+  },
+  "filters": {
+    "searchPlaceholder": "Search icons, tags, keywords (e.g. shopping cart, shield, عربة تسوق)...",
+    "clearSearch": "Clear search (Esc)",
+    "sortLabel": "Sort:",
+    "sort": {
+      "relevance": "Relevance",
+      "downloads": "Most Downloaded",
+      "newest": "Newest First",
+      "nameAsc": "Name (A-Z)",
+      "nameDesc": "Name (Z-A)"
+    },
+    "filtersButton": "Filters",
+    "allCategories": "All Categories",
+    "assetType": "Asset Type",
+    "allAssetTypes": "All Asset Types",
+    "types": {
+      "icon": "Icon (Vector)",
+      "font": "Font (Typography)",
+      "illustration": "Illustration (Scene)",
+      "logo": "Logo (Brand)",
+      "template": "Template (Design System)"
+    },
+    "license": "Legal License",
+    "allLicenses": "All Licenses",
+    "licenseUsage": {
+      "commercial": "Commercial",
+      "personal": "Personal"
+    },
+    "status": "Status Lifecycle",
+    "anyStatus": "Any Status",
+    "statuses": {
+      "published": "Published (Public)",
+      "draft": "Draft",
+      "pendingReview": "Pending Review",
+      "archived": "Archived"
+    },
+    "tags": "Filter by Tags",
+    "active": "Active:",
+    "chips": {
+      "query": "Query: \"{term}\"",
+      "category": "Category: {name}",
+      "license": "License: {name}",
+      "type": "Type: {type}"
+    },
+    "removeChip": "Remove filter {name}"
+  },
+  "assetCard": {
+    "featured": "Featured",
+    "typeFallback": "Digital {type} asset",
+    "generalCategory": "General",
+    "noLicense": "No License"
+  },
+  "assetDetail": {
+    "backToCatalog": "Back to Assets Catalog",
+    "accessRestricted": "Access Restricted",
+    "notFound": "Asset not found or restricted by RLS",
+    "returnHome": "Return Home",
+    "featured": "Featured",
+    "slug": "slug: {slug}",
+    "noDescription": "No description provided for this digital asset.",
+    "manifestTitle": "Storage Files Manifest (Supabase Storage)",
+    "manifestDescription": "Binary files decoupled from PostgreSQL metadata. Paths are partitioned logically.",
+    "noFiles": "No binary file attached to this draft yet.",
+    "download": "Download {format}",
+    "licenseTitle": "License & Terms",
+    "commercialUse": "Commercial Use:",
+    "standaloneResale": "Standalone Resale:",
+    "attribution": "Attribution:",
+    "allowed": "Allowed",
+    "prohibited": "Prohibited",
+    "required": "Required",
+    "notRequired": "Not Required",
+    "missingLicense": "Warning: Draft currently lacks an assigned license. Cannot be published without one.",
+    "category": "Category",
+    "uncategorized": "Uncategorized",
+    "author": "Author / Contributor",
+    "downloads": "Downloads",
+    "createdAt": "Created At",
+    "adminModeration": "Admin Lifecycle Moderation",
+    "adminDescription": "Admins govern asset lifecycle states through server-side authorization.",
+    "publish": "Publish Asset (Public Read)",
+    "archive": "Archive Asset",
+    "revertToDraft": "Revert to Draft",
+    "relatedTitle": "Related Icons & Similar Assets",
+    "relatedDescription": "Icons sharing related tags, taxonomy category, or search keywords."
+  },
+  "admin": {
+    "nav": {
+      "overview": "Overview & Health",
+      "assets": "Asset Moderation",
+      "categories": "Categories",
+      "licenses": "Licenses",
+      "audit": "Audit Trail"
+    }
+  },
+  "toast": {
+    "statusUpdated": "Status Updated",
+    "statusUpdatedMessage": "Asset transitioned to {status}",
+    "updateFailed": "Update Failed",
+    "categoryCreated": "Category Created",
+    "categoryCreatedMessage": "Dynamic category \"{name}\" added successfully",
+    "licenseCreated": "License Created",
+    "licenseCreatedMessage": "License \"{name}\" registered successfully",
+    "creationFailed": "Creation Failed"
+  },
+  "adminCategories": {
+    "title": "Dynamic Taxonomy Categories",
+    "description": "Categories are stored dynamically in PostgreSQL, not hardcoded enums.",
+    "namePlaceholder": "Category name (e.g. Artificial Intelligence)",
+    "descriptionPlaceholder": "Short description...",
+    "add": "Add Category",
+    "userNotice": "Viewing as standard USER. Category management requires the ADMIN role.",
+    "noDescription": "No description"
+  },
+  "assetForm": {
+    "title": "Create New Digital Asset",
+    "name": "Asset Name *",
+    "namePlaceholder": "e.g. Modern Secure Shield",
+    "assetType": "Asset Type",
+    "category": "Category",
+    "selectCategory": "Select a Category",
+    "license": "License",
+    "licenseRequired": "(Mandatory for Published Assets) *",
+    "licenseOptional": "(Optional for Drafts)",
+    "selectLicense": "Select a License",
+    "status": "Status Lifecycle",
+    "statusDraft": "DRAFT (Author only)",
+    "statusPendingReview": "PENDING_REVIEW (Awaiting approval)",
+    "statusPublished": "PUBLISHED (Public - {scope})",
+    "statusPublishedAdmin": "Admin allowed",
+    "statusPublishedUser": "Admin only",
+    "draftNotice": "As a regular user, RLS allows saving in DRAFT or PENDING_REVIEW status. Admins moderate and publish.",
+    "svgLabel": "Vector SVG Code (Optional - Automatically sanitized against XSS)",
+    "description": "Description",
+    "descriptionPlaceholder": "Brief description of asset usage and characteristics...",
+    "cancel": "Cancel",
+    "submit": "Save Asset & Metadata",
+    "errorNameRequired": "Asset name is required",
+    "errorLicenseRequired": "A license is strictly required for Published assets",
+    "errorCreateFailed": "Failed to create asset"
+  },
+  "foundationStatus": {
+    "title": "Phase 0 Foundation Architecture Status",
+    "description": "Live inspection of relational schema, RLS enforcement, storage buckets, and audit log.",
+    "reverify": "Re-verify",
+    "backendConnected": "Supabase Backend Connected",
+    "liveProject": "LIVE PROJECT",
+    "storageBuckets": "Storage Buckets:",
+    "tablesPending": "PostgreSQL Tables: In-memory store active while awaiting Supabase SQL execution.",
+    "openSqlEditor": "Open Supabase SQL Editor",
+    "metrics": {
+      "assets": "Core Assets",
+      "assetsHint": "Polymorphic entities",
+      "categories": "Categories",
+      "categoriesHint": "Dynamic taxonomy",
+      "licenses": "Licenses",
+      "licensesHint": "Legal constraints",
+      "audit": "Audit Logs",
+      "auditHint": "Immutable records"
+    },
+    "tablesTitle": "Relational Database Entities (10 Foundation Tables)",
+    "invariantsTitle": "Architectural Invariants & Security Boundaries",
+    "verified": "VERIFIED",
+    "failed": "FAILED",
+    "pathCopied": "Path Copied",
+    "pathCopiedMessage": "SQL Migration file: {path}"
+  },
+  "adminLicenses": {
+    "title": "Legal Licensing Engine",
+    "description": "Every published asset requires an explicit, verified digital asset license.",
+    "namePlaceholder": "License Name (e.g. Apache 2.0)",
+    "urlPlaceholder": "https://opensource.org/licenses/...",
+    "commercialUse": "Commercial Use",
+    "redistribution": "Standalone Redistribution",
+    "modification": "Derivatives / Modification",
+    "attributionRequired": "Attribution Required",
+    "add": "Add Legal License",
+    "userNotice": "Viewing as standard USER. License management requires the ADMIN role.",
+    "commercial": "Commercial",
+    "nonCommercial": "Non-Commercial",
+    "redistributionAllowed": "Redistribution: Allowed",
+    "noResale": "No Resale",
+    "attributionRequiredBadge": "Attribution Req.",
+    "noAttribution": "No Attribution"
+  }
+}
