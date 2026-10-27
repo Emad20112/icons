@@ -3,13 +3,25 @@ import type { Asset } from '../../types/database'
 import Badge from '../ui/Badge.vue'
 import Button from '../ui/Button.vue'
 
-defineProps<{
+const { t, tm } = useI18n()
+
+const props = defineProps<{
   asset: Asset
 }>()
 
 defineEmits<{
   (e: 'select', asset: Asset): void
 }>()
+
+const typeLabels = computed<Record<string, string>>(() => tm('filters.types') as Record<string, string>)
+const statusLabels = computed<Record<string, string>>(() => tm('filters.statuses') as Record<string, string>)
+
+const typeLabel = computed(() => typeLabels.value[props.asset.type] || props.asset.type)
+const statusLabel = computed(() => statusLabels.value[props.asset.status] || props.asset.status)
+
+const description = computed(
+  () => props.asset.description || t('assetCard.typeFallback', { type: typeLabel.value })
+)
 </script>
 
 <template>
@@ -30,10 +42,10 @@ defineEmits<{
             'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
           ]"
         >
-          {{ asset.type }}
+          {{ typeLabel }}
         </span>
         <span v-if="asset.is_featured" class="text-[10px] font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded dark:bg-amber-950">
-          ★ Featured
+          ★ {{ t('assetCard.featured') }}
         </span>
       </div>
 
@@ -44,7 +56,7 @@ defineEmits<{
           asset.status === 'PENDING_REVIEW' ? 'warning' : 'destructive'
         "
       >
-        {{ asset.status }}
+        {{ statusLabel }}
       </Badge>
     </div>
 
@@ -83,18 +95,18 @@ defineEmits<{
         </h3>
       </div>
       <p class="text-xs text-slate-500 line-clamp-1 mt-0.5">
-        {{ asset.description || `Digital ${asset.type.toLowerCase()} asset` }}
+        {{ description }}
       </p>
 
       <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
         <span class="truncate max-w-[100px]">
-          {{ asset.category?.name || 'General' }}
+          {{ asset.category?.name || t('assetCard.generalCategory') }}
         </span>
         <span v-if="asset.license" class="text-slate-400 font-medium">
           {{ asset.license.name.split(' ')[0] }}
         </span>
         <span v-else class="text-amber-500 font-medium">
-          No License
+          {{ t('assetCard.noLicense') }}
         </span>
       </div>
     </div>

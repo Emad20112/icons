@@ -1,10 +1,16 @@
 import { ref } from 'vue'
 
+/**
+ * A translatable toast string. Prefer `{ key: 'toast.x', params: { ... } }`
+ * over raw English text so the message is rendered in the active locale.
+ */
+export type ToastText = string | { key: string; params?: Record<string, unknown> }
+
 export interface ToastItem {
   id: string
   type: 'success' | 'error' | 'info' | 'warning'
-  title: string
-  message?: string
+  title: ToastText
+  message?: ToastText
 }
 
 const toasts = ref<ToastItem[]>([])
@@ -20,19 +26,19 @@ export function useToast() {
     }, duration)
   }
 
-  function success(title: string, message?: string) {
+  function success(title: ToastText, message?: ToastText) {
     show({ type: 'success', title, message })
   }
 
-  function error(title: string, message?: string) {
+  function error(title: ToastText, message?: ToastText) {
     show({ type: 'error', title, message })
   }
 
-  function info(title: string, message?: string) {
+  function info(title: ToastText, message?: ToastText) {
     show({ type: 'info', title, message })
   }
 
-  function warning(title: string, message?: string) {
+  function warning(title: ToastText, message?: ToastText) {
     show({ type: 'warning', title, message })
   }
 

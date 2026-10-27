@@ -3,6 +3,8 @@ defineProps<{
   title?: string
   description?: string
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -14,7 +16,7 @@ defineProps<{
         <line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
     </div>
-    <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ title || 'No records found' }}</h3>
+    <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ title || t('common.noRecords') }}</h3>
     <p v-if="description" class="text-xs text-slate-500 mt-1 max-w-sm">
       {{ description }}
     </p>

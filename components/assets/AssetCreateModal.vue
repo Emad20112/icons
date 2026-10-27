@@ -18,6 +18,7 @@ const emit = defineEmits<{
 }>()
 
 const { isAdmin, role } = useAuth()
+const { t } = useI18n()
 
 const name = ref('')
 const type = ref<AssetType>('ICON')
@@ -33,13 +34,13 @@ const errorMessage = ref<string | null>(null)
 async function handleSubmit() {
   errorMessage.value = null
   if (!name.value.trim()) {
-    errorMessage.value = 'Asset name is required'
+    errorMessage.value = t('assetForm.errorNameRequired')
     return
   }
 
   // Business Rule Validation: Published assets require license
   if (status.value === 'PUBLISHED' && !licenseId.value) {
-    errorMessage.value = 'A license is strictly required for Published assets'
+    errorMessage.value = t('assetForm.errorLicenseRequired')
     return
   }
 
@@ -82,7 +83,7 @@ async function handleSubmit() {
     emit('created')
     emit('close')
   } catch (err: any) {
-    errorMessage.value = err.statusMessage || err.message || 'Failed to create asset'
+    errorMessage.value = err.statusMessage || err.message || t('assetForm.errorCreateFailed')
   } finally {
     isSubmitting.value = false
   }
@@ -90,7 +91,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <Modal :open="open" title="Create New Digital Asset" @close="emit('close')">
+  <Modal :open="open" :title="t('assetForm.title')" @close="emit('close')">
     <form @submit.prevent="handleSubmit" class="space-y-4">
       <div v-if="errorMessage" class="rounded-md bg-red-50 p-3 text-xs text-red-700 border border-red-200">
         {{ errorMessage }}
@@ -98,33 +99,33 @@ async function handleSubmit() {
 
       <!-- Asset Name -->
       <div>
-        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Asset Name *</label>
-        <Input v-model="name" placeholder="e.g. Modern Secure Shield" required />
+        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('assetForm.name') }}</label>
+        <Input v-model="name" :placeholder="t('assetForm.namePlaceholder')" required />
       </div>
 
       <!-- Asset Type -->
       <div>
-        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Asset Type</label>
+        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('assetForm.assetType') }}</label>
         <select
           v-model="type"
           class="flex h-9 w-full rounded-md border border-slate-300 bg-white px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         >
-          <option value="ICON">Icon (Vector)</option>
-          <option value="FONT">Font (Typography)</option>
-          <option value="ILLUSTRATION">Illustration (Scene)</option>
-          <option value="LOGO">Logo (Brand)</option>
-          <option value="TEMPLATE">Template (Design System)</option>
+          <option value="ICON">{{ t('filters.types.icon') }}</option>
+          <option value="FONT">{{ t('filters.types.font') }}</option>
+          <option value="ILLUSTRATION">{{ t('filters.types.illustration') }}</option>
+          <option value="LOGO">{{ t('filters.types.logo') }}</option>
+          <option value="TEMPLATE">{{ t('filters.types.template') }}</option>
         </select>
       </div>
 
       <!-- Category -->
       <div>
-        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Category</label>
+        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('assetForm.category') }}</label>
         <select
           v-model="categoryId"
           class="flex h-9 w-full rounded-md border border-slate-300 bg-white px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         >
-          <option value="">Select a Category</option>
+          <option value="">{{ t('assetForm.selectCategory') }}</option>
           <option v-for="cat in categories" :key="cat.id" :value="cat.id">
             {{ cat.name }}
           </option>
@@ -134,41 +135,41 @@ async function handleSubmit() {
       <!-- License -->
       <div>
         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-          License {{ status === 'PUBLISHED' ? '(Mandatory for Published Assets) *' : '(Optional for Drafts)' }}
+          {{ t('assetForm.license') }} {{ status === 'PUBLISHED' ? t('assetForm.licenseRequired') : t('assetForm.licenseOptional') }}
         </label>
         <select
           v-model="licenseId"
           class="flex h-9 w-full rounded-md border border-slate-300 bg-white px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         >
-          <option value="">Select a License</option>
+          <option value="">{{ t('assetForm.selectLicense') }}</option>
           <option v-for="lic in licenses" :key="lic.id" :value="lic.id">
-            {{ lic.name }} ({{ lic.commercial_use ? 'Commercial' : 'Personal' }})
+            {{ lic.name }} ({{ lic.commercial_use ? t('filters.licenseUsage.commercial') : t('filters.licenseUsage.personal') }})
           </option>
         </select>
       </div>
 
       <!-- Status & Permissions Notice -->
       <div>
-        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Lifecycle</label>
+        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('assetForm.status') }}</label>
         <select
           v-model="status"
           class="flex h-9 w-full rounded-md border border-slate-300 bg-white px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         >
-          <option value="DRAFT">DRAFT (Author only)</option>
-          <option value="PENDING_REVIEW">PENDING_REVIEW (Awaiting approval)</option>
+          <option value="DRAFT">{{ t('assetForm.statusDraft') }}</option>
+          <option value="PENDING_REVIEW">{{ t('assetForm.statusPendingReview') }}</option>
           <option value="PUBLISHED" :disabled="!isAdmin">
-            PUBLISHED (Public - {{ isAdmin ? 'Admin allowed' : 'Admin only' }})
+            {{ t('assetForm.statusPublished', { scope: isAdmin ? t('assetForm.statusPublishedAdmin') : t('assetForm.statusPublishedUser') }) }}
           </option>
         </select>
         <p v-if="!isAdmin && status === 'DRAFT'" class="text-[11px] text-slate-500 mt-1">
-          As a regular user, RLS allows saving in DRAFT or PENDING_REVIEW status. Admins moderate and publish.
+          {{ t('assetForm.draftNotice') }}
         </p>
       </div>
 
       <!-- Optional Raw SVG Payload -->
       <div>
         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-          Vector SVG Code (Optional - Automatically sanitized against XSS)
+          {{ t('assetForm.svgLabel') }}
         </label>
         <textarea
           v-model="svgContent"
@@ -180,20 +181,20 @@ async function handleSubmit() {
 
       <!-- Description -->
       <div>
-        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Description</label>
+        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('assetForm.description') }}</label>
         <textarea
           v-model="description"
           rows="2"
-          placeholder="Brief description of asset usage and characteristics..."
+          :placeholder="t('assetForm.descriptionPlaceholder')"
           class="w-full rounded-md border border-slate-300 p-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         ></textarea>
       </div>
 
       <!-- Actions -->
       <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-        <Button variant="outline" type="button" @click="emit('close')">Cancel</Button>
+        <Button variant="outline" type="button" @click="emit('close')">{{ t('assetForm.cancel') }}</Button>
         <Button variant="primary" type="submit" :loading="isSubmitting">
-          Save Asset & Metadata
+          {{ t('assetForm.submit') }}
         </Button>
       </div>
     </form>

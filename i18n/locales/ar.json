@@ -1,0 +1,264 @@
+{
+  "common": {
+    "loading": "جارٍ التحميل...",
+    "retry": "إعادة المحاولة",
+    "clearAll": "مسح كل الفلاتر",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "search": "بحث",
+    "pageOf": "صفحة {page} من {totalPages}",
+    "assetsCount": "لا توجد أصول | أصل واحد | {count} أصول",
+    "noRecords": "لا توجد سجلات",
+    "errorOccurred": "حدث خطأ ما",
+    "dismiss": "إغلاق",
+    "close": "إغلاق"
+  },
+  "loadingState": {
+    "assets": "جارٍ تحميل أصول المنصة..."
+  },
+  "header": {
+    "brand": "الأصول الرقمية",
+    "phaseBadge": "المرحلة 0",
+    "nav": {
+      "catalog": "كتالوج الأصول",
+      "imageToIcon": "تحويل صورة إلى أيقونة",
+      "toolBadge": "أداة",
+      "admin": "الإدارة والحوكمة",
+      "audit": "سجلات التدقيق"
+    },
+    "role": "الدور:",
+    "signIn": "تسجيل الدخول",
+    "language": "اللغة",
+    "selectLanguage": "اختر اللغة"
+  },
+  "footer": {
+    "brand": "منصة الأصول الرقمية",
+    "phase": "المرحلة 0: الأساس",
+    "database": "PostgreSQL 16 و Supabase RLS",
+    "schema": "مخطط متعدد الأنواع (أيقونات، خطوط، رسومات، شعارات، قوالب)",
+    "storage": "تخزين منفصل",
+    "audit": "سجل تدقيق كامل"
+  },
+  "catalog": {
+    "meta": {
+      "title": "منصة الأصول الرقمية - استكشف الأصول",
+      "description": "ابحث في آلاف الأيقونات والخطوط والرسومات والشعارات الحديثة مع بحث فوري بالنص الكامل وفلاتر تصنيف متعددة وترتيب حسب الصلة."
+    },
+    "hero": {
+      "badgePhase": "المرحلة 2: البحث والاكتشاف المتقدم",
+      "badgeStack": "PostgreSQL + البحث النصي والملاءمة",
+      "title": "استكشف أصولاً رقمية احترافية",
+      "description": "ابحث في آلاف الأيقونات والخطوط والرسومات والشعارات الحديثة مع بحث فوري بالنص الكامل وفلاتر تصنيف متعددة وترتيب حسب الصلة.",
+      "createAsset": "إنشاء أصل رقمي",
+      "showArchitecture": "عرض حالة البنية",
+      "hideArchitecture": "إخفاء حالة البنية",
+      "adminGovernance": "حوكمة الإدارة"
+    },
+    "heading": {
+      "resultsFor": "نتائج البحث عن «{term}»",
+      "categoryIcons": "أيقونات {category}",
+      "allAssets": "أصول الكتالوج",
+      "activeRole": "الدور النشط:"
+    },
+    "error": {
+      "title": "تعذّر تحميل نتائج البحث",
+      "retry": "إعادة البحث"
+    },
+    "emptyState": {
+      "searchTitle": "لا توجد أصول مطابقة لـ «{term}»",
+      "title": "لم يتم العثور على أصول مطابقة",
+      "description": "جرّب التحقق من الأخطاء الإملائية أو مسح فلاتر الوسوم النشطة أو تصفح تصنيفات أخرى.",
+      "clearFilters": "مسح كل الفلاتر",
+      "createAsset": "إنشاء أصل جديد"
+    },
+    "pagination": {
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية"
+    }
+  },
+  "filters": {
+    "searchPlaceholder": "ابحث في الأيقونات والوسوم والكلمات المفتاحية (مثال: عربة تسوق، درع)...",
+    "clearSearch": "مسح البحث (Esc)",
+    "sortLabel": "الترتيب:",
+    "sort": {
+      "relevance": "الصلة",
+      "downloads": "الأكثر تحميلاً",
+      "newest": "الأحدث أولاً",
+      "nameAsc": "الاسم (أ-ي)",
+      "nameDesc": "الاسم (ي-أ)"
+    },
+    "filtersButton": "الفلاتر",
+    "allCategories": "كل التصنيفات",
+    "assetType": "نوع الأصل",
+    "allAssetTypes": "كل أنواع الأصول",
+    "types": {
+      "icon": "أيقونة (متجهية)",
+      "font": "خط (طباعة)",
+      "illustration": "رسم توضيحي (مشهد)",
+      "logo": "شعار (هوية)",
+      "template": "قالب (نظام تصميم)"
+    },
+    "license": "الترخيص القانوني",
+    "allLicenses": "كل التراخيص",
+    "licenseUsage": {
+      "commercial": "تجاري",
+      "personal": "شخصي"
+    },
+    "status": "دورة حياة الحالة",
+    "anyStatus": "أي حالة",
+    "statuses": {
+      "published": "منشور (عام)",
+      "draft": "مسودة",
+      "pendingReview": "بانتظار المراجعة",
+      "archived": "مؤرشف"
+    },
+    "tags": "التصفية حسب الوسوم",
+    "active": "نشط:",
+    "chips": {
+      "query": "بحث: «{term}»",
+      "category": "التصنيف: {name}",
+      "license": "الترخيص: {name}",
+      "type": "النوع: {type}"
+    },
+    "removeChip": "إزالة الفلتر {name}"
+  },
+  "assetCard": {
+    "featured": "مميز",
+    "typeFallback": "أصل رقمي من نوع {type}",
+    "generalCategory": "عام",
+    "noLicense": "بلا ترخيص"
+  },
+  "assetDetail": {
+    "backToCatalog": "العودة إلى كتالوج الأصول",
+    "accessRestricted": "الوصول مقيّد",
+    "notFound": "الأصل غير موجود أو محظور بواسطة RLS",
+    "returnHome": "العودة للرئيسية",
+    "featured": "مميز",
+    "slug": "المعرف: {slug}",
+    "noDescription": "لا يوجد وصف لهذا الأصل الرقمي.",
+    "manifestTitle": "بيان ملفات التخزين (Supabase Storage)",
+    "manifestDescription": "ملفات ثنائية منفصلة عن بيانات PostgreSQL الوصفية. المسارات مقسّمة منطقيًا.",
+    "noFiles": "لا يوجد ملف ثنائي مرفق بهذه المسودة بعد.",
+    "download": "تحميل {format}",
+    "licenseTitle": "الترخيص والشروط",
+    "commercialUse": "الاستخدام التجاري:",
+    "standaloneResale": "إعادة البيع المنفرد:",
+    "attribution": "نسب المؤلف:",
+    "allowed": "مسموح",
+    "prohibited": "محظور",
+    "required": "مطلوب",
+    "notRequired": "غير مطلوب",
+    "missingLicense": "تنبيه: المسودة الحالية بلا ترخيص معيّن ولا يمكن نشرها بدونه.",
+    "category": "التصنيف",
+    "uncategorized": "غير مصنّف",
+    "author": "المؤلف / المساهم",
+    "downloads": "التحميلات",
+    "createdAt": "تاريخ الإنشاء",
+    "adminModeration": "إشراف الإدارة على دورة الحياة",
+    "adminDescription": "تتحكم الإدارة في حالات دورة حياة الأصل عبر تفويض من جهة الخادم.",
+    "publish": "نشر الأصل (قراءة عامة)",
+    "archive": "أرشفة الأصل",
+    "revertToDraft": "إرجاع إلى مسودة",
+    "relatedTitle": "أيقونات ذات صلة وأصول مشابهة",
+    "relatedDescription": "أيقونات تشترك في وسوم أو تصنيف أو كلمات بحث متشابهة."
+  },
+  "admin": {
+    "nav": {
+      "overview": "نظرة عامة والصحة",
+      "assets": "إشراف الأصول",
+      "categories": "التصنيفات",
+      "licenses": "التراخيص",
+      "audit": "سجل التدقيق"
+    }
+  },
+  "toast": {
+    "statusUpdated": "تم تحديث الحالة",
+    "statusUpdatedMessage": "تم نقل الأصل إلى حالة {status}",
+    "updateFailed": "فشل التحديث",
+    "categoryCreated": "تم إنشاء التصنيف",
+    "categoryCreatedMessage": "أُضيف التصنيف «{name}» بنجاح",
+    "licenseCreated": "تم إنشاء الترخيص",
+    "licenseCreatedMessage": "سُجّل الترخيص «{name}» بنجاح",
+    "creationFailed": "فشل الإنشاء"
+  },
+  "adminCategories": {
+    "title": "تصنيفات ديناميكية",
+    "description": "التصنيفات مخزنة ديناميكيًا في PostgreSQL وليست قوائم ثابتة.",
+    "namePlaceholder": "اسم التصنيف (مثال: الذكاء الاصطناعي)",
+    "descriptionPlaceholder": "وصف مختصر...",
+    "add": "إضافة تصنيف",
+    "userNotice": "أنت تشاهد كمستخدم عادي. إدارة التصنيفات تتطلب دور المدير.",
+    "noDescription": "لا يوجد وصف"
+  },
+  "assetForm": {
+    "title": "إنشاء أصل رقمي جديد",
+    "name": "اسم الأصل *",
+    "namePlaceholder": "مثال: درع آمن حديث",
+    "assetType": "نوع الأصل",
+    "category": "التصنيف",
+    "selectCategory": "اختر تصنيفًا",
+    "license": "الترخيص",
+    "licenseRequired": "(إلزامي للأصول المنشورة) *",
+    "licenseOptional": "(اختياري للمسودات)",
+    "selectLicense": "اختر ترخيصًا",
+    "status": "دورة حياة الحالة",
+    "statusDraft": "مسودة (للمؤلف فقط)",
+    "statusPendingReview": "بانتظار المراجعة (تنتظر الموافقة)",
+    "statusPublished": "منشور (عام - {scope})",
+    "statusPublishedAdmin": "مسموح للمدير",
+    "statusPublishedUser": "للمدير فقط",
+    "draftNotice": "كمستخدم عادي، تسمح سياسات RLS بالحفظ في حالة المسودة أو بانتظار المراجعة. الإدارة تراجع وتنشر.",
+    "svgLabel": "كود SVG متجهي (اختياري - يُعقّم تلقائيًا ضد XSS)",
+    "description": "الوصف",
+    "descriptionPlaceholder": "وصف مختصر لاستخدام الأصل وخصائصه...",
+    "cancel": "إلغاء",
+    "submit": "حفظ الأصل والبيانات الوصفية",
+    "errorNameRequired": "اسم الأصل مطلوب",
+    "errorLicenseRequired": "ترخيص الأصل إلزامي للنشر",
+    "errorCreateFailed": "تعذّر إنشاء الأصل"
+  },
+  "foundationStatus": {
+    "title": "حالة بنية المرحلة صفر",
+    "description": "فحص مباشر للمخطط العلائقي وسياسات RLS وحزم التخزين وسجل التدقيق.",
+    "reverify": "إعادة التحقق",
+    "backendConnected": "خلفية Supabase متصلة",
+    "liveProject": "مشروع حي",
+    "storageBuckets": "حزم التخزين:",
+    "tablesPending": "جداول PostgreSQL: مخزن في الذاكرة نشط بانتظار تنفيذ SQL على Supabase.",
+    "openSqlEditor": "فتح محرر SQL في Supabase",
+    "metrics": {
+      "assets": "الأصول الأساسية",
+      "assetsHint": "كيانات متعددة الأنواع",
+      "categories": "التصنيفات",
+      "categoriesHint": "تصنيف ديناميكي",
+      "licenses": "التراخيص",
+      "licensesHint": "قيود قانونية",
+      "audit": "سجلات التدقيق",
+      "auditHint": "سجلات غير قابلة للتغيير"
+    },
+    "tablesTitle": "كيانات قاعدة البيانات العلائقية (10 جداول أساسية)",
+    "invariantsTitle": "ثوابت البنية وحدود الأمان",
+    "verified": "مُتحقق",
+    "failed": "فشل",
+    "pathCopied": "تم نسخ المسار",
+    "pathCopiedMessage": "ملف ترحيل SQL: {path}"
+  },
+  "adminLicenses": {
+    "title": "محرك التراخيص القانونية",
+    "description": "كل أصل منشور يتطلب ترخيصًا صريحًا وموثقًا.",
+    "namePlaceholder": "اسم الترخيص (مثال: Apache 2.0)",
+    "urlPlaceholder": "https://opensource.org/licenses/...",
+    "commercialUse": "الاستخدام التجاري",
+    "redistribution": "إعادة التوزيع المنفرد",
+    "modification": "المشتقات / التعديل",
+    "attributionRequired": "نسب المؤلف مطلوب",
+    "add": "إضافة ترخيص قانوني",
+    "userNotice": "أنت تشاهد كمستخدم عادي. إدارة التراخيص تتطلب دور المدير.",
+    "commercial": "تجاري",
+    "nonCommercial": "غير تجاري",
+    "redistributionAllowed": "إعادة التوزيع: مسموح",
+    "noResale": "لا إعادة بيع",
+    "attributionRequiredBadge": "نسب مطلوب",
+    "noAttribution": "بلا نسب"
+  }
+}

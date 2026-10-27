@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Container from '../components/layout/Container.vue'
 import Button from '../components/ui/Button.vue'
@@ -26,6 +26,16 @@ const { categories, fetchCategories } = useCategories()
 const { licenses, fetchLicenses } = useLicenses()
 const { tags, fetchTags } = useTags()
 const { role } = useAuth()
+const { t } = useI18n()
+
+useHead(() => ({
+  title: t('catalog.meta.title'),
+  meta: [
+    { name: 'description', content: t('catalog.meta.description') },
+    { property: 'og:title', content: t('catalog.meta.title') },
+    { property: 'og:description', content: t('catalog.meta.description') }
+  ]
+}))
 
 const isCreateModalOpen = ref(false)
 const showArchitectureInfo = ref(false)
@@ -151,6 +161,10 @@ function resetAllFilters() {
 function handleAssetSelect(asset: Asset) {
   router.push(`/assets/${asset.id}`)
 }
+
+const selectedCategoryName = computed(
+  () => categories.value.find(c => c.slug === filters.selectedCategory)?.name || ''
+)
 </script>
 
 <template>
@@ -159,24 +173,24 @@ function handleAssetSelect(asset: Asset) {
     <div class="mb-8 rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 p-8 text-white shadow-lg relative overflow-hidden">
       <div class="relative z-10 max-w-3xl">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold backdrop-blur-sm border border-blue-400/30 mb-4">
-          <span>Phase 2: Advanced Search & Discovery</span>
-          <span>•</span>
-          <span>PostgreSQL + Full-Text & Relevance</span>
+          <span>{{ t('catalog.hero.badgePhase') }}</span>
+          <span aria-hidden="true">•</span>
+          <span>{{ t('catalog.hero.badgeStack') }}</span>
         </div>
         <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
-          Explore Professional Digital Assets
+          {{ t('catalog.hero.title') }}
         </h1>
         <p class="mt-3 text-sm sm:text-base text-slate-300 leading-relaxed">
-          Search thousands of modern icons, fonts, illustrations, and logos with instant full-text search, multi-faceted taxonomy filters, and relevance ranking.
+          {{ t('catalog.hero.description') }}
         </p>
 
         <div class="mt-6 flex flex-wrap items-center gap-3">
           <Button variant="primary" @click="isCreateModalOpen = true">
-            <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="w-4 h-4 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            Create Digital Asset
+            {{ t('catalog.hero.createAsset') }}
           </Button>
 
           <Button
@@ -184,19 +198,20 @@ function handleAssetSelect(asset: Asset) {
             class="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white"
             @click="showArchitectureInfo = !showArchitectureInfo"
           >
-            {{ showArchitectureInfo ? 'Hide Architecture Status' : 'View Architecture Health' }}
+            {{ showArchitectureInfo ? t('catalog.hero.hideArchitecture') : t('catalog.hero.showArchitecture') }}
           </Button>
 
           <NuxtLink to="/admin">
             <Button variant="ghost" class="text-slate-300 hover:text-white hover:bg-white/10">
-              Admin Governance &rarr;
+              {{ t('catalog.hero.adminGovernance') }}
+              <span class="rtl:rotate-180 ms-1" aria-hidden="true">&rarr;</span>
             </Button>
           </NuxtLink>
         </div>
       </div>
 
       <!-- Background Decoration Grid -->
-      <div class="absolute -right-12 -bottom-12 w-96 h-96 opacity-10 pointer-events-none">
+      <div class="absolute -end-12 -bottom-12 w-96 h-96 opacity-10 pointer-events-none">
         <svg viewBox="0 0 200 200" fill="currentColor">
           <path d="M45,-78C58,-70,68,-58,75,-44C82,-30,86,-15,84,-1C82,14,75,28,66,41C57,53,46,65,33,72C20,79,5,81,-10,80C-25,79,-40,75,-52,66C-64,57,-73,43,-79,28C-85,13,-88,-3,-84,-18C-80,-33,-69,-46,-56,-55C-43,-64,-28,-68,-14,-71C0,-74,15,-76,30,-77" />
         </svg>
@@ -229,23 +244,23 @@ function handleAssetSelect(asset: Asset) {
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
       <div class="flex items-center gap-3">
         <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <span v-if="filters.search">Results for "{{ filters.search }}"</span>
+          <span v-if="filters.search">{{ t('catalog.heading.resultsFor', { term: filters.search }) }}</span>
           <span v-else-if="filters.selectedCategory">
-            {{ categories.find(c => c.slug === filters.selectedCategory)?.name }} Icons
+            {{ t('catalog.heading.categoryIcons', { category: selectedCategoryName }) }}
           </span>
-          <span v-else>Catalog Assets</span>
+          <span v-else>{{ t('catalog.heading.allAssets') }}</span>
         </h2>
         <Badge variant="secondary" class="font-mono text-xs">
-          {{ total }} {{ total === 1 ? 'asset' : 'assets' }}
+          {{ t('common.assetsCount', { count: total }, total) }}
         </Badge>
       </div>
 
       <div class="flex items-center gap-4 text-xs text-slate-500">
         <span v-if="totalPages > 1" class="font-medium">
-          Page {{ page }} of {{ totalPages }}
+          {{ t('common.pageOf', { page, totalPages }) }}
         </span>
-        <div class="border-l border-slate-200 dark:border-slate-800 pl-4">
-          Active Role:
+        <div class="border-s border-slate-200 dark:border-slate-800 ps-4">
+          {{ t('catalog.heading.activeRole') }}
           <span class="font-semibold text-blue-600 dark:text-blue-400">{{ role }}</span>
         </div>
       </div>
@@ -257,25 +272,27 @@ function handleAssetSelect(asset: Asset) {
     <!-- Error State -->
     <ErrorState
       v-else-if="error"
-      title="Failed to load search results"
+      :title="t('catalog.error.title')"
       :message="error"
-      action-label="Retry Search"
+      :action-label="t('catalog.error.retry')"
       @retry="triggerFetch"
     />
 
     <!-- Empty State -->
     <EmptyState
       v-else-if="assets.length === 0"
-      :title="filters.search ? `No assets found for \`${filters.search}\`` : 'No matching assets found'"
-      description="Try checking for typos, clearing active tag filters, or browsing other categories."
+      :title="filters.search
+        ? t('catalog.emptyState.searchTitle', { term: filters.search })
+        : t('catalog.emptyState.title')"
+      :description="t('catalog.emptyState.description')"
     >
       <template #action>
         <div class="flex gap-2">
           <Button size="sm" variant="outline" @click="resetAllFilters">
-            Clear all filters
+            {{ t('catalog.emptyState.clearFilters') }}
           </Button>
           <Button size="sm" variant="primary" @click="isCreateModalOpen = true">
-            Create New Asset
+            {{ t('catalog.emptyState.createAsset') }}
           </Button>
         </div>
       </template>
@@ -300,10 +317,11 @@ function handleAssetSelect(asset: Asset) {
         <Button
           variant="outline"
           size="sm"
-          :disabled="page <= 1"
+          :disabled="filters.page <= 1"
           @click="filters.page--"
         >
-          &larr; Previous Page
+          <span class="rtl:rotate-180 me-1" aria-hidden="true">&larr;</span>
+          {{ t('catalog.pagination.previous') }}
         </Button>
 
         <div class="flex items-center gap-1">
@@ -327,7 +345,8 @@ function handleAssetSelect(asset: Asset) {
           :disabled="page >= totalPages"
           @click="filters.page++"
         >
-          Next Page &rarr;
+          {{ t('catalog.pagination.next') }}
+          <span class="rtl:rotate-180 ms-1" aria-hidden="true">&rarr;</span>
         </Button>
       </div>
     </div>
