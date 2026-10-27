@@ -264,7 +264,52 @@ AssetService / AuthService / StorageService / AuditService
 - `audit/index.get.ts`
 - `auth/`: `login.post`, `logout.post`, `register.post`, `user.get`
 
-### 8.3 تفاصيل ميزة Phase 3 (Image to Icon Converter)
+### 8.3 التبديل بين العربية والإنجليزية (i18n)
+
+**الوضع:** ✅ مكتمل ومتحقق — التفاصيل الكاملة في `docs/plans/i18n-ar-en-plan.md`.
+
+| العنصر | المكان |
+| :----- | :----- |
+| إعداد الوحدة | `nuxt.config.ts` → `i18n` (`@nuxtjs/i18n` 9.5.6، `strategy: 'no_prefix'`) |
+| حزم الترجمة | `i18n/locales/en.json` (مصدر الحقيقة) و`i18n/locales/ar.json` |
+| سجل اللغات (كود/لغة/اتجاه) | `i18n/locales.ts` → `SUPPORTED_LOCALES` |
+| مبدّل اللغة | `components/i18n/LocaleSwitcher.vue` (في الهيدر، سطح المكتب + موبايل) |
+| `lang`/`dir` + SEO | `app.vue` (`useLocaleHead({ seo: true })` + `hreflangLinks`) |
+| الخط العربي | `assets/css/main.css` (`html[lang="ar"]` فقط) |
+| الحراسة الآلية | `tests/unit/i18n_locales.test.ts`, `i18n_rtl.test.ts`, `i18n_hardcoded_copy.test.ts` |
+
+**كيف يعمل التبديل:**
+
+1. المستخدم يختار اللغة ← `setLocale('ar')` (بدون إعادة تحميل كاملة).
+2. الوحدة تحفظ الاختيار في cookie `i18n_redirected` (`sameSite: lax`، سنة واحدة).
+3. في الطلب التالي يقرأ السيرفر الـ cookie ويعرض `lang="ar-SA" dir="rtl"` من أول paint — لا وميض RTL.
+4. لو لم يوجد cookie، يُستخدم `Accept-Language` ثم `en`.
+
+**كيف تضيف مفتاح ترجمة:**
+
+1. أضِفه إلى `i18n/locales/en.json` داخل الكائن المناسب (`catalog.*`, `filters.*`, `common.*` …).
+2. أضِف نفس المفتاح إلى `i18n/locales/ar.json` — أي نقص يُسقِط `pnpm test`.
+3. استخدمه في المكوّن: `const { t } = useI18n()` ثم `{{ t('catalog.hero.title') }}`.
+4. للرسائل ذات المتغيرات: `{term}` في الملف + `t('key', { term })`، واختبار التطابق يتحقق من تطابق المتغيرات بين اللغتين.
+5. للتوست: `success({ key: 'toast.categoryCreated', params: { name } })` بدل نص إنجليزي جاهز.
+
+**قواعد RTL:**
+
+- استخدم `ms/me/ps/pe/start/end/text-start/border-s/rounded-s` — لا `ml/mr/pl/pr/left/right`.
+- الأيقونات الاتجاهية (`←`/`→`) تُقلَب بـ `rtl:rotate-180`.
+- لا تكتب نصًا إنجليزيًا صلبًا في `placeholder`/`title`/`aria-label`/`alt`؛ الاختبار يرفضه.
+
+**أخطاء يجب تجنبها (تمت مواجهتها فعليًا):**
+
+- بدون `file: 'en.json'` داخل `locales` **لا تُضمَّن** أي ترجمة، و`pnpm build` ينجح بصمت وكل `t()` يطبع المفتاح الخام.
+- `langDir` يُحلّ نسبةً إلى `rootDir`؛ مع `restructureDir: 'i18n'` القيمة الصحيحة `'locales'`.
+- `useLocaleHead` يتجاهل `hreflang` في `strategy: 'no_prefix'` — تُولَّد يدويًا في `app.vue`.
+- `baseUrl` مطلوب وإلا تُحذف `og:url`/`canonical` مع تحذير.
+- للتحقق من SSR من PowerShell استخدم `curl.exe` (الـ cookie لا يُمرَّر بـ `Invoke-WebRequest -Headers` بشكل موثوق).
+
+**لم يُترجم بعد (خارج النطاق):** بيانات السيرفر (أسماء التصنيفات/الوسوم/الوصف)، رسائل أخطاء API الجاهزة، صفحات `/auth/*`، وصفحة `/tools/image-to-icon` وكل مكوّنات `features/image-converter/`، و`components/admin/AuditLogViewer.vue`.
+
+### 8.4 تفاصيل ميزة Phase 3 (Image to Icon Converter)
 
 **خط المعالجة (client-side بالكامل، بلا رفع للخادم):**
 

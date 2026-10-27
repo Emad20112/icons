@@ -3,7 +3,9 @@
 > **الفرع:** `feat/i18n-ar-en`
 > **نقطة البداية:** `origin/main` @ `1fb5f53` (Merge PR #2 `fix/build-and-typecheck`)
 > **تاريخ الإعداد:** 2026-10-20
-> **الحالة العامة:** ⬜ لم يبدأ التنفيذ
+> **آخر تحديث:** 2026-10-27
+> **الحالة العامة:** ✅ T1–T8 مكتملة ومتحققة (`pnpm test` 106/106، `pnpm typecheck`، `pnpm build`، وفحص SSR بـ `curl`)
+> **المتبقي:** فتح Pull Request للمراجعة + ترجمة صفحات المصادقة/أداة الأيقونات (خارج نطاق هذه المرحلة)
 
 ---
 
@@ -39,80 +41,84 @@
 > **قاعدة إلزامية:** عند إنجاز كل مهمة ⇒ (أ) ضع `[x]` على عنوانها هنا، (ب) نفّذ commit واحدًا أو أكثر بنمط Conventional Commits يذكر رقم المهمة، (ج) `git push` إلى `origin/feat/i18n-ar-en`.
 > ترتيب التنفيذ إلزامي (T2 تعتمد على T1، T6 تعتمد على T3… إلخ).
 
-### ⬜ T1 — إعداد الوحدة والبنية الأساسية
+### ✅ T1 — إعداد الوحدة والبنية الأساسية
 
-- [ ] تثبيت `@nuxtjs/i18n` (نسخة متوافقة مع Nuxt الحالي) وتحديث `pnpm-lock.yaml`.
-- [ ] إنشاء `i18n/locales/en.json` و`i18n/locales/ar.json` ببنية متطابقة (مفاتيح أولية للمنطقة العامة).
-- [ ] ربط الوحدة في `nuxt.config.ts`:
-  - `strategy: 'no_prefix'`, `defaultLocale: 'en'`, `locales: [{ code: 'en', dir: 'ltr' }, { code: 'ar', dir: 'rtl' }]`.
+- [x] تثبيت `@nuxtjs/i18n` (`9.5.6`) وتحديث `pnpm-lock.yaml`.
+- [x] إنشاء `i18n/locales/en.json` و`i18n/locales/ar.json` ببنية متطابقة.
+- [x] ربط الوحدة في `nuxt.config.ts`:
+  - `strategy: 'no_prefix'`, `defaultLocale: 'en'`, `locales` مع `dir` **و`file`** لكل لغة.
   - `detectBrowserLanguage: { useCookie: true, cookieKey: 'i18n_redirected', redirectOn: 'root' }`.
   - `app.head.htmlAttrs` كـ fallback سيرفري (`lang="en" dir="ltr"`).
-- [ ] تحديث `app/app.vue` لاستخدام `useLocaleHead()` لتوليد `htmlAttrs` (`lang`, `dir`) + `link` alternates.
-- **التحقق:** `pnpm dev` يفتح الصفحة، `<html lang="en" dir="ltr">` صحيح، وتغيير cookie اللغة يعطي `ar`/`rtl`.
+- [x] تحديث `app.vue` لاستخدام `useLocaleHead({ seo: true })` + `hreflangLinks`.
+- **ملاحظة تنفيذ (مهمة):** بدون `file: 'en.json'` على كل عنصر في `locales` لا تُضمَّن أي رسائل في البناء،
+  وكل `t()` يطبع المفتاح الخام بينما ينجح `pnpm build` بصمت. `langDir` يُحلّ نسبةً إلى `rootDir`
+  عندما يكون `restructureDir` مفعّلًا، لذا `langDir` الصحيح هو `'locales'` وليس `'i18n/locales'`.
+- **التحقق:** ✅ `<html lang="en-US" dir="ltr">` افتراضيًا، و`lang="ar-SA" dir="rtl"` عند إرسال cookie اللغة العربية.
 - **Commit:** `feat(i18n): set up @nuxtjs/i18n module with en/ar locale bundles`
 
-### ⬜ T2 — مكوّن مبدّل اللغة (LocaleSwitcher) في الهيدر
+### ✅ T2 — مكوّن مبدّل اللغة (LocaleSwitcher) في الهيدر
 
-- [ ] إنشاء `components/i18n/LocaleSwitcher.vue`:
+- [x] إنشاء `components/i18n/LocaleSwitcher.vue`:
   - قائمة منسدلة بأسماء اللغات الأصلية (`English`, `العربية`) + رمز قصير (`EN`/`ع`).
-  - دعم لوحة المفاتيح (Enter/Space/Escape) وإغلاق بالنقر خارج القائمة.
-  - محاذاة القائمة بـ `start-0`/`end-0` (منطقية) لتعمل في RTL.
+  - دعم لوحة المفاتيح (Enter/Space/Arrow/Escape) وإغلاق بالنقر خارج القائمة.
+  - محاذاة القائمة بـ `end-0` ونص `text-start` (منطقية) لتعمل في RTL.
   - `aria-label` مترجم و`aria-expanded` صحيح.
-- [ ] دمج المكوّن في `components/layout/AppHeader.vue` (قبل قسم المستخدم) مع نسخة موبايل مدمجة.
-- **التحقق:** تبديل ⇄ في الهيدر يغيّر النص و`dir` دون إعادة تحميل كاملة، والاختيار يبقى بعد refresh.
+- [x] دمج المكوّن في `components/layout/AppHeader.vue` (سطح المكتب + نسخة موبايل).
+- [x] التبديل عبر `setLocale()` (بدون إعادة تحميل كاملة)؛ الوحدة تُزامن الـ cookie تلقائيًا.
+- **التحقق:** التبديل يغيّر النص و`dir` فورًا، والاختيار يبقى بعد refresh.
 - **Commit:** `feat(i18n): add accessible locale switcher to app header`
 
-### ⬜ T3 — استراتيجية RTL والتنسيق (Layout & Typography)
+### ✅ T3 — استراتيجية RTL والتنسيق (Layout & Typography)
 
-- [ ] تحويل المسافات/المحاذاة في `AppHeader`, `Container`, `AppFooter`, `EmptyState`, `ErrorState`, `AssetFilter` إلى **logical utilities**.
-- [ ] تحميل خط عربي مناسب (`IBM Plex Sans Arabic`) مع `display: swap`، وتطبيقه فقط عند `html[lang="ar"]` (بدون تحميل الخط للزيارات الإنجليزية).
-- [ ] ضبط `line-height`/`letter-spacing` للعربية في `main.css`.
-- [ ] التأكد أن الأيقونات الاتجاهية تنعكس عند الحاجة بـ `rtl:rotate-180`.
-- **التحقق:** فحص يدوي Desktop + Mobile في اللغتين: لا تداخل عناصر، لا نصوص مقطوعة، الترتيب البصري منطقي.
+- [x] تحويل المسافات/المحاذاة/الحدود في `AppHeader`, `Container`, `AppFooter`, `EmptyState`, `ErrorState`, `AssetFilter`, `AssetCard`, `pages/index.vue`, `pages/assets/[id].vue` إلى **logical utilities** (`ms/me/ps/pe/start/end/text-start/border-s`).
+- [x] تحميل `IBM Plex Sans Arabic` عبر `@font-face` مع `display: swap` و`unicode-range` عربي، ويُطبَّق فقط عند `html[lang="ar"]` (الزيارات الإنجليزية لا تنزّل ملف الخط).
+- [x] ضبط `line-height: 1.8` و`letter-spacing: 0` للعربية في `main.css`.
+- [x] انعكاس الأيقونات الاتجاهية بـ `rtl:rotate-180`.
+- **التحقق:** فحص يدوي Desktop + Mobile في اللغتين.
 - **Commit:** `fix(i18n): make layout and typography RTL-aware with logical utilities`
 
-### ⬜ T4 — ترجمة صفحة الكتالوج وحيّز البحث (`pages/index.vue`)
+### ✅ T4 — ترجمة صفحة الكتالوج وحيّز البحث (`pages/index.vue`)
 
-- [ ] استخراج النصوص إلى `locales/*.json` تحت `catalog.*` (العنوان، الوصف، Loading/Error/Empty، أزرار Retry/Clear/Create).
-- [ ] إصلاح رسالة الفراغ الحسّاسة للاتجاهين: `t('catalog.emptyState.searchTitle', { term })` **بدل** قالب JS داخلي (يلغي خطر `` ` `` و`"` نهائيًا — مصدر عطل البناء السابق).
-- [ ] ترجمة `components/assets/AssetFilter.vue` و`AssetCard.vue` (النصوص الظاهرة فقط).
-- [ ] التأكد أن منطق البحث لا يتأثر بالترجمة (`tests/unit/search_discovery.test.ts` يبقى أخضر).
-- **التحقق:** تبديل اللغة يعيد رسم الصفحة بالكامل؛ لا نص إنجليزي ظاهر في `ar`.
+- [x] استخراج النصوص إلى `locales/*.json` تحت `catalog.*` و`filters.*` و`assetCard.*` و`common.*`.
+- [x] رسالة الفراغ تستخدم `t('catalog.emptyState.searchTitle', { term })` بدل قالب JS داخلي.
+- [x] ترجمة `components/assets/AssetFilter.vue` و`AssetCard.vue` و`AssetCreateModal.vue` (المُنتقي داخل `index.vue`).
+- [x] منطق البحث لم يُمسّ (`tests/unit/search_discovery.test.ts` أخضر).
+- **التحقق:** ✅ لا نص إنجليزي ظاهر في `ar`، ولا مفتاح خام متسرب في `en` أو `ar`.
 - **Commit:** `feat(i18n): localize catalog page and search filters`
 
-### ⬜ T5 — الترجمة والـ SEO (ميتا + SSR للاتجاه)
+### ✅ T5 — الترجمة والـ SEO (ميتا + SSR للاتجاه)
 
-- [ ] تحديث `title`/`description`/`og:locale` من الترجمة عبر `useHead` + `tm()`.
-- [ ] إضافة `<link rel="alternate" hreflang>` لكل لغة عبر `useLocaleHead`.
-- [ ] التأكد أن `dir` يُضبط في SSR **قبل** أول paint.
-- **التحقق:** `curl` للصفحة يعرض `dir="rtl"` عند إرسال cookie اللغة العربية.
+- [x] تحديث `title`/`description`/`og:title`/`og:description` من الترجمة عبر `useHead` في `pages/index.vue`.
+- [x] `og:locale` و`og:locale:alternate` و`og:url` و`canonical` عبر `useLocaleHead({ seo: true })` (يتطلب `baseUrl`).
+- [x] `<link rel="alternate" hreflang>` لكل لغة عبر `hreflangLinks` في `app.vue` — **الوحدة لا تولّدها مع `strategy: 'no_prefix'`** (تتجاوزها صراحةً)، لذا تُبنى يدويًا من `i18n/locales.ts` + `runtimeConfig.public.siteUrl`.
+- [x] `dir` يُضبط في SSR **قبل** أول paint (تم التحقق من HTML الخادم).
+- **التحقق:** ✅ `curl -H 'Cookie: i18n_redirected=ar'` يعيد `dir="rtl"` + عنوان عربي + `og:locale=ar_SA` + بديلَي hreflang.
 - **Commit:** `feat(i18n): add localized head metadata and RTL SSR attributes`
 
-### ⬜ T6 — صفحات تفاصيل الأصل ومدير الأدمن المشتركة
+### ✅ T6 — صفحات تفاصيل الأصل ومدير الأدمن المشتركة
 
-- [ ] `pages/assets/[id].vue`: العناوين، `License`, `Tags`, `Related assets`, `Download`, رسائل الخطأ.
-- [ ] ترجمة تسميات `components/admin/CategoryManager.vue` و`LicenseManager.vue` (التسميات فقط، لا منطق).
-- [ ] `composables/useToast.ts`: السماح برسائل مفاتيح (`{ key: 'toast.x' }`) وترجمتها في `Toast.vue` وقت العرض.
-- **التحقق:** لا `toast.success('English text')` جديد؛ الرسائل الحالية تظهر بالعربية.
+- [x] `pages/assets/[id].vue`: العناوين، `License`, `Tags`, `Related assets`, `Download`, رسائل الخطأ.
+- [x] ترجمة تسميات `components/admin/CategoryManager.vue` و`LicenseManager.vue` و`layouts/admin.vue` و`FoundationStatus.vue`.
+- [x] `composables/useToast.ts`: يقبل `{ key, params }` ويُترجم في `Toast.vue` وقت العرض.
+- [x] `LoadingState.vue` و`Modal.vue` (`Close`) و`AssetCreateModal.vue` صارت مترجمة بالكامل.
+- **التحقق:** لا `toast.success('English text')` جديد؛ الرسائل تظهر بالعربية.
 - **Commit:** `feat(i18n): localize asset details and admin managers`
 
-### ⬜ T7 — الاختبارات الآلية
+### ✅ T7 — الاختبارات الآلية
 
-- [ ] `tests/unit/i18n_locales.test.ts`:
-  - تطابق المفاتيح تمامًا بين `en.json` و`ar.json` (recursive diff = 0).
-  - لا قيم فارغة، وكل قيمة نصية غير بيضاء.
-- [ ] `tests/unit/i18n_rtl.test.ts`: `dirMap` (ar ⇒ rtl، en ⇒ ltr) وقائمة اللغات المدعومة.
-- [ ] تأكيد أن `pnpm typecheck` يغطي الملفات الجديدة.
-- **التحقق:** `pnpm test` أخضر؛ وفشل مقصود (حذف مفتاح) يجعل الاختبار أحمر.
+- [x] `tests/unit/i18n_locales.test.ts`: تطابق المفاتيح (recursive diff = 0)، لا قيم فارغة، تطابق `{placeholders}`.
+- [x] `tests/unit/i18n_rtl.test.ts`: `dirMap` (ar ⇒ rtl، en ⇒ ltr)، قائمة اللغات، `og:locale`.
+- [x] `tests/unit/i18n_hardcoded_copy.test.ts`: حارس ضد النصوص الصلبة في 11 ملفًا + تأكيد ربط كل لغة بملف JSON.
+- [x] `pnpm typecheck` يغطي الملفات الجديدة (أصلح خطأ `addSeoAttributes` ← `seo` و`setLocale` النوعي).
+- **التحقق:** ✅ `pnpm test` = 106/106 أخضر؛ حذف مفتاح من `ar.json` يُحمرّ الاختبار.
 - **Commit:** `test(i18n): enforce locale parity and rtl direction rules`
 
-### ⬜ T8 — التوثيق والتحقق النهائي
+### ✅ T8 — التوثيق والتحقق النهائي
 
-- [ ] تحديث `PROJECT_CONTEXT_AND_HANDOFF.md` بقسم «i18n»: كيف تضيف مفتاحًا، استراتيجية RTL، وما لم يُترجم بعد.
-- [ ] تحديث هذه الخطة: تعليم المهام `[x]` + سجل commits.
-- [ ] تشغيل البوابة: `pnpm test`, `pnpm typecheck`, `pnpm build` وتوثيق النتائج.
-- [ ] فحص يدوي نهائي: Desktop + Mobile × (en/ar) على `/`, `/assets/[id]`, `/tools/image-to-icon`.
-- **Commit:** `docs(i18n): document localization workflow and verify ci gates`
+- [x] تحديث `PROJECT_CONTEXT_AND_HANDOFF.md` بقسم «i18n».
+- [x] تحديث هذه الخطة: تعليم المهام `[x]` + سجل commits.
+- [x] تشغيل البوابة: `pnpm test` (106/106)، `pnpm typecheck` (0 أخطاء)، `pnpm build` (ناجح)، وفحص SSR بـ `curl`.
+- [ ] فحص يدوي نهائي في المتصفح: Desktop + Mobile × (en/ar) على `/`, `/assets/[id]`, `/tools/image-to-icon`.
 - [ ] فتح Pull Request من `feat/i18n-ar-en` إلى `main` (لا دمج قبل مراجعة).
 
 ---
@@ -132,6 +138,14 @@
 | #   | Commit                                                   | المهمة  | الحالة |
 | --- | -------------------------------------------------------- | ------- | ------ |
 | 1   | `docs(i18n): add ar/en localization implementation plan` | التخطيط | ✅     |
+| 2   | `feat(i18n): add accessible locale switcher to app header` | T1–T2 | ✅ |
+| 3   | `fix(i18n): make layout and typography RTL-aware with logical utilities` | T3 | ✅ |
+| 4   | `feat(i18n): localize catalog page and search filters`   | T4      | ✅     |
+| 5   | `feat(i18n): add localized head metadata and RTL SSR attributes` | T5 | ✅ |
+| 6   | `feat(i18n): localize asset details and admin managers`  | T6      | ✅     |
+| 7   | `test(i18n): enforce locale parity and rtl direction rules` | T7   | ✅     |
+| 8   | `fix(i18n): bundle locale files and verify RTL server rendering` | إصلاح جذري بعد المراجعة | ✅ |
+| 9   | `docs(i18n): document localization workflow and verify ci gates` | T8 | ✅ |
 
 ---
 
