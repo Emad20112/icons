@@ -81,3 +81,39 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+/*
+ * Arabic typography: `IBM Plex Sans Arabic` is only *applied* to
+ * `html[lang="ar"]`, so LTR (English) pages keep the English font stack and
+ * never request these files. `font-display: swap` keeps Arabic text visible in
+ * the fallback stack until the webfont arrives (no invisible text, no FOIT).
+ */
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://fonts.bunny.net/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-400-normal.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('https://fonts.bunny.net/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-600-normal.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+html[lang='ar'] body {
+  font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, system-ui, sans-serif;
+  line-height: 1.8;
+  letter-spacing: 0;
+}
+
+/* Keep Latin runs (slugs, file formats, numbers) comfortably spaced in RTL. */
+html[lang='ar'] .font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0;
+}

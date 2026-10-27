@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import { useToast } from '../../composables/useToast'
+import type { ToastText } from '../../composables/useToast'
 
 const { toasts, dismiss } = useToast()
+const { t } = useI18n()
+
+// Resolve a toast string at render time so it follows the active locale.
+// Raw server messages (plain strings) are shown as-is.
+function resolve(text?: ToastText): string {
+  if (text === undefined || text === null) return ''
+  if (typeof text === 'string') return text
+  return t(text.key, (text.params || {}) as Record<string, unknown>)
+}
 </script>
 
 <template>
-  <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+  <div class="fixed bottom-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none end-4">
     <div
       v-for="toast in toasts"
       :key="toast.id"
@@ -19,13 +29,14 @@ const { toasts, dismiss } = useToast()
     >
       <div class="flex items-start justify-between gap-3">
         <div>
-          <h4 class="text-sm font-semibold">{{ toast.title }}</h4>
+          <h4 class="text-sm font-semibold">{{ resolve(toast.title) }}</h4>
           <p v-if="toast.message" class="text-xs text-slate-600 dark:text-slate-400 mt-1">
-            {{ toast.message }}
+            {{ resolve(toast.message) }}
           </p>
         </div>
         <button
           class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs"
+          :aria-label="t('common.dismiss')"
           @click="dismiss(toast.id)"
         >
           ✕

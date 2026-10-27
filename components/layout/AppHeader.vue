@@ -2,15 +2,16 @@
 import { useAuth } from '../../composables/useAuth'
 import Container from './Container.vue'
 import Button from '../ui/Button.vue'
-import Badge from '../ui/Badge.vue'
+import LocaleSwitcher from '../i18n/LocaleSwitcher.vue'
 
-const { user, role, isAdmin, availableProfiles, switchRole, selectProfile, logout } = useAuth()
+const { user, role, availableProfiles, switchRole, selectProfile, logout } = useAuth()
+const { t } = useI18n()
 </script>
 
 <template>
   <header class="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
     <Container class="flex h-16 items-center justify-between">
-      <!-- Left: Logo & Nav -->
+      <!-- Start: Logo & Nav -->
       <div class="flex items-center gap-8">
         <NuxtLink to="/" class="flex items-center gap-2.5 font-bold text-slate-900 dark:text-white">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
@@ -21,8 +22,8 @@ const { user, role, isAdmin, availableProfiles, switchRole, selectProfile, logou
             </svg>
           </div>
           <div>
-            <span class="text-base tracking-tight font-semibold">DigitalAssets</span>
-            <span class="ml-1 text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950 px-1.5 py-0.5 rounded">Phase 0</span>
+            <span class="text-base tracking-tight font-semibold">{{ t('header.brand') }}</span>
+            <span class="ms-1 text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950 px-1.5 py-0.5 rounded">{{ t('header.phaseBadge') }}</span>
           </div>
         </NuxtLink>
 
@@ -32,38 +33,42 @@ const { user, role, isAdmin, availableProfiles, switchRole, selectProfile, logou
             class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors"
             active-class="text-blue-600 dark:text-blue-400 font-semibold"
           >
-            Assets Catalog
+            {{ t('header.nav.catalog') }}
           </NuxtLink>
           <NuxtLink
             to="/tools/image-to-icon"
             class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors flex items-center gap-1.5"
             active-class="text-blue-600 dark:text-blue-400 font-semibold"
           >
-            <span>Image to Icon</span>
-            <span class="rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-1.5 py-0.5">Tool</span>
+            <span>{{ t('header.nav.imageToIcon') }}</span>
+            <span class="rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-1.5 py-0.5">{{ t('header.nav.toolBadge') }}</span>
           </NuxtLink>
           <NuxtLink
             to="/admin"
             class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors"
             active-class="text-blue-600 dark:text-blue-400 font-semibold"
           >
-            Admin & Governance
+            {{ t('header.nav.admin') }}
           </NuxtLink>
           <NuxtLink
             to="/admin/audit"
             class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors"
             active-class="text-blue-600 dark:text-blue-400 font-semibold"
           >
-            Audit Logs
+            {{ t('header.nav.audit') }}
           </NuxtLink>
         </nav>
       </div>
 
-      <!-- Right: Role Switcher & User Profile -->
+      <!-- End: Language, Role Switcher & User Profile -->
       <div class="flex items-center gap-3">
+        <div class="hidden sm:items-center sm:flex">
+          <LocaleSwitcher />
+        </div>
+
         <!-- Interactive RLS Role Simulator Badge -->
-        <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
-          <span class="text-[11px] font-semibold text-slate-500 uppercase px-2">Role:</span>
+        <div class="hidden md:flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+          <span class="text-[11px] font-semibold text-slate-500 uppercase px-2">{{ t('header.role') }}</span>
           <button
             type="button"
             class="px-2.5 py-1 text-xs font-semibold rounded-md transition-all"
@@ -82,14 +87,19 @@ const { user, role, isAdmin, availableProfiles, switchRole, selectProfile, logou
           </button>
         </div>
 
-        <!-- User Info / Avatar -->
-        <div v-if="user" class="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700">
+        <!-- Mobile: compact menu with role switcher + language -->
+    <div class="flex items-center sm:hidden">
+      <LocaleSwitcher />
+    </div>
+
+    <!-- User Info / Avatar -->
+        <div v-if="user" class="flex items-center gap-2 ps-2 border-s border-slate-200 dark:border-slate-700">
           <img
             :src="user.avatar_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=user'"
             :alt="user.display_name || user.email"
             class="h-8 w-8 rounded-full border border-slate-200 dark:border-slate-700 object-cover"
           />
-          <div class="hidden sm:block text-left">
+          <div class="hidden sm:block text-start">
             <div class="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[120px]">
               {{ user.display_name || user.email.split('@')[0] }}
             </div>
@@ -100,7 +110,7 @@ const { user, role, isAdmin, availableProfiles, switchRole, selectProfile, logou
         </div>
         <div v-else class="flex items-center gap-2">
           <NuxtLink to="/auth/login">
-            <Button size="sm" variant="outline">Sign In</Button>
+            <Button size="sm" variant="outline">{{ t('header.signIn') }}</Button>
           </NuxtLink>
         </div>
       </div>

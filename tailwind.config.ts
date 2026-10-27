@@ -66,6 +66,8 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        // Applied only when `<html lang="ar">` is active (see assets/css/main.css)
+        arabic: ['IBM Plex Sans Arabic', 'Segoe UI', 'Tahoma', 'system-ui', 'sans-serif'],
       }
     },
   },

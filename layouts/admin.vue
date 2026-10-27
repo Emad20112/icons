@@ -7,6 +7,7 @@ import { onMounted } from 'vue'
 import { useAuth } from '../composables/useAuth'
 
 const { fetchUser, isAdmin } = useAuth()
+const { t } = useI18n()
 
 onMounted(() => {
   fetchUser()
@@ -25,35 +26,35 @@ onMounted(() => {
           class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
           exact-active-class="text-blue-600 dark:text-blue-400 font-semibold"
         >
-          Overview & Health
+          {{ t('admin.nav.overview') }}
         </NuxtLink>
         <NuxtLink
           to="/admin/assets"
           class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
           exact-active-class="text-blue-600 dark:text-blue-400 font-semibold"
         >
-          Asset Moderation
+          {{ t('admin.nav.assets') }}
         </NuxtLink>
         <NuxtLink
           to="/admin/categories"
           class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
           exact-active-class="text-blue-600 dark:text-blue-400 font-semibold"
         >
-          Categories
+          {{ t('admin.nav.categories') }}
         </NuxtLink>
         <NuxtLink
           to="/admin/licenses"
           class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
           exact-active-class="text-blue-600 dark:text-blue-400 font-semibold"
         >
-          Licenses
+          {{ t('admin.nav.licenses') }}
         </NuxtLink>
         <NuxtLink
           to="/admin/audit"
           class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
           exact-active-class="text-blue-600 dark:text-blue-400 font-semibold"
         >
-          Audit Trail
+          {{ t('admin.nav.audit') }}
         </NuxtLink>
       </Container>
     </div>

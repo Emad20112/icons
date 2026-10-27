@@ -10,6 +10,8 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'retry'): void
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -21,7 +23,7 @@ const emit = defineEmits<{
         <line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
     </div>
-    <h3 class="text-sm font-semibold text-red-900 dark:text-red-200">{{ title || 'An error occurred' }}</h3>
+    <h3 class="text-sm font-semibold text-red-900 dark:text-red-200">{{ title || t('common.errorOccurred') }}</h3>
     <p v-if="message" class="text-xs text-red-700 dark:text-red-300 mt-1 max-w-sm">
       {{ message }}
     </p>
