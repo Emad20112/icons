@@ -129,6 +129,7 @@
     "noLicense": "بلا ترخيص"
   },
   "assetDetail": {
+    "fontSpecimen": "أبجد Aa Gg",
     "backToCatalog": "العودة إلى كتالوج الأصول",
     "accessRestricted": "الوصول مقيّد",
     "notFound": "الأصل غير موجود أو محظور بواسطة RLS",
@@ -260,5 +261,191 @@
     "noResale": "لا إعادة بيع",
     "attributionRequiredBadge": "نسب مطلوب",
     "noAttribution": "بلا نسب"
+  },
+  "roles": {
+    "admin": "مسؤول",
+    "user": "مستخدم"
+  },
+  "auth": {
+    "login": {
+      "title": "تسجيل الدخول إلى المنصة",
+      "subtitle": "استمرار الجلسة عبر نظام المصادقة Supabase",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "name{'@'}example.com",
+      "submit": "تسجيل الدخول",
+      "noAccount": "ليس لديك حساب؟",
+      "signUp": "إنشاء حساب",
+      "quickTest": "حسابات الاختبار السريع (المرحلة 0: الأساس)",
+      "authSuccess": "تمت المصادقة",
+      "signedInAs": "تم تسجيل الدخول باسم {email}",
+      "authFailed": "فشلت المصادقة",
+      "profileSwitched": "تم تبديل الملف الشخصي",
+      "profileLoaded": "تم تحميل ملف الجلسة الشخصي"
+    },
+    "register": {
+      "title": "إنشاء حساب جديد",
+      "subtitle": "تسجيل مستخدم مصادقة جديد وملف شخصي مرتبط به",
+      "displayName": "الاسم الظاهر",
+      "displayNamePlaceholder": "سارة أحمد",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "sarah{'@'}example.com",
+      "submit": "إنشاء الحساب",
+      "hasAccount": "لديك حساب بالفعل؟",
+      "signIn": "تسجيل الدخول",
+      "accountCreated": "تم إنشاء الحساب",
+      "profileInitialized": "تم تهيئة الملف الشخصي بدور مستخدم USER",
+      "registrationFailed": "فشل إنشاء الحساب"
+    }
+  },
+  "adminOverview": {
+    "title": "الحوكمة وبنية المنصة",
+    "subtitle": "إدارة الأساس للأصول الرقمية متعددة التصنيفات.",
+    "moderateAssets": "إشراف الأصول",
+    "viewAuditTrail": "عرض سجل التدقيق",
+    "userWarningPrefix": "الوضع الحالي: مستخدم (USER)",
+    "userWarningText": "أنت تتصفح المنصة حاليًا بصلاحيات مستخدم عادي. استخدم مبدّل الأدوار في الشريط العلوي للتبديل إلى مسؤول (ADMIN) لاختبار العمليات المحمية والتحقق منها."
+  },
+  "adminAssets": {
+    "title": "إشراف الأصول ودورة حياتها",
+    "subtitle": "إدارة المسودات والمراجعات المعلقة والأصول المنشورة والمؤرشفة.",
+    "refresh": "تحديث",
+    "empty": "لم يتم العثور على أصول",
+    "table": {
+      "asset": "الأصل",
+      "type": "النوع",
+      "category": "التصنيف",
+      "license": "الترخيص",
+      "status": "الحالة",
+      "actions": "إجراءات دورة الحياة"
+    },
+    "uncategorized": "غير مصنف",
+    "noLicense": "بدون ترخيص",
+    "publish": "نشر",
+    "archive": "أرشفة",
+    "delete": "حذف",
+    "confirmDelete": "هل أنت متأكد من رغبتك في حذف الأصل «{name}»؟",
+    "deleted": "تم حذف الأصل",
+    "deletedMessage": "تمت إزالة {name} بنجاح",
+    "deleteFailed": "فشل الحذف",
+    "actionFailed": "فشل الإجراء"
+  },
+  "adminCategoriesPage": {
+    "title": "التصنيفات وهيكل الأصول",
+    "subtitle": "إدارة التصنيفات المخزنة ديناميكيًا في PostgreSQL."
+  },
+  "adminLicensesPage": {
+    "title": "تراخيص الأصول الرقمية",
+    "subtitle": "الأذونات القانونية وقواعد الاستخدام التجاري وشروط الإسناد والنسبة."
+  },
+  "adminAuditPage": {
+    "title": "سجلات التدقيق والامتثال",
+    "subtitle": "سجل غير قابل للتعديل لعمليات النظام والتعديلات الإدارية وإنشاء الأصول."
+  },
+  "auditLogViewer": {
+    "title": "سجل التدقيق غير القابل للتعديل",
+    "subtitle": "عمليات النظام المسجلة والتعديلات والأنشطة الإدارية.",
+    "refresh": "تحديث السجل",
+    "emptyTitle": "لا توجد سجلات تدقيق",
+    "emptyDescription": "ستظهر هنا العمليات والتعديلات الإدارية فور حدوثها.",
+    "systemActor": "النظام",
+    "table": {
+      "timestamp": "الوقت",
+      "action": "الإجراء",
+      "entityType": "نوع الكيان",
+      "targetId": "المعرّف المستهدف",
+      "actor": "المنفّذ",
+      "metadata": "البيانات الوصفية"
+    }
+  },
+  "converter": {
+    "meta": {
+      "title": "أداة تحويل الصور إلى أيقونات — منصة الأصول الرقمية",
+      "description": "تحويل صور PNG وJPEG وWebP وSVG إلى أيقونات واضحة متعددة المقاسات وأيقونات Windows Favicon (.ICO) وحزم أيقونات مخصصة."
+    },
+    "breadcrumb": {
+      "home": "الرئيسية",
+      "tools": "الأدوات",
+      "imageToIcon": "تحويل الصور إلى أيقونات"
+    },
+    "header": {
+      "title": "أداة تحويل الصور إلى أيقونات",
+      "phaseBadge": "المرحلة 3",
+      "description": "حوّل أي رسم نقطي أو متجهي إلى أيقونات تطبيقات مخصصة وأيقونات Windows Favicon (.ICO) متعددة الدقة. خصص الحواف والأشكال والألوان وقم بالتصدير بصيغ PNG أو WebP أو حزم ZIP مجمعة.",
+      "sampleIcon": "تجربة باستخدام أيقونة نموذجية"
+    },
+    "toolbar": {
+      "resetSettings": "إعادة ضبط الإعدادات",
+      "uploadDifferent": "رفع صورة مختلفة"
+    },
+    "features": {
+      "clientSideTitle": "معالجة محلية وخصوصية كاملة",
+      "clientSideDesc": "تتم كل عمليات فك التشفير وتغيير الحجم والترميز بالكامل داخل متصفحك. لا يوجد أي تأخير لرفع الملفات إلى الخادم وأقصى درجات الخصوصية.",
+      "multiResTitle": "ملف ICO متعدد الدقات",
+      "multiResDesc": "توليد ملفات أيقونات Windows وFavicon بصيغة .ICO قياسية تضم إطارات مقاسات 16 و24 و32 و48 و64 و128 و256 بكسل في ملف واحد.",
+      "batchZipTitle": "حزمة ZIP كاملة المقاسات",
+      "batchZipDesc": "تصدير فوري لكافة المقاسات المحددة حتى 1024 بكسل داخل أرشيف .zip منظم وجاهز لتطوير التطبيقات ومواقع الويب."
+    },
+    "upload": {
+      "dropPrompt": "أفلت صورتك هنا، أو",
+      "browseFiles": "تصفح الملفات",
+      "supportedNotice": "يدعم صور PNG وJPEG وWebP وSVG بحجم يصل إلى 20 ميجابايت. توسيط تلقائي بنسبة 1:1 وحفظ الشفافية وتخصيص الخلفية.",
+      "maxSize": "حد أقصى 20 ميجابايت",
+      "loading": "جارٍ التحقق من الصورة ومعالجتها...",
+      "errorTitle": "تعذر تحميل الصورة"
+    },
+    "preview": {
+      "fitMode": "الملاءمة:",
+      "showGrid": "إظهار شبكة الشفافية",
+      "hideGrid": "إخفاء شبكة الشفافية",
+      "rendering": "جارٍ تجهيز المعاينة...",
+      "original": "الأصلية: {width} × {height} بكسل ({size} ك.ب)",
+      "scalingTitle": "معاينة تحجيم الأيقونة بالمقاسات الحقيقية",
+      "scalingSubtitle": "معاينة حية للمقاسات عبر شريط المهام وألسنة المتصفح",
+      "modeTooltip": "الوضع الحالي: {mode}. انقر للتبديل."
+    },
+    "controls": {
+      "title": "تخصيص الأيقونة",
+      "subtitle": "ضبط دقيق للشكل، المسافات، الألوان والأبعاد",
+      "reset": "إعادة ضبط",
+      "shape": "شكل الأيقونة",
+      "shapes": {
+        "square": "مربع",
+        "rounded": "حواف مستديرة",
+        "circle": "دائري"
+      },
+      "cornerCurvature": "انحناء الحواف:",
+      "background": "الخلفية والشفافية",
+      "trueAlpha": "شفافية حقيقية",
+      "customColor": "لون مخصص",
+      "padding": "الهامش الداخلي",
+      "cropAspect": "نسبة أبعاد القص",
+      "cropIcon": "1:1 (أيقونة)",
+      "targetResolution": "دقة المعاينة المستهدفة",
+      "exportFormat": "صيغة التصدير",
+      "pngDesc": "دون فقدان وشفافية",
+      "webpDesc": "حديث ومضغوط",
+      "icoDesc": "أيقونة ويندوز ومواقع",
+      "presets": {
+        "transparent": "شفاف",
+        "white": "أبيض",
+        "black": "أسود",
+        "navy": "كحلي",
+        "blue": "أزرق",
+        "emerald": "زمردي",
+        "violet": "بنفسجي"
+      }
+    },
+    "export": {
+      "title": "خيارات التصدير والتنزيل",
+      "subtitle": "اختر المقاسات لتجميعها في أرشيف ZIP أو نزّل ملفًا فرديًا",
+      "selectAll": "تحديد الكل",
+      "includedSizes": "المقاسات المضمنة في حزمة ZIP ({count} محددة):",
+      "downloadSingle": "تنزيل {format} ({size} بكسل)",
+      "downloadZip": "تنزيل الكل كملف ZIP ({count} مقاسات)",
+      "downloadMultiIco": "تنزيل أيقونة Windows Favicon كاملة (.ICO بـ 7 مقاسات)",
+      "convertAnother": "تحويل صورة أخرى",
+      "exporting": "جارٍ تصدير {format} بمقاس {size}x{size}...",
+      "defaultExporting": "جارٍ تصدير الملفات..."
+    }
   }
 }

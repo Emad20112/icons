@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import type { FitMode, IconShape, ImageMetadata } from '../types/converter'
 
+const { t } = useI18n()
+
 const props = defineProps<{
   previewUrl: string | null
   metadata: ImageMetadata | null
@@ -32,7 +34,7 @@ function toggleFitMode() {
     <div class="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-900 shadow-inner flex flex-col items-center justify-center p-8 min-h-[380px] sm:min-h-[440px]">
       
       <!-- Top Viewport Bar -->
-      <div class="absolute top-3 left-3 right-3 flex items-center justify-between text-xs z-10">
+      <div class="absolute top-3 start-3 end-3 flex items-center justify-between text-xs z-10">
         <!-- Resolution badge -->
         <div class="flex items-center gap-1.5 rounded-lg bg-black/60 backdrop-blur-md px-2.5 py-1 text-slate-200 font-mono border border-white/10 shadow-sm">
           <span class="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -45,10 +47,10 @@ function toggleFitMode() {
           <button
             type="button"
             class="rounded-lg bg-black/60 hover:bg-black/80 backdrop-blur-md px-2.5 py-1 text-slate-300 hover:text-white border border-white/10 transition-colors flex items-center gap-1"
-            :title="`Current mode: ${fitMode}. Click to toggle.`"
+            :title="t('converter.preview.modeTooltip', { mode: fitMode })"
             @click="toggleFitMode"
           >
-            <span>Fit:</span>
+            <span>{{ t('converter.preview.fitMode') }}</span>
             <span class="font-semibold uppercase text-blue-400">{{ fitMode }}</span>
           </button>
 
@@ -56,7 +58,7 @@ function toggleFitMode() {
           <button
             type="button"
             class="rounded-lg bg-black/60 hover:bg-black/80 backdrop-blur-md p-1.5 text-slate-300 hover:text-white border border-white/10 transition-colors"
-            :title="showCheckerboard ? 'Hide transparency grid' : 'Show transparency grid'"
+            :title="showCheckerboard ? t('converter.preview.hideGrid') : t('converter.preview.showGrid')"
             @click="showCheckerboard = !showCheckerboard"
           >
             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -87,19 +89,19 @@ function toggleFitMode() {
           <img
             v-if="previewUrl"
             :src="previewUrl"
-            alt="Live Icon Preview"
+            :alt="t('converter.preview.scalingTitle')"
             class="h-full w-full object-contain pointer-events-none select-none transition-transform duration-75"
           />
           <div v-else class="flex flex-col items-center justify-center text-slate-400 text-xs gap-2">
             <div class="h-6 w-6 animate-spin rounded-full border-2 border-slate-400 border-t-transparent"></div>
-            <span>Rendering preview...</span>
+            <span>{{ t('converter.preview.rendering') }}</span>
           </div>
         </div>
       </div>
 
       <!-- Bottom Metadata Pill -->
-      <div v-if="metadata" class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] text-slate-400 px-1">
-        <span>Original: {{ metadata.width }} × {{ metadata.height }} px ({{ (metadata.sizeBytes / 1024).toFixed(0) }} KB)</span>
+      <div v-if="metadata" class="absolute bottom-3 start-3 end-3 flex items-center justify-between text-[11px] text-slate-400 px-1">
+        <span>{{ t('converter.preview.original', { width: metadata.width, height: metadata.height, size: (metadata.sizeBytes / 1024).toFixed(0) }) }}</span>
         <span class="uppercase font-semibold text-slate-300">{{ metadata.detectedFormat }}</span>
       </div>
     </div>
@@ -108,9 +110,9 @@ function toggleFitMode() {
     <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
       <div class="flex items-center justify-between mb-3">
         <h4 class="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-          Real-Size Icon Scaling Preview
+          {{ t('converter.preview.scalingTitle') }}
         </h4>
-        <span class="text-[11px] text-slate-500">Live preview across OS dock & browser tabs</span>
+        <span class="text-[11px] text-slate-500">{{ t('converter.preview.scalingSubtitle') }}</span>
       </div>
 
       <div class="flex items-end justify-around gap-4 overflow-x-auto py-2 px-1">

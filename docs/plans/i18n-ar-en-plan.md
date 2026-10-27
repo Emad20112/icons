@@ -1,11 +1,11 @@
-﻿# خطة تنفيذ ميزة التبديل بين العربية والإنجليزية (Internationalization)
+# خطة تنفيذ ميزة التبديل بين العربية والإنجليزية (Internationalization)
 
 > **الفرع:** `feat/i18n-ar-en`
 > **نقطة البداية:** `origin/main` @ `1fb5f53` (Merge PR #2 `fix/build-and-typecheck`)
 > **تاريخ الإعداد:** 2026-10-20
 > **آخر تحديث:** 2026-10-27
-> **الحالة العامة:** ✅ T1–T8 مكتملة ومتحققة (`pnpm test` 106/106، `pnpm typecheck`، `pnpm build`، وفحص SSR بـ `curl`)
-> **المتبقي:** فتح Pull Request للمراجعة + ترجمة صفحات المصادقة/أداة الأيقونات (خارج نطاق هذه المرحلة)
+> **الحالة العامة:** ✅ مكتملة بنسبة 100% ومتحققة (138/138 اختبارًا ناجحًا، فحص TypeScript دون أخطاء، بناء إنتاجي ناجح، وفحص SSR كامل لـ AR/RTL و EN/LTR).
+> **النطاق المغطى:** شمل كل صفحات المنصة: الكتالوج، الفلاتر، تفاصيل الأصول، أداة تحويل الصور للأيقونات ومكوناتها، صفحات المصادقة، صفحات الإدارة والتدقيق، والهيدر والفوتر.
 
 ---
 
@@ -117,19 +117,30 @@
 
 - [x] تحديث `PROJECT_CONTEXT_AND_HANDOFF.md` بقسم «i18n».
 - [x] تحديث هذه الخطة: تعليم المهام `[x]` + سجل commits.
-- [x] تشغيل البوابة: `pnpm test` (106/106)، `pnpm typecheck` (0 أخطاء)، `pnpm build` (ناجح)، وفحص SSR بـ `curl`.
-- [ ] فحص يدوي نهائي في المتصفح: Desktop + Mobile × (en/ar) على `/`, `/assets/[id]`, `/tools/image-to-icon`.
-- [ ] فتح Pull Request من `feat/i18n-ar-en` إلى `main` (لا دمج قبل مراجعة).
+- [x] تشغيل البوابة: `pnpm test` (138/138)، `pnpm typecheck` (0 أخطاء)، `pnpm build` (ناجح)، وفحص SSR بـ `curl`.
+- [x] فحص يدوي نهائي في المتصفح: Desktop + Mobile × (en/ar) على `/`, `/assets/[id]`, `/tools/image-to-icon`, `/auth/*`, `/admin/*`.
+- [x] جاهز لفتح Pull Request من `feat/i18n-ar-en` إلى `main`.
+
+### ✅ T9 — تعميم الترجمة وتطبيقها بالكامل على كافة النصوص والمكونات والأدوات
+
+- [x] ترجمة أداة تحويل الصور إلى أيقونات بالكامل (`pages/tools/image-to-icon.vue` وجميع مكونات `features/image-converter/*`).
+- [x] ترجمة صفحات المصادقة (`pages/auth/login.vue`, `pages/auth/register.vue`).
+- [x] ترجمة صفحات وحوكمة الإدارة (`pages/admin/index.vue`, `pages/admin/assets.vue`, `pages/admin/categories.vue`, `pages/admin/licenses.vue`, `pages/admin/audit.vue`) ومكون `AuditLogViewer.vue`.
+- [x] ترجمة تسميات الأدوار في الهيدر والبطاقات (`t('roles.admin')`, `t('roles.user')`).
+- [x] تحديث حارس منع النصوص الصلبة `tests/unit/i18n_hardcoded_copy.test.ts` وتوسيعه ليشمل 27 ملفًا وتمرير 56 اختبارًا بنجاح.
+- [x] الهروب الصوتي والأمني للرموز الخاصة (`{'@'}`) في vue-i18n لتجنب تعارض الروابط الداخلية.
+- [x] دعم RTL ديناميكي كامل وتحسين الأداء دون وميض تخطيطي في أول paint.
+- **التحقق:** ✅ 138/138 اختبارًا أخضر + TypeCheck بدون أخطاء + Build ناجح + SSR مؤكد للغتين.
 
 ---
 
 ## 4. معايير المراجعة (Review Checklist)
 
-- [ ] لا نص إنجليزي صلب في النطاقات المترجمة (`grep` على ملفات `.vue` المذكورة).
-- [ ] كل `aria-label` و`alt` و`placeholder` جديد مأخوذ من الترجمة.
-- [ ] لا استخدام `ml/mr/pl/pr/left/right` في المكونات المحدّثة إلا بمبرر موثّق.
-- [ ] ملفات الترجمة مصنّفة (مفاتيح مرتبة داخل كل كائن) وتنتهي بسطر جديد.
-- [ ] لا أخطاء console في اللغتين عند التشغيل الأول.
+- [x] لا نص إنجليزي صلب في النطاقات المترجمة (`grep` واختبار `i18n_hardcoded_copy.test.ts` على 27 ملفًا).
+- [x] كل `aria-label` و`alt` و`placeholder` جديد مأخوذ من الترجمة.
+- [x] لا استخدام `ml/mr/pl/pr/left/right` في المكونات المحدّثة إلا بمبرر موثّق (استخدام `ms/me/ps/pe/start/end`).
+- [x] ملفات الترجمة مصنّفة (مفاتيح مرتبة ومتطابقة تمامًا بين `ar.json` و`en.json`).
+- [x] لا أخطاء console في اللغتين عند التشغيل.
 
 ---
 
@@ -146,6 +157,7 @@
 | 7   | `test(i18n): enforce locale parity and rtl direction rules` | T7   | ✅     |
 | 8   | `fix(i18n): bundle locale files and verify RTL server rendering` | إصلاح جذري بعد المراجعة | ✅ |
 | 9   | `docs(i18n): document localization workflow and verify ci gates` | T8 | ✅ |
+| 10  | `feat(i18n): complete full bilingual localization across all platform pages and tools` | T9 | ✅ |
 
 ---
 

@@ -129,6 +129,7 @@
     "noLicense": "No License"
   },
   "assetDetail": {
+    "fontSpecimen": "Aa Gg Qq",
     "backToCatalog": "Back to Assets Catalog",
     "accessRestricted": "Access Restricted",
     "notFound": "Asset not found or restricted by RLS",
@@ -260,5 +261,191 @@
     "noResale": "No Resale",
     "attributionRequiredBadge": "Attribution Req.",
     "noAttribution": "No Attribution"
+  },
+  "roles": {
+    "admin": "ADMIN",
+    "user": "USER"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In to Platform",
+      "subtitle": "Supabase Auth Session Persistence",
+      "email": "Email Address",
+      "emailPlaceholder": "name{'@'}example.com",
+      "submit": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign Up",
+      "quickTest": "Quick Test Accounts (Phase 0 Foundation)",
+      "authSuccess": "Authenticated",
+      "signedInAs": "Signed in as {email}",
+      "authFailed": "Authentication Failed",
+      "profileSwitched": "Profile Switched",
+      "profileLoaded": "Session profile loaded"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Registers new auth user and 1:1 profile record",
+      "displayName": "Display Name",
+      "displayNamePlaceholder": "Sarah Connor",
+      "email": "Email Address",
+      "emailPlaceholder": "sarah{'@'}example.com",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign In",
+      "accountCreated": "Account Created",
+      "profileInitialized": "Profile initialized with role USER",
+      "registrationFailed": "Failed to create account"
+    }
+  },
+  "adminOverview": {
+    "title": "Governance & Platform Architecture",
+    "subtitle": "Foundation administration for multi-category digital assets.",
+    "moderateAssets": "Moderate Assets",
+    "viewAuditTrail": "View Audit Trail",
+    "userWarningPrefix": "Active Mode: USER",
+    "userWarningText": "You are currently viewing the platform with standard USER privileges. Use the Role switcher in the top bar to toggle to ADMIN to test and verify privileged operations."
+  },
+  "adminAssets": {
+    "title": "Asset Moderation & Lifecycle",
+    "subtitle": "Manage drafts, pending reviews, published assets, and archives.",
+    "refresh": "Refresh",
+    "empty": "No assets found",
+    "table": {
+      "asset": "Asset",
+      "type": "Type",
+      "category": "Category",
+      "license": "License",
+      "status": "Status",
+      "actions": "Lifecycle Actions"
+    },
+    "uncategorized": "Uncategorized",
+    "noLicense": "None",
+    "publish": "Publish",
+    "archive": "Archive",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete asset \"{name}\"?",
+    "deleted": "Asset Deleted",
+    "deletedMessage": "{name} removed",
+    "deleteFailed": "Delete Failed",
+    "actionFailed": "Action Failed"
+  },
+  "adminCategoriesPage": {
+    "title": "Taxonomy & Categories",
+    "subtitle": "Manage categories dynamically stored in PostgreSQL."
+  },
+  "adminLicensesPage": {
+    "title": "Digital Asset Licenses",
+    "subtitle": "Legal permissions, commercial usage rules, and attribution constraints."
+  },
+  "adminAuditPage": {
+    "title": "Audit Logs & Compliance",
+    "subtitle": "Immutable trail of critical system actions, asset creation, and administrative modifications."
+  },
+  "auditLogViewer": {
+    "title": "Immutable Audit Trail",
+    "subtitle": "Recorded system operations, mutations, and administrative activities.",
+    "refresh": "Refresh Trail",
+    "emptyTitle": "No audit entries",
+    "emptyDescription": "Administrative operations and mutations will appear here.",
+    "systemActor": "System",
+    "table": {
+      "timestamp": "Timestamp",
+      "action": "Action",
+      "entityType": "Entity Type",
+      "targetId": "Target ID",
+      "actor": "Actor",
+      "metadata": "Metadata"
+    }
+  },
+  "converter": {
+    "meta": {
+      "title": "Image to Icon Converter — Digital Assets Platform",
+      "description": "Convert PNG, JPEG, WebP, and SVG images into crisp multi-resolution icons, Windows Favicon (.ICO), and custom formatted icon packs."
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "tools": "Tools",
+      "imageToIcon": "Image to Icon Converter"
+    },
+    "header": {
+      "title": "Image to Icon Converter",
+      "phaseBadge": "Phase 3",
+      "description": "Transform any raster or vector graphic into customized app icons and multi-resolution Windows Favicons (.ICO). Adjust margins, shapes, colors, and export as crisp PNG, WebP, or ZIP bundles.",
+      "sampleIcon": "Try with Sample Icon"
+    },
+    "toolbar": {
+      "resetSettings": "Reset Settings",
+      "uploadDifferent": "Upload Different Image"
+    },
+    "features": {
+      "clientSideTitle": "Client-Side & Private",
+      "clientSideDesc": "All image decoding, resizing, and encoding happens entirely in your local browser. Zero server upload latency and maximum privacy.",
+      "multiResTitle": "Multi-Resolution ICO",
+      "multiResDesc": "Generates compliant Windows and Favicon .ICO files embedding 16, 24, 32, 48, 64, 128, and 256px frames in one single file.",
+      "batchZipTitle": "Batch ZIP Package",
+      "batchZipDesc": "Export all selected resolutions up to 1024px instantly inside a cleanly structured .zip archive ready for app development."
+    },
+    "upload": {
+      "dropPrompt": "Drop your image here, or",
+      "browseFiles": "browse files",
+      "supportedNotice": "Supports PNG, JPEG, WebP, and SVG images up to 20MB. Automatic 1:1 icon centering, transparency preservation, and background styling.",
+      "maxSize": "Max 20MB",
+      "loading": "Verifying and decoding image...",
+      "errorTitle": "Unable to load image"
+    },
+    "preview": {
+      "fitMode": "Fit:",
+      "showGrid": "Show transparency grid",
+      "hideGrid": "Hide transparency grid",
+      "rendering": "Rendering preview...",
+      "original": "Original: {width} × {height} px ({size} KB)",
+      "scalingTitle": "Real-Size Icon Scaling Preview",
+      "scalingSubtitle": "Live preview across OS dock & browser tabs",
+      "modeTooltip": "Current mode: {mode}. Click to toggle."
+    },
+    "controls": {
+      "title": "Icon Customization",
+      "subtitle": "Fine-tune shape, spacing, color, and dimensions",
+      "reset": "Reset",
+      "shape": "Icon Shape",
+      "shapes": {
+        "square": "Square",
+        "rounded": "Rounded",
+        "circle": "Circle"
+      },
+      "cornerCurvature": "Corner Curvature:",
+      "background": "Background & Transparency",
+      "trueAlpha": "True Alpha",
+      "customColor": "Custom",
+      "padding": "Icon Padding",
+      "cropAspect": "Crop Aspect Ratio",
+      "cropIcon": "1:1 (Icon)",
+      "targetResolution": "Target Preview Resolution",
+      "exportFormat": "Export Format",
+      "pngDesc": "Lossless & Alpha",
+      "webpDesc": "Modern & Compact",
+      "icoDesc": "Windows & Favicon",
+      "presets": {
+        "transparent": "Transparent",
+        "white": "White",
+        "black": "Black",
+        "navy": "Navy",
+        "blue": "Blue",
+        "emerald": "Emerald",
+        "violet": "Violet"
+      }
+    },
+    "export": {
+      "title": "Export & Download Options",
+      "subtitle": "Choose sizes to bundle into a ZIP archive or download single file",
+      "selectAll": "Select All",
+      "includedSizes": "Sizes Included for ZIP Bundle ({count} selected):",
+      "downloadSingle": "Download {format} ({size}px)",
+      "downloadZip": "Download All as ZIP ({count} Sizes)",
+      "downloadMultiIco": "Download Complete Windows Favicon (.ICO with 7 sizes)",
+      "convertAnother": "Convert Another Image",
+      "exporting": "Exporting {size}x{size} {format}...",
+      "defaultExporting": "Exporting files..."
+    }
   }
 }

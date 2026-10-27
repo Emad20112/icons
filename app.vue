@@ -2,14 +2,13 @@
 // Localized document attributes (lang/dir), hreflang alternates and og:locale.
 // The negotiated locale is resolved server-side from the cookie, so `dir`
 // is already correct before the first paint.
-import { SUPPORTED_LOCALES } from '~/i18n/locales'
+import { SUPPORTED_LOCALES, getDirection } from '~/i18n/locales'
 
-/**
- * `dir`/`lang` plus `og:locale`/`og:url` come from the module (`seo: true`).
- * `hreflang` alternates are added below because the module only emits them for
- * prefixed strategies, and this app uses `no_prefix` (locale = cookie).
- */
+const { locale } = useI18n()
 const head = useLocaleHead({ seo: true })
+
+const currentDir = computed(() => head.value?.htmlAttrs?.dir || getDirection(locale.value))
+const currentLang = computed(() => head.value?.htmlAttrs?.lang || (locale.value === 'ar' ? 'ar-SA' : 'en-US'))
 
 const config = useRuntimeConfig()
 const baseUrl = String(config.public.siteUrl).replace(/\/+$/, '')
@@ -29,7 +28,7 @@ useHead(() => ({ link: hreflangLinks.value }))
 
 <template>
   <div>
-    <Html :lang="head.htmlAttrs?.lang" :dir="head.htmlAttrs?.dir">
+    <Html :lang="currentLang" :dir="currentDir">
       <Head>
         <Link
           v-for="link in head.link || []"

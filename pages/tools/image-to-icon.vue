@@ -7,12 +7,14 @@ import ConverterControlPanel from '../../features/image-converter/components/Con
 import ConverterExportActions from '../../features/image-converter/components/ConverterExportActions.vue'
 import type { ExportImageFormat } from '../../features/image-converter/types/converter'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'Image to Icon Converter — Digital Assets Platform',
+  title: () => `${t('converter.meta.title')}`,
   meta: [
     {
       name: 'description',
-      content: 'Convert PNG, JPEG, WebP, and SVG images into crisp multi-resolution icons, Windows Favicon (.ICO), and custom formatted icon packs.'
+      content: () => t('converter.meta.description')
     }
   ]
 })
@@ -75,11 +77,11 @@ function loadDemoIcon() {
     <!-- Breadcrumb & Header -->
     <div class="mb-8">
       <div class="flex items-center gap-2 text-xs text-slate-500 mb-2">
-        <NuxtLink to="/" class="hover:text-blue-600 transition-colors">Home</NuxtLink>
+        <NuxtLink to="/" class="hover:text-blue-600 transition-colors">{{ t('converter.breadcrumb.home') }}</NuxtLink>
         <span>/</span>
-        <span class="text-slate-400">Tools</span>
+        <span class="text-slate-400">{{ t('converter.breadcrumb.tools') }}</span>
         <span>/</span>
-        <span class="text-blue-600 dark:text-blue-400 font-medium">Image to Icon Converter</span>
+        <span class="text-blue-600 dark:text-blue-400 font-medium">{{ t('converter.breadcrumb.imageToIcon') }}</span>
       </div>
 
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -93,14 +95,14 @@ function loadDemoIcon() {
               </svg>
             </div>
             <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Image to Icon Converter
+              {{ t('converter.header.title') }}
             </h1>
             <span class="rounded-full bg-blue-50 dark:bg-blue-950 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-              Phase 3
+              {{ t('converter.header.phaseBadge') }}
             </span>
           </div>
           <p class="text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
-            Transform any raster or vector graphic into customized app icons and multi-resolution Windows Favicons (.ICO). Adjust margins, shapes, colors, and export as crisp PNG, WebP, or ZIP bundles.
+            {{ t('converter.header.description') }}
           </p>
         </div>
 
@@ -114,7 +116,7 @@ function loadDemoIcon() {
             <svg class="h-3.5 w-3.5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
-            <span>Try with Sample Icon</span>
+            <span>{{ t('converter.header.sampleIcon') }}</span>
           </button>
         </div>
       </div>
@@ -126,7 +128,7 @@ function loadDemoIcon() {
       <div class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 shadow-sm">
         <div class="flex items-center gap-3">
           <div class="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center overflow-hidden">
-            <img :src="previewDataUrl || sourceUrl || ''" alt="Thumb" class="h-full w-full object-contain" />
+            <img :src="previewDataUrl || sourceUrl || ''" :alt="fileName" class="h-full w-full object-contain" />
           </div>
           <div>
             <div class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -147,14 +149,14 @@ function loadDemoIcon() {
             class="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             @click="resetToDefaults"
           >
-            Reset Settings
+            {{ t('converter.toolbar.resetSettings') }}
           </button>
           <button
             type="button"
             class="rounded-lg bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-950/40 dark:hover:bg-red-900/60 dark:text-red-300 px-3 py-1.5 text-xs font-semibold transition-colors"
             @click="clearImage"
           >
-            Upload Different Image
+            {{ t('converter.toolbar.uploadDifferent') }}
           </button>
         </div>
       </div>
@@ -228,9 +230,9 @@ function loadDemoIcon() {
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
           </div>
-          <h4 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Client-Side & Private</h4>
+          <h4 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">{{ t('converter.features.clientSideTitle') }}</h4>
           <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            All image decoding, resizing, and encoding happens entirely in your local browser. Zero server upload latency and maximum privacy.
+            {{ t('converter.features.clientSideDesc') }}
           </p>
         </div>
 
@@ -240,9 +242,9 @@ function loadDemoIcon() {
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
           </div>
-          <h4 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Multi-Resolution ICO</h4>
+          <h4 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">{{ t('converter.features.multiResTitle') }}</h4>
           <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Generates compliant Windows and Favicon .ICO files embedding 16, 24, 32, 48, 64, 128, and 256px frames in one single file.
+            {{ t('converter.features.multiResDesc') }}
           </p>
         </div>
 
@@ -254,9 +256,9 @@ function loadDemoIcon() {
               <line x1="10" y1="12" x2="14" y2="12" />
             </svg>
           </div>
-          <h4 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Batch ZIP Package</h4>
+          <h4 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">{{ t('converter.features.batchZipTitle') }}</h4>
           <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Export all selected resolutions up to 1024px instantly inside a cleanly structured .zip archive ready for app development.
+            {{ t('converter.features.batchZipDesc') }}
           </p>
         </div>
       </div>

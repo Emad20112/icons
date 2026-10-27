@@ -75,7 +75,7 @@ const { t } = useI18n()
             :class="role === 'ADMIN' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'"
             @click="switchRole('ADMIN')"
           >
-            ADMIN
+            {{ t('roles.admin') }}
           </button>
           <button
             type="button"
@@ -83,16 +83,16 @@ const { t } = useI18n()
             :class="role === 'USER' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'"
             @click="switchRole('USER')"
           >
-            USER
+            {{ t('roles.user') }}
           </button>
         </div>
 
         <!-- Mobile: compact menu with role switcher + language -->
-    <div class="flex items-center sm:hidden">
-      <LocaleSwitcher />
-    </div>
+        <div class="flex items-center sm:hidden">
+          <LocaleSwitcher />
+        </div>
 
-    <!-- User Info / Avatar -->
+        <!-- User Info / Avatar -->
         <div v-if="user" class="flex items-center gap-2 ps-2 border-s border-slate-200 dark:border-slate-700">
           <img
             :src="user.avatar_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=user'"
@@ -104,7 +104,7 @@ const { t } = useI18n()
               {{ user.display_name || user.email.split('@')[0] }}
             </div>
             <div class="text-[10px] text-slate-500">
-              {{ role }}
+              {{ role === 'ADMIN' ? t('roles.admin') : t('roles.user') }}
             </div>
           </div>
         </div>

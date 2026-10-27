@@ -8,6 +8,8 @@ import type {
 } from '../types/converter'
 import { STANDARD_ICON_SIZES } from '../types/converter'
 
+const { t } = useI18n()
+
 const props = defineProps<{
   shape: IconShape
   cornerRadiusPercent: number
@@ -30,13 +32,13 @@ const emit = defineEmits<{
 }>()
 
 const bgPresets = [
-  { name: 'Transparent', value: 'transparent' },
-  { name: 'White', value: '#ffffff' },
-  { name: 'Black', value: '#000000' },
-  { name: 'Navy', value: '#0f172a' },
-  { name: 'Blue', value: '#2563eb' },
-  { name: 'Emerald', value: '#059669' },
-  { name: 'Violet', value: '#7c3aed' }
+  { id: 'transparent', value: 'transparent' },
+  { id: 'white', value: '#ffffff' },
+  { id: 'black', value: '#000000' },
+  { id: 'navy', value: '#0f172a' },
+  { id: 'blue', value: '#2563eb' },
+  { id: 'emerald', value: '#059669' },
+  { id: 'violet', value: '#7c3aed' }
 ]
 
 const paddingQuickButtons = [0, 5, 10, 15, 20, 30]
@@ -51,8 +53,8 @@ const isCustomBg = computed(() => {
     <!-- Header with Reset -->
     <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-4">
       <div>
-        <h3 class="text-base font-semibold text-slate-900 dark:text-white">Icon Customization</h3>
-        <p class="text-xs text-slate-500">Fine-tune shape, spacing, color, and dimensions</p>
+        <h3 class="text-base font-semibold text-slate-900 dark:text-white">{{ t('converter.controls.title') }}</h3>
+        <p class="text-xs text-slate-500">{{ t('converter.controls.subtitle') }}</p>
       </div>
       <button
         type="button"
@@ -63,14 +65,14 @@ const isCustomBg = computed(() => {
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
           <path d="M3 3v5h5" />
         </svg>
-        Reset
+        <span>{{ t('converter.controls.reset') }}</span>
       </button>
     </div>
 
     <!-- 1. Icon Shape -->
     <div>
       <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
-        Icon Shape
+        {{ t('converter.controls.shape') }}
       </label>
       <div class="grid grid-cols-3 gap-2">
         <button
@@ -82,7 +84,7 @@ const isCustomBg = computed(() => {
           @click="emit('update:shape', 'square')"
         >
           <div class="h-6 w-6 rounded-none border-2 border-current"></div>
-          <span>Square</span>
+          <span>{{ t('converter.controls.shapes.square') }}</span>
         </button>
 
         <button
@@ -94,7 +96,7 @@ const isCustomBg = computed(() => {
           @click="emit('update:shape', 'rounded')"
         >
           <div class="h-6 w-6 rounded-md border-2 border-current"></div>
-          <span>Rounded</span>
+          <span>{{ t('converter.controls.shapes.rounded') }}</span>
         </button>
 
         <button
@@ -106,14 +108,14 @@ const isCustomBg = computed(() => {
           @click="emit('update:shape', 'circle')"
         >
           <div class="h-6 w-6 rounded-full border-2 border-current"></div>
-          <span>Circle</span>
+          <span>{{ t('converter.controls.shapes.circle') }}</span>
         </button>
       </div>
 
       <!-- Corner Radius Slider (visible if rounded) -->
       <div v-if="shape === 'rounded'" class="mt-3 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
         <div class="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-1.5">
-          <span>Corner Curvature:</span>
+          <span>{{ t('converter.controls.cornerCurvature') }}</span>
           <span class="font-mono font-semibold text-blue-600 dark:text-blue-400">{{ cornerRadiusPercent }}%</span>
         </div>
         <input
@@ -132,10 +134,10 @@ const isCustomBg = computed(() => {
     <div>
       <div class="flex items-center justify-between mb-2">
         <label class="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-          Background & Transparency
+          {{ t('converter.controls.background') }}
         </label>
         <span class="text-[11px] font-mono text-slate-500">
-          {{ backgroundColor === 'transparent' ? 'True Alpha' : backgroundColor }}
+          {{ backgroundColor === 'transparent' ? t('converter.controls.trueAlpha') : backgroundColor }}
         </span>
       </div>
 
@@ -143,7 +145,7 @@ const isCustomBg = computed(() => {
       <div class="flex flex-wrap items-center gap-2">
         <button
           v-for="preset in bgPresets"
-          :key="preset.name"
+          :key="preset.id"
           type="button"
           class="h-8 px-2.5 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-all"
           :class="backgroundColor.toLowerCase() === preset.value.toLowerCase()
@@ -160,7 +162,7 @@ const isCustomBg = computed(() => {
             class="h-3.5 w-3.5 rounded-full border border-slate-300/40"
             :style="{ backgroundColor: preset.value }"
           ></span>
-          <span>{{ preset.name }}</span>
+          <span>{{ t(`converter.controls.presets.${preset.id}`) }}</span>
         </button>
 
         <!-- Custom Color Picker -->
@@ -174,7 +176,7 @@ const isCustomBg = computed(() => {
             class="h-4 w-4 cursor-pointer rounded border-0 p-0"
             @input="emit('update:backgroundColor', ($event.target as HTMLInputElement).value)"
           />
-          <span>Custom</span>
+          <span>{{ t('converter.controls.customColor') }}</span>
         </label>
       </div>
     </div>
@@ -183,7 +185,7 @@ const isCustomBg = computed(() => {
     <div>
       <div class="flex items-center justify-between mb-2">
         <label class="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-          Icon Padding
+          {{ t('converter.controls.padding') }}
         </label>
         <span class="text-xs font-mono font-semibold text-blue-600 dark:text-blue-400">
           {{ paddingPercent }}%
@@ -219,7 +221,7 @@ const isCustomBg = computed(() => {
     <!-- 4. Crop Aspect Presets -->
     <div>
       <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
-        Crop Aspect Ratio
+        {{ t('converter.controls.cropAspect') }}
       </label>
       <div class="grid grid-cols-4 gap-2 text-xs">
         <button
@@ -232,7 +234,7 @@ const isCustomBg = computed(() => {
             : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'"
           @click="emit('update:cropPreset', preset)"
         >
-          {{ preset === '1:1' ? '1:1 (Icon)' : preset }}
+          {{ preset === '1:1' ? t('converter.controls.cropIcon') : preset }}
         </button>
       </div>
     </div>
@@ -240,7 +242,7 @@ const isCustomBg = computed(() => {
     <!-- 5. Target Preview Resolution -->
     <div>
       <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
-        Target Preview Resolution
+        {{ t('converter.controls.targetResolution') }}
       </label>
       <div class="flex flex-wrap gap-1.5">
         <button
@@ -261,7 +263,7 @@ const isCustomBg = computed(() => {
     <!-- 6. Export Format -->
     <div>
       <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
-        Export Format
+        {{ t('converter.controls.exportFormat') }}
       </label>
       <div class="grid grid-cols-3 gap-2">
         <button
@@ -273,7 +275,7 @@ const isCustomBg = computed(() => {
           @click="emit('update:exportFormat', 'PNG')"
         >
           <span class="font-bold">PNG</span>
-          <span class="text-[10px] text-slate-500">Lossless & Alpha</span>
+          <span class="text-[10px] text-slate-500">{{ t('converter.controls.pngDesc') }}</span>
         </button>
 
         <button
@@ -285,7 +287,7 @@ const isCustomBg = computed(() => {
           @click="emit('update:exportFormat', 'WEBP')"
         >
           <span class="font-bold">WebP</span>
-          <span class="text-[10px] text-slate-500">Modern & Compact</span>
+          <span class="text-[10px] text-slate-500">{{ t('converter.controls.webpDesc') }}</span>
         </button>
 
         <button
@@ -297,7 +299,7 @@ const isCustomBg = computed(() => {
           @click="emit('update:exportFormat', 'ICO')"
         >
           <span class="font-bold">ICO</span>
-          <span class="text-[10px] text-slate-500">Windows & Favicon</span>
+          <span class="text-[10px] text-slate-500">{{ t('converter.controls.icoDesc') }}</span>
         </button>
       </div>
     </div>

@@ -137,7 +137,7 @@ const statusLabels = computed<Record<string, string>>(() => tm('filters.statuses
                 v-html="asset.files[0].metadata.rawContent"
               />
               <div v-else-if="asset.type === 'FONT'" class="text-6xl font-serif text-slate-800 dark:text-slate-100 font-bold">
-                Aa Gg Qq
+                {{ t('assetDetail.fontSpecimen') }}
               </div>
               <div v-else class="text-4xl font-bold text-slate-400">
                 {{ asset.name.charAt(0) }}

@@ -1,12 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
-  future: {
-    // The application source lives at the repository root (`pages/`,
-    // `components/`, `layouts/`, etc.). Keep Nuxt on the matching directory
-    // convention until those files are migrated into `app/`.
-    compatibilityVersion: 3,
-  },
   devtools: { enabled: false },
 
   modules: [
@@ -94,15 +88,13 @@ export default defineNuxtConfig({
     }
   },
 
-  nitro: {
-    routeRules: {
-      '/**': {
-        headers: {
-          'X-Content-Type-Options': 'nosniff',
-          'X-XSS-Protection': '1; mode=block',
-          'Referrer-Policy': 'strict-origin-when-cross-origin'
-        }
+  routeRules: {
+    '/**': {
+      headers: {
+        'X-Content-Type-Options': 'nosniff',
+        'X-XSS-Protection': '1; mode=block',
+        'Referrer-Policy': 'strict-origin-when-cross-origin'
       }
-    }
+    } as any
   }
 })

@@ -11,6 +11,7 @@ import { useToast } from '../../composables/useToast'
 const router = useRouter()
 const { login, availableProfiles, selectProfile } = useAuth()
 const { success, error } = useToast()
+const { t } = useI18n()
 
 const email = ref('')
 const isSubmitting = ref(false)
@@ -20,10 +21,10 @@ async function handleLogin() {
   isSubmitting.value = true
   try {
     await login(email.value)
-    success('Authenticated', `Signed in as ${email.value}`)
+    success(t('auth.login.authSuccess'), t('auth.login.signedInAs', { email: email.value }))
     router.push('/')
   } catch (err: any) {
-    error('Authentication Failed', err.statusMessage || err.message)
+    error(t('auth.login.authFailed'), err.statusMessage || err.message)
   } finally {
     isSubmitting.value = false
   }
@@ -31,7 +32,7 @@ async function handleLogin() {
 
 async function quickSwitch(profileId: string) {
   await selectProfile(profileId)
-  success('Profile Switched', 'Session profile loaded')
+  success(t('auth.login.profileSwitched'), t('auth.login.profileLoaded'))
   router.push('/')
 }
 </script>
@@ -41,38 +42,38 @@ async function quickSwitch(profileId: string) {
     <Card>
       <template #header>
         <div class="text-center">
-          <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Sign In to Platform</h2>
-          <p class="text-xs text-slate-500 mt-1">Supabase Auth Session Persistence</p>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ t('auth.login.title') }}</h2>
+          <p class="text-xs text-slate-500 mt-1">{{ t('auth.login.subtitle') }}</p>
         </div>
       </template>
 
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-          <Input v-model="email" type="email" placeholder="name@example.com" required />
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('auth.login.email') }}</label>
+          <Input v-model="email" type="email" :placeholder="t('auth.login.emailPlaceholder')" required />
         </div>
 
         <Button type="submit" variant="primary" class="w-full" :loading="isSubmitting">
-          Sign In
+          {{ t('auth.login.submit') }}
         </Button>
 
         <div class="text-center text-xs text-slate-500 pt-2">
-          Don't have an account?
-          <NuxtLink to="/auth/register" class="text-blue-600 font-semibold hover:underline">Sign Up</NuxtLink>
+          {{ t('auth.login.noAccount') }}
+          <NuxtLink to="/auth/register" class="text-blue-600 font-semibold hover:underline">{{ t('auth.login.signUp') }}</NuxtLink>
         </div>
       </form>
 
       <!-- Quick Session Switcher for Testing Acceptance Criteria -->
       <div v-if="availableProfiles.length > 0" class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
         <h4 class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">
-          Quick Test Accounts (Phase 0 Foundation)
+          {{ t('auth.login.quickTest') }}
         </h4>
         <div class="space-y-2">
           <button
             v-for="p in availableProfiles"
             :key="p.id"
             type="button"
-            class="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-xs"
+            class="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-start hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-xs"
             @click="quickSwitch(p.id)"
           >
             <div>
