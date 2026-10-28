@@ -41,6 +41,13 @@ const { t } = useI18n()
             active-class="text-blue-600 dark:text-blue-400 font-semibold"
           >
             <span>{{ t('header.nav.imageToIcon') }}</span>
+          </NuxtLink>
+          <NuxtLink
+            to="/tools/image-to-svg"
+            class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors flex items-center gap-1.5"
+            active-class="text-blue-600 dark:text-blue-400 font-semibold"
+          >
+            <span>{{ t('header.nav.imageToSvg') }}</span>
             <span class="rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-1.5 py-0.5">{{ t('header.nav.toolBadge') }}</span>
           </NuxtLink>
           <NuxtLink
