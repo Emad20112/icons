@@ -22,6 +22,7 @@
     "nav": {
       "catalog": "Assets Catalog",
       "imageToIcon": "Image to Icon",
+      "imageToSvg": "Image to SVG",
       "toolBadge": "Tool",
       "admin": "Admin & Governance",
       "audit": "Audit Logs"
@@ -491,5 +492,110 @@
     "cloud": "Cloud",
     "finance": "Finance",
     "database": "Database"
+  },
+  "vectorizer": {
+    "meta": {
+      "title": "Image to SVG Vectorizer — Digital Assets Platform",
+      "description": "Convert raster PNG, JPEG, and WebP images into genuine scalable SVG vector graphics with Bézier paths, multi-color layers, and zero pixelation."
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "tools": "Tools",
+      "imageToSvg": "Image to SVG Vectorizer"
+    },
+    "header": {
+      "title": "True Image-to-SVG Vectorization",
+      "phaseBadge": "Phase 4",
+      "description": "Convert raster images into pure scalable SVG vector paths. No embedded rasters or fake wrappers—get authentic Bézier curves, crisp edges at 800% zoom, and customizable color layers.",
+      "sampleButton": "Load Sample Icon"
+    },
+    "guidance": {
+      "title": "Best Practices for Vectorization",
+      "idealTitle": "Best Results",
+      "idealDesc": "Icons, flat illustrations, logos, geometric badges, and high-contrast line drawings with distinct boundaries.",
+      "photoTitle": "Photographs & Gradients",
+      "photoDesc": "Complex photos can be vectorized, but produce thousands of dense path layers with larger file sizes."
+    },
+    "upload": {
+      "dropPrompt": "Drop your image here to vectorize, or",
+      "browseFiles": "browse files",
+      "supportedNotice": "Supports PNG, JPEG, and WebP images up to 15MB. Fully processed locally inside your browser with maximum privacy.",
+      "maxSize": "Max 15MB",
+      "processing": "Tracing vector paths and fitting Bézier curves...",
+      "errorTitle": "Unable to process image"
+    },
+    "presets": {
+      "title": "Preset Profile",
+      "icon": "Icon & Logo",
+      "lineArt": "Line Art & Sketch",
+      "detailed": "Detailed Graphic",
+      "custom": "Custom"
+    },
+    "controls": {
+      "title": "Vectorization Engine Settings",
+      "subtitle": "Tune color quantization, threshold, curve smoothing, and path fidelity",
+      "reset": "Reset",
+      "colorMode": "Color Mode",
+      "modes": {
+        "blackAndWhite": "Black & White",
+        "grayscale": "Grayscale",
+        "multiColor": "Multi-Color"
+      },
+      "threshold": "B&W Threshold",
+      "thresholdDesc": "Adjust luminance split point (0 = all white, 255 = all black)",
+      "colorsCount": "Color Palette Size",
+      "colorsDesc": "Number of quantized color layers (2 - 32 colors)",
+      "detailLevel": "Detail & Path Tolerance",
+      "details": {
+        "low": "Low (Compact)",
+        "medium": "Medium (Balanced)",
+        "high": "High (Crisp)",
+        "ultra": "Ultra (Maximum)"
+      },
+      "smoothing": "Curve Smoothing",
+      "smoothings": {
+        "none": "None (Sharp)",
+        "low": "Subtle",
+        "medium": "Medium",
+        "high": "Aggressive"
+      },
+      "speckleFilter": "Speckle Noise Filter",
+      "speckleDesc": "Omit small noisy path artifacts smaller than {pixels}px",
+      "invert": "Invert Foreground / Background",
+      "invertDesc": "Swap dark and light regions",
+      "removeBg": "Remove White Background",
+      "removeBgDesc": "Make background pixels fully transparent in SVG output"
+    },
+    "preview": {
+      "title": "Vector Output Preview",
+      "subtitle": "Inspect crisp vector paths with real-time zooming and comparison",
+      "viewModes": {
+        "preview": "SVG Preview",
+        "split": "Split Compare",
+        "sideBySide": "Side by Side",
+        "code": "SVG XML Code"
+      },
+      "zoom": "Zoom:",
+      "original": "Original Raster",
+      "vectorized": "True Vector SVG",
+      "dragSliderHint": "Drag divider slider left/right to compare original vs vectorized paths",
+      "checkerboard": "Toggle transparency checkerboard",
+      "copyCode": "Copy SVG Code",
+      "copied": "Copied to Clipboard!",
+      "downloadSvg": "Download SVG",
+      "resetImage": "Upload New Image",
+      "codeTitle": "Sanitized Vector SVG Code"
+    },
+    "stats": {
+      "title": "Vector Geometry Metrics",
+      "pathCount": "Vector Paths",
+      "nodeCount": "Bézier Nodes",
+      "colorCount": "Color Layers",
+      "svgSize": "SVG File Size",
+      "originalSize": "Original Size",
+      "compression": "Size Delta",
+      "renderTime": "Trace Time",
+      "trueVectorBadge": "100% True Vector (No Raster Embeds)"
+    }
   }
 }
