@@ -28,7 +28,8 @@ export function validateTrueVectorSvg(rawSvg: string): TrueVectorCheckResult {
       pathCount: 0,
       nodeCount: 0,
       colors: new Set(),
-      errors: ['Empty or non-string SVG payload']
+      errors: ['Empty or non-string SVG payload'],
+      warnings: []
     }
   }
 

@@ -172,5 +172,40 @@ describe('Phase 4: True Vectorization Service Suite', () => {
       }
       expect(hasTransparentPixel).toBe(true)
     })
+
+    it('supports Grayscale vectorization mode', () => {
+      const imgData = createTestImageData('gradient')
+      const options: VectorizationOptions = {
+        ...DEFAULT_VECTORIZATION_OPTIONS,
+        colorMode: 'grayscale',
+        numberOfColors: 4
+      }
+
+      const result = VectorizationService.traceImageData(imgData, options, 256)
+      expect(result.isTrueVector).toBe(true)
+      expect(result.stats.pathCount).toBeGreaterThan(0)
+    })
+
+    it('builds tracer options matching detail and smoothing levels', () => {
+      const lowOpts = VectorizationService.buildTracerOptions({
+        ...DEFAULT_VECTORIZATION_OPTIONS,
+        detail: 'low',
+        smoothing: 'none'
+      })
+      const ultraOpts = VectorizationService.buildTracerOptions({
+        ...DEFAULT_VECTORIZATION_OPTIONS,
+        detail: 'ultra',
+        smoothing: 'high'
+      })
+
+      expect(lowOpts.pathomit).toBeGreaterThan(ultraOpts.pathomit!)
+      expect(lowOpts.blurradius).toBe(0)
+      expect(ultraOpts.blurradius).toBeGreaterThan(0)
+    })
+
+    it('enforces safety limit on maximum canvas dimension', () => {
+      expect(VectorizationService.MAX_CANVAS_DIMENSION).toBe(1536)
+    })
   })
 })
+
