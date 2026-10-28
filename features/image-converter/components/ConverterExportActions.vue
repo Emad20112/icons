@@ -2,6 +2,8 @@
 import type { ExportImageFormat } from '../types/converter'
 import { STANDARD_ICON_SIZES } from '../types/converter'
 
+const { t } = useI18n()
+
 const props = defineProps<{
   exportFormat: ExportImageFormat
   currentSize: number
@@ -25,22 +27,22 @@ const emit = defineEmits<{
     <!-- Section Header -->
     <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
       <div>
-        <h3 class="text-base font-semibold text-slate-900 dark:text-white">Export & Download Options</h3>
-        <p class="text-xs text-slate-500">Choose sizes to bundle into a ZIP archive or download single file</p>
+        <h3 class="text-base font-semibold text-slate-900 dark:text-white">{{ t('converter.export.title') }}</h3>
+        <p class="text-xs text-slate-500">{{ t('converter.export.subtitle') }}</p>
       </div>
       <button
         type="button"
         class="text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline"
         @click="emit('select-all-sizes')"
       >
-        Select All
+        {{ t('converter.export.selectAll') }}
       </button>
     </div>
 
     <!-- Batch Sizes Grid -->
     <div>
       <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
-        Sizes Included for ZIP Bundle ({{ selectedSizes.length }} selected):
+        {{ t('converter.export.includedSizes', { count: selectedSizes.length }) }}
       </label>
       <div class="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
         <button
@@ -72,7 +74,7 @@ const emit = defineEmits<{
           <polyline points="7 10 12 15 17 10" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
-        <span>Download {{ exportFormat }} ({{ currentSize }}px)</span>
+        <span>{{ t('converter.export.downloadSingle', { format: exportFormat, size: currentSize }) }}</span>
       </button>
 
       <!-- 2. Download All as ZIP -->
@@ -87,7 +89,7 @@ const emit = defineEmits<{
           <rect x="1" y="3" width="22" height="5" />
           <line x1="10" y1="12" x2="14" y2="12" />
         </svg>
-        <span>Download All as ZIP ({{ selectedSizes.length }} Sizes)</span>
+        <span>{{ t('converter.export.downloadZip', { count: selectedSizes.length }) }}</span>
       </button>
     </div>
 
@@ -102,7 +104,7 @@ const emit = defineEmits<{
         <svg class="h-4 w-4 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
-        <span>Download Complete Windows Favicon (.ICO with 7 sizes)</span>
+        <span>{{ t('converter.export.downloadMultiIco') }}</span>
       </button>
 
       <button
@@ -110,7 +112,7 @@ const emit = defineEmits<{
         class="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
         @click="emit('new-image')"
       >
-        Convert Another Image
+        {{ t('converter.export.convertAnother') }}
       </button>
     </div>
 
@@ -120,7 +122,7 @@ const emit = defineEmits<{
       class="flex items-center gap-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 p-3 text-xs text-blue-700 dark:text-blue-300"
     >
       <div class="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
-      <span class="font-medium">{{ exportProgress || 'Exporting files...' }}</span>
+      <span class="font-medium">{{ exportProgress || t('converter.export.defaultExporting') }}</span>
     </div>
   </div>
 </template>

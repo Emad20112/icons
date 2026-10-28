@@ -10,6 +10,7 @@ definePageMeta({
 })
 
 const { categories, isLoading, fetchCategories } = useCategories()
+const { t } = useI18n()
 
 onMounted(() => {
   fetchCategories()
@@ -19,8 +20,8 @@ onMounted(() => {
 <template>
   <Container>
     <div class="mb-6">
-      <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">Taxonomy & Categories</h1>
-      <p class="text-xs text-slate-500">Manage categories dynamically stored in PostgreSQL.</p>
+      <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ t('adminCategoriesPage.title') }}</h1>
+      <p class="text-xs text-slate-500">{{ t('adminCategoriesPage.subtitle') }}</p>
     </div>
 
     <LoadingState v-if="isLoading" />

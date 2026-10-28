@@ -21,7 +21,23 @@ const scopeFiles = [
   "components/common/LoadingState.vue",
   "components/ui/Modal.vue",
   "components/admin/FoundationStatus.vue",
+  "components/admin/CategoryManager.vue",
+  "components/admin/LicenseManager.vue",
+  "components/admin/AuditLogViewer.vue",
   "pages/index.vue",
+  "pages/assets/[id].vue",
+  "pages/tools/image-to-icon.vue",
+  "features/image-converter/components/ConverterUploadZone.vue",
+  "features/image-converter/components/ConverterPreviewStage.vue",
+  "features/image-converter/components/ConverterControlPanel.vue",
+  "features/image-converter/components/ConverterExportActions.vue",
+  "pages/auth/login.vue",
+  "pages/auth/register.vue",
+  "pages/admin/index.vue",
+  "pages/admin/assets.vue",
+  "pages/admin/categories.vue",
+  "pages/admin/licenses.vue",
+  "pages/admin/audit.vue",
 ];
 
 /** Literal (non-bound) copy-bearing attributes. */

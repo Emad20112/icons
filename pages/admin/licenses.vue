@@ -10,6 +10,7 @@ definePageMeta({
 })
 
 const { licenses, isLoading, fetchLicenses } = useLicenses()
+const { t } = useI18n()
 
 onMounted(() => {
   fetchLicenses()
@@ -19,8 +20,8 @@ onMounted(() => {
 <template>
   <Container>
     <div class="mb-6">
-      <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">Digital Asset Licenses</h1>
-      <p class="text-xs text-slate-500">Legal permissions, commercial usage rules, and attribution constraints.</p>
+      <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ t('adminLicensesPage.title') }}</h1>
+      <p class="text-xs text-slate-500">{{ t('adminLicensesPage.subtitle') }}</p>
     </div>
 
     <LoadingState v-if="isLoading" />

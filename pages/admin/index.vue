@@ -9,29 +9,30 @@ definePageMeta({
 })
 
 const { role, isAdmin } = useAuth()
+const { t } = useI18n()
 </script>
 
 <template>
   <Container>
     <div class="mb-6 flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Governance & Platform Architecture</h1>
-        <p class="text-xs text-slate-500 mt-1">Foundation administration for multi-category digital assets.</p>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ t('adminOverview.title') }}</h1>
+        <p class="text-xs text-slate-500 mt-1">{{ t('adminOverview.subtitle') }}</p>
       </div>
 
       <div class="flex items-center gap-3">
         <NuxtLink to="/admin/assets">
-          <Button size="sm" variant="outline">Moderate Assets</Button>
+          <Button size="sm" variant="outline">{{ t('adminOverview.moderateAssets') }}</Button>
         </NuxtLink>
         <NuxtLink to="/admin/audit">
-          <Button size="sm" variant="primary">View Audit Trail</Button>
+          <Button size="sm" variant="primary">{{ t('adminOverview.viewAuditTrail') }}</Button>
         </NuxtLink>
       </div>
     </div>
 
     <!-- Active Role Warning if User is standard user -->
     <div v-if="!isAdmin" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
-      <strong>Active Mode: USER</strong>. You are currently viewing the platform with standard USER privileges. Use the Role switcher in the top bar to toggle to ADMIN to test and verify privileged operations.
+      <strong>{{ t('adminOverview.userWarningPrefix') }}</strong>. {{ t('adminOverview.userWarningText') }}
     </div>
 
     <FoundationStatus />

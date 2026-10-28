@@ -101,6 +101,45 @@ export function isDevImpersonationEnabled(): boolean {
   return process.env.NUXT_DEV_ALLOW_IMPERSONATION === 'true'
 }
 
+function safeGetHeader(event: H3Event, name: string): string | undefined {
+  if (!event) return undefined
+  const lower = name.toLowerCase()
+  const evAny = event as any
+  if (evAny.node?.req?.headers) {
+    const val = evAny.node.req.headers[lower] ?? evAny.node.req.headers[name]
+    if (val !== undefined) return val
+  }
+  if (evAny.req?.headers) {
+    if (typeof evAny.req.headers.get === 'function') {
+      const val = evAny.req.headers.get(name)
+      if (val !== undefined && val !== null) return val
+    }
+    const val = evAny.req.headers[lower] ?? evAny.req.headers[name]
+    if (val !== undefined) return val
+  }
+  try {
+    return getHeader(event, name)
+  } catch {
+    return undefined
+  }
+}
+
+function safeGetCookie(event: H3Event, name: string): string | undefined {
+  if (!event) return undefined
+  try {
+    const val = getCookie(event, name)
+    if (val !== undefined) return val
+  } catch {
+    // fall through
+  }
+  const cookieHeader = safeGetHeader(event, 'cookie')
+  if (cookieHeader) {
+    const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`))
+    if (match) return decodeURIComponent(match[1])
+  }
+  return undefined
+}
+
 /**
  * Resolves the current authenticated identity from the request.
  *
@@ -113,7 +152,7 @@ export function isDevImpersonationEnabled(): boolean {
  * supplied role would be an unauthenticated privilege escalation.
  */
 export async function getAuthContext(event: H3Event): Promise<AuthContext> {
-  const authHeader = getHeader(event, 'authorization')
+  const authHeader = safeGetHeader(event, 'authorization')
 
   // 1. If real Supabase is configured and a bearer token is present
   if (isSupabaseConfigured() && authHeader?.startsWith('Bearer ')) {
@@ -139,7 +178,7 @@ export async function getAuthContext(event: H3Event): Promise<AuthContext> {
 
   // 2. Signed-in session cookie. The role always comes from the stored
   //    profile, never from the request.
-  const sessionUserId = getCookie(event, 'session_user_id')
+  const sessionUserId = safeGetCookie(event, 'session_user_id')
   if (sessionUserId) {
     const profile = dbStore.profiles.get(sessionUserId)
     if (profile) {
@@ -154,7 +193,7 @@ export async function getAuthContext(event: H3Event): Promise<AuthContext> {
   // 3. Dev-only impersonation (explicitly opted in, never in production).
   //    The selected profile's stored role is used; x-user-role is ignored.
   if (isDevImpersonationEnabled()) {
-    const impersonatedUserId = getHeader(event, 'x-user-id')
+    const impersonatedUserId = safeGetHeader(event, 'x-user-id')
     const profile = impersonatedUserId ? dbStore.profiles.get(impersonatedUserId) : undefined
     if (profile) {
       return {

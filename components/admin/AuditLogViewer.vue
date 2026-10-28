@@ -7,6 +7,7 @@ import LoadingState from '../common/LoadingState.vue'
 import EmptyState from '../common/EmptyState.vue'
 
 const { auditLogs, isLoading, fetchLogs } = useAudit()
+const { t } = useI18n()
 
 onMounted(() => {
   fetchLogs()
@@ -17,11 +18,11 @@ onMounted(() => {
   <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
       <div>
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Immutable Audit Trail</h3>
-        <p class="text-xs text-slate-500">Recorded system operations, mutations, and administrative activities.</p>
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ t('auditLogViewer.title') }}</h3>
+        <p class="text-xs text-slate-500">{{ t('auditLogViewer.subtitle') }}</p>
       </div>
       <Button size="sm" variant="outline" @click="fetchLogs">
-        Refresh Trail
+        {{ t('auditLogViewer.refresh') }}
       </Button>
     </div>
 
@@ -29,20 +30,20 @@ onMounted(() => {
 
     <EmptyState
       v-else-if="auditLogs.length === 0"
-      title="No audit entries"
-      description="Administrative operations and mutations will appear here."
+      :title="t('auditLogViewer.emptyTitle')"
+      :description="t('auditLogViewer.emptyDescription')"
     />
 
     <div v-else class="overflow-x-auto">
-      <table class="w-full text-left text-xs text-slate-600 dark:text-slate-400">
+      <table class="w-full text-start text-xs text-slate-600 dark:text-slate-400">
         <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 dark:bg-slate-800/50">
           <tr>
-            <th class="px-6 py-3">Timestamp</th>
-            <th class="px-6 py-3">Action</th>
-            <th class="px-6 py-3">Entity Type</th>
-            <th class="px-6 py-3">Target ID</th>
-            <th class="px-6 py-3">Actor</th>
-            <th class="px-6 py-3">Metadata</th>
+            <th class="px-6 py-3 text-start">{{ t('auditLogViewer.table.timestamp') }}</th>
+            <th class="px-6 py-3 text-start">{{ t('auditLogViewer.table.action') }}</th>
+            <th class="px-6 py-3 text-start">{{ t('auditLogViewer.table.entityType') }}</th>
+            <th class="px-6 py-3 text-start">{{ t('auditLogViewer.table.targetId') }}</th>
+            <th class="px-6 py-3 text-start">{{ t('auditLogViewer.table.actor') }}</th>
+            <th class="px-6 py-3 text-start">{{ t('auditLogViewer.table.metadata') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
@@ -68,7 +69,7 @@ onMounted(() => {
               {{ log.entity_id }}
             </td>
             <td class="px-6 py-3.5 whitespace-nowrap font-sans">
-              {{ log.actor?.display_name || log.actor_id || 'System' }}
+              {{ log.actor?.display_name || log.actor_id || t('auditLogViewer.systemActor') }}
             </td>
             <td class="px-6 py-3.5 font-mono text-[10px] text-slate-500 truncate max-w-[180px]">
               {{ JSON.stringify(log.metadata) }}

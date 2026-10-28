@@ -177,6 +177,8 @@ class InMemoryDatabaseStore {
         metadata: {
           grid: '24x24',
           strokeWidth: 2,
+          name_ar: 'درع أمان الحوسبة السحابية',
+          description_ar: 'أيقونة متجهية قابلة للتحجيم لدرع الأمان السحابي لجدران الحماية وحماية البيانات.',
           aliases: ['cloud shield', 'security shield', 'firewall', 'protection', 'درع أمان', 'حماية سحابية', 'أمان'],
           keywords: ['security', 'cloud', 'cybersecurity', 'safe', 'حماية', 'سحابة']
         },
@@ -199,6 +201,8 @@ class InMemoryDatabaseStore {
         metadata: {
           grid: '24x24',
           strokeWidth: 2,
+          name_ar: 'عنقود قواعد البيانات',
+          description_ar: 'رمز رسومي لعنقود قواعد بيانات PostgreSQL العلائقية الموزعة لتخزين البنية التحتية.',
           aliases: ['database', 'sql cluster', 'postgres', 'server', 'قاعدة بيانات', 'خادم بيانات'],
           keywords: ['data', 'storage', 'backend', 'table', 'بيانات', 'تخزين']
         },
@@ -221,6 +225,8 @@ class InMemoryDatabaseStore {
         metadata: {
           grid: '24x24',
           strokeWidth: 2,
+          name_ar: 'عربة التسوق',
+          description_ar: 'أيقونة عربة تسوق حديثة وانسيابية بعجلات ومقبض للمتاجر الإلكترونية والدفع.',
           aliases: ['shopping cart', 'cart', 'trolley', 'checkout', 'store', 'buy', 'عربة تسوق', 'سلة تسوق', 'سلة'],
           keywords: ['ecommerce', 'retail', 'market', 'purchase', 'شراء', 'متجر', 'تسوق']
         },
@@ -243,6 +249,8 @@ class InMemoryDatabaseStore {
         metadata: {
           grid: '24x24',
           strokeWidth: 2,
+          name_ar: 'حقيبة التسوق',
+          description_ar: 'أيقونة حقيبة تسوق بسيطة لواجهات المتاجر الرقمية وملخصات الشراء وطلبات المنتجات.',
           aliases: ['shopping bag', 'tote bag', 'order bag', 'bag', 'حقيبة تسوق', 'كيس تسوق'],
           keywords: ['shopping', 'retail', 'orders', 'fashion', 'boutique', 'تسوق', 'حقيبة']
         },
@@ -265,6 +273,8 @@ class InMemoryDatabaseStore {
         metadata: {
           grid: '24x24',
           strokeWidth: 2,
+          name_ar: 'متجر محلي',
+          description_ar: 'مبنى متجر تجاري بسقف مظلة للمتاجر الفعلية والبيع بالتجزئة وقوائم السوق.',
           aliases: ['storefront', 'shop', 'market', 'outlet', 'متجر', 'دكان', 'محل'],
           keywords: ['shopping', 'commerce', 'store', 'business', 'تجارة', 'تسوق']
         },
@@ -287,6 +297,8 @@ class InMemoryDatabaseStore {
         metadata: {
           grid: '24x24',
           strokeWidth: 2,
+          name_ar: 'الدفع بالبطاقة الائتمانية',
+          description_ar: 'أيقونة شريحة بطاقة ائتمانية للدفع اللاتلامسي للفواتير والاشتراكات والعمليات المصرفية.',
           aliases: ['credit card', 'payment', 'checkout', 'billing', 'بطاقة ائتمان', 'دفع إلكتروني', 'فيزا'],
           keywords: ['finance', 'shopping', 'visa', 'mastercard', 'money', 'أموال', 'دفع']
         },
@@ -306,7 +318,13 @@ class InMemoryDatabaseStore {
         is_featured: true,
         download_count: 512,
         favorite_count: 120,
-        metadata: { weights: ['Regular', 'SemiBold', 'Bold'], glyphCount: 420, aliases: ['font', 'typeface', 'خط'] },
+        metadata: {
+          weights: ['Regular', 'SemiBold', 'Bold'],
+          glyphCount: 420,
+          name_ar: 'خط إنتربلكس سانز للعرض',
+          description_ar: 'خط حديث للعناوين وواجهات المستخدم مع دعم كامل للأحرف والأرقام.',
+          aliases: ['font', 'typeface', 'خط']
+        },
         created_at: new Date(Date.now() - 86400000).toISOString(),
         updated_at: new Date().toISOString()
       },
@@ -323,7 +341,12 @@ class InMemoryDatabaseStore {
         is_featured: false,
         download_count: 140,
         favorite_count: 32,
-        metadata: { colors: ['#2563EB', '#38BDF8', '#0F172A'], aliases: ['delivery', 'truck', 'شاحنة', 'توصيل'] },
+        metadata: {
+          colors: ['#2563EB', '#38BDF8', '#0F172A'],
+          name_ar: 'أسطول التوصيل الذاتي',
+          description_ar: 'رسم توضيحي متري لمركبات التوصيل الذاتية الحديثة والخدمات اللوجستية.',
+          aliases: ['delivery', 'truck', 'شاحنة', 'توصيل']
+        },
         created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
         updated_at: new Date().toISOString()
       },
@@ -340,7 +363,11 @@ class InMemoryDatabaseStore {
         is_featured: false,
         download_count: 0,
         favorite_count: 0,
-        metadata: { aliases: ['draft', 'gateway'] },
+        metadata: {
+          name_ar: 'بوابة دفع تجريبية',
+          description_ar: 'مسودة غير منشورة لأيقونة بوابة الدفع لسير العمل المستقبلي.',
+          aliases: ['draft', 'gateway']
+        },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }

@@ -26,7 +26,7 @@ const { categories, fetchCategories } = useCategories()
 const { licenses, fetchLicenses } = useLicenses()
 const { tags, fetchTags } = useTags()
 const { role } = useAuth()
-const { t } = useI18n()
+const { t, te } = useI18n()
 
 useHead(() => ({
   title: t('catalog.meta.title'),
@@ -162,9 +162,26 @@ function handleAssetSelect(asset: Asset) {
   router.push(`/assets/${asset.id}`)
 }
 
-const selectedCategoryName = computed(
-  () => categories.value.find(c => c.slug === filters.selectedCategory)?.name || ''
-)
+function normalizeKey(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]/g, '_')
+}
+
+function getCategoryName(cat?: { name: string; slug: string }): string {
+  if (!cat) return ''
+  const key = `categories.${normalizeKey(cat.slug)}`
+  return te(key) ? t(key) : cat.name
+}
+
+const selectedCategoryName = computed(() => {
+  if (!filters.selectedCategory) return ''
+  const cat = categories.value.find(c => c.slug === filters.selectedCategory)
+  return getCategoryName(cat) || filters.selectedCategory
+})
+
+const activeRoleLabel = computed(() => {
+  const key = `roles.${role.value?.toLowerCase()}`
+  return te(key) ? t(key) : role.value
+})
 </script>
 
 <template>
@@ -251,7 +268,7 @@ const selectedCategoryName = computed(
           <span v-else>{{ t('catalog.heading.allAssets') }}</span>
         </h2>
         <Badge variant="secondary" class="font-mono text-xs">
-          {{ t('common.assetsCount', { count: total }, total) }}
+          {{ total }} {{ total === 1 ? t('catalog.heading.asset') : t('catalog.heading.assets') }}
         </Badge>
       </div>
 
@@ -261,7 +278,7 @@ const selectedCategoryName = computed(
         </span>
         <div class="border-s border-slate-200 dark:border-slate-800 ps-4">
           {{ t('catalog.heading.activeRole') }}
-          <span class="font-semibold text-blue-600 dark:text-blue-400">{{ role }}</span>
+          <span class="font-semibold text-blue-600 dark:text-blue-400 ms-1">{{ activeRoleLabel }}</span>
         </div>
       </div>
     </div>

@@ -1,8 +1,8 @@
 import { AuthService } from '../../../services/authService'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  if (!body.email) {
+  const body = await readBody<{ email?: string }>(event)
+  if (!body?.email) {
     throw createError({ statusCode: 400, statusMessage: 'Email is required' })
   }
 

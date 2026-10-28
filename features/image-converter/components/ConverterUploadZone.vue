@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const { t } = useI18n()
+
 const props = defineProps<{
   isLoading: boolean
   error: string | null
@@ -79,10 +81,10 @@ function triggerFileBrowser() {
       </div>
 
       <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-1">
-        Drop your image here, or <span class="text-blue-600 dark:text-blue-400 underline decoration-2 underline-offset-2">browse files</span>
+        {{ t('converter.upload.dropPrompt') }} <span class="text-blue-600 dark:text-blue-400 underline decoration-2 underline-offset-2">{{ t('converter.upload.browseFiles') }}</span>
       </h3>
       <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mb-4">
-        Supports PNG, JPEG, WebP, and SVG images up to 20MB. Automatic 1:1 icon centering, transparency preservation, and background styling.
+        {{ t('converter.upload.supportedNotice') }}
       </p>
 
       <!-- Format Badges -->
@@ -100,7 +102,7 @@ function triggerFileBrowser() {
           SVG
         </span>
         <span class="rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-          Max 20MB
+          {{ t('converter.upload.maxSize') }}
         </span>
       </div>
 
@@ -110,7 +112,7 @@ function triggerFileBrowser() {
         class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center"
       >
         <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent mb-2"></div>
-        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Verifying and decoding image...</p>
+        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ t('converter.upload.loading') }}</p>
       </div>
     </div>
 
@@ -125,7 +127,7 @@ function triggerFileBrowser() {
         <line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
       <div>
-        <p class="font-semibold">Unable to load image</p>
+        <p class="font-semibold">{{ t('converter.upload.errorTitle') }}</p>
         <p class="text-xs mt-0.5">{{ error }}</p>
       </div>
     </div>
