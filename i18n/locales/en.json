@@ -58,7 +58,9 @@
       "resultsFor": "Results for \"{term}\"",
       "categoryIcons": "{category} Icons",
       "allAssets": "Catalog Assets",
-      "activeRole": "Active Role:"
+      "activeRole": "Active Role:",
+      "asset": "asset",
+      "assets": "assets"
     },
     "error": {
       "title": "Failed to load search results",
@@ -447,5 +449,47 @@
       "exporting": "Exporting {size}x{size} {format}...",
       "defaultExporting": "Exporting files..."
     }
+  },
+  "badges": {
+    "types": {
+      "icon": "Icon",
+      "font": "Font",
+      "illustration": "Illustration",
+      "logo": "Logo",
+      "template": "Template"
+    },
+    "statuses": {
+      "published": "Published",
+      "draft": "Draft",
+      "pending_review": "Pending Review",
+      "archived": "Archived"
+    }
+  },
+  "categories": {
+    "business": "Business",
+    "finance": "Finance",
+    "shopping": "Shopping",
+    "food": "Food",
+    "technology": "Technology",
+    "transportation": "Transportation",
+    "communication": "Communication",
+    "education": "Education",
+    "medical": "Medical",
+    "social": "Social",
+    "ui": "User Interface"
+  },
+  "licenseNames": {
+    "mit": "MIT License",
+    "cc0_1_0": "Creative Commons CC0",
+    "platform_commercial": "Standard Commercial"
+  },
+  "tags": {
+    "minimal": "Minimal",
+    "outline": "Outline",
+    "solid": "Solid",
+    "security": "Security",
+    "cloud": "Cloud",
+    "finance": "Finance",
+    "database": "Database"
   }
 }

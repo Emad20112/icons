@@ -3,7 +3,7 @@ import type { Asset } from '../../types/database'
 import Badge from '../ui/Badge.vue'
 import Button from '../ui/Button.vue'
 
-const { t, tm } = useI18n()
+const { t, te, locale } = useI18n()
 
 const props = defineProps<{
   asset: Asset
@@ -13,15 +13,47 @@ defineEmits<{
   (e: 'select', asset: Asset): void
 }>()
 
-const typeLabels = computed<Record<string, string>>(() => tm('filters.types') as Record<string, string>)
-const statusLabels = computed<Record<string, string>>(() => tm('filters.statuses') as Record<string, string>)
+function normalizeKey(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]/g, '_')
+}
 
-const typeLabel = computed(() => typeLabels.value[props.asset.type] || props.asset.type)
-const statusLabel = computed(() => statusLabels.value[props.asset.status] || props.asset.status)
+const typeLabel = computed(() => {
+  const raw = props.asset.type ? normalizeKey(props.asset.type) : ''
+  const key = `badges.types.${raw}`
+  return te(key) ? t(key) : props.asset.type
+})
 
-const description = computed(
-  () => props.asset.description || t('assetCard.typeFallback', { type: typeLabel.value })
-)
+const statusLabel = computed(() => {
+  const raw = props.asset.status ? normalizeKey(props.asset.status) : ''
+  const key = `badges.statuses.${raw}`
+  return te(key) ? t(key) : props.asset.status
+})
+
+const displayName = computed(() => {
+  if (locale.value === 'ar' && (props.asset.metadata as any)?.name_ar) {
+    return (props.asset.metadata as any).name_ar
+  }
+  return props.asset.name
+})
+
+const displayDescription = computed(() => {
+  if (locale.value === 'ar' && (props.asset.metadata as any)?.description_ar) {
+    return (props.asset.metadata as any).description_ar
+  }
+  return props.asset.description || t('assetCard.typeFallback', { type: typeLabel.value })
+})
+
+const displayCategory = computed(() => {
+  if (!props.asset.category) return t('assetCard.generalCategory')
+  const key = `categories.${normalizeKey(props.asset.category.slug)}`
+  return te(key) ? t(key) : props.asset.category.name
+})
+
+const displayLicense = computed(() => {
+  if (!props.asset.license) return null
+  const key = `licenseNames.${normalizeKey(props.asset.license.slug)}`
+  return te(key) ? t(key) : props.asset.license.name.split(' ')[0]
+})
 </script>
 
 <template>
@@ -91,19 +123,19 @@ const description = computed(
     <div class="mt-3 flex-1 flex flex-col">
       <div class="flex items-baseline justify-between gap-2">
         <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-blue-600">
-          {{ asset.name }}
+          {{ displayName }}
         </h3>
       </div>
       <p class="text-xs text-slate-500 line-clamp-1 mt-0.5">
-        {{ description }}
+        {{ displayDescription }}
       </p>
 
       <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
         <span class="truncate max-w-[100px]">
-          {{ asset.category?.name || t('assetCard.generalCategory') }}
+          {{ displayCategory }}
         </span>
-        <span v-if="asset.license" class="text-slate-400 font-medium">
-          {{ asset.license.name.split(' ')[0] }}
+        <span v-if="displayLicense" class="text-slate-400 font-medium">
+          {{ displayLicense }}
         </span>
         <span v-else class="text-amber-500 font-medium">
           {{ t('assetCard.noLicense') }}

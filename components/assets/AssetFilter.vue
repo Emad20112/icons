@@ -5,7 +5,7 @@ import type { SortOption } from '../../server/services/assetService'
 import Badge from '../ui/Badge.vue'
 import Button from '../ui/Button.vue'
 
-const { t, tm } = useI18n()
+const { t, tm, te } = useI18n()
 
 const props = withDefaults(
   defineProps<{
@@ -145,6 +145,43 @@ const statusLabels = computed<Record<AssetStatus, string>>(() => {
     ARCHIVED: labels.archived
   } as Record<AssetStatus, string>
 })
+
+function normalizeKey(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]/g, '_')
+}
+
+function getCategoryName(cat: { name: string; slug: string }): string {
+  const key = `categories.${normalizeKey(cat.slug)}`
+  return te(key) ? t(key) : cat.name
+}
+
+function getCategoryNameBySlug(slug: string): string {
+  const cat = props.categories.find(c => c.slug === slug)
+  if (!cat) return slug
+  return getCategoryName(cat)
+}
+
+function getLicenseName(lic: { name: string; slug: string }): string {
+  const key = `licenseNames.${normalizeKey(lic.slug)}`
+  return te(key) ? t(key) : lic.name
+}
+
+function getLicenseNameBySlug(slug: string): string {
+  const lic = props.licenses.find(l => l.slug === slug)
+  if (!lic) return slug
+  return getLicenseName(lic)
+}
+
+function getTagName(tag: { name: string; slug: string }): string {
+  const key = `tags.${normalizeKey(tag.slug)}`
+  return te(key) ? t(key) : tag.name
+}
+
+function getTagNameBySlug(slug: string): string {
+  const tag = props.tags.find(t => t.slug === slug)
+  if (!tag) return slug
+  return getTagName(tag)
+}
 </script>
 
 <template>
@@ -276,7 +313,7 @@ const statusLabels = computed<Record<AssetStatus, string>>(() => {
         :class="selectedCategory === cat.slug ? 'bg-blue-600 text-white shadow-2xs font-semibold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
         @click="selectCategoryPill(cat.slug)"
       >
-        <span>{{ cat.name }}</span>
+        <span>{{ getCategoryName(cat) }}</span>
         <span
           v-if="cat.asset_count !== undefined"
           class="rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
@@ -320,7 +357,7 @@ const statusLabels = computed<Record<AssetStatus, string>>(() => {
           >
             <option value="">{{ t('filters.allLicenses') }}</option>
             <option v-for="lic in licenses" :key="lic.id" :value="lic.slug">
-              {{ lic.name }} ({{ lic.commercial_use ? t('filters.licenseUsage.commercial') : t('filters.licenseUsage.personal') }})
+              {{ getLicenseName(lic) }} ({{ lic.commercial_use ? t('filters.licenseUsage.commercial') : t('filters.licenseUsage.personal') }})
             </option>
           </select>
         </div>
@@ -356,7 +393,7 @@ const statusLabels = computed<Record<AssetStatus, string>>(() => {
               : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'"
             @click="toggleTag(t.slug)"
           >
-            #{{ t.name }}
+            #{{ getTagName(t) }}
           </button>
         </div>
       </div>
@@ -383,7 +420,7 @@ const statusLabels = computed<Record<AssetStatus, string>>(() => {
         v-if="selectedCategory"
         class="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 text-xs text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-800"
       >
-        {{ t('filters.chips.category', { name: categories.find(c => c.slug === selectedCategory)?.name || selectedCategory }) }}
+        {{ t('filters.chips.category', { name: getCategoryNameBySlug(selectedCategory) }) }}
         <button type="button" class="hover:text-indigo-900" :aria-label="t('filters.removeChip', { name: selectedCategory })" @click="emit('update:selectedCategory', '')">✕</button>
       </span>
 
@@ -393,7 +430,7 @@ const statusLabels = computed<Record<AssetStatus, string>>(() => {
         :key="tagSlug"
         class="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800"
       >
-        #{{ tags.find(t => t.slug === tagSlug)?.name || tagSlug }}
+        #{{ getTagNameBySlug(tagSlug) }}
         <button type="button" class="hover:text-emerald-900" :aria-label="t('filters.removeChip', { name: tagSlug })" @click="toggleTag(tagSlug)">✕</button>
       </span>
 
@@ -402,7 +439,7 @@ const statusLabels = computed<Record<AssetStatus, string>>(() => {
         v-if="selectedLicense"
         class="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-xs text-amber-700 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800"
       >
-        {{ t('filters.chips.license', { name: licenses.find(l => l.slug === selectedLicense)?.name || selectedLicense }) }}
+        {{ t('filters.chips.license', { name: getLicenseNameBySlug(selectedLicense) }) }}
         <button type="button" class="hover:text-amber-900" :aria-label="t('filters.removeChip', { name: selectedLicense })" @click="emit('update:selectedLicense', '')">✕</button>
       </span>
 

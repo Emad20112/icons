@@ -18,7 +18,7 @@ const router = useRouter()
 const { role, isAdmin } = useAuth()
 const { success, error } = useToast()
 const { getRelatedAssets } = useAssets()
-const { t, tm } = useI18n()
+const { t, tm, te, locale } = useI18n()
 
 const asset = ref<Asset | null>(null)
 const relatedAssets = ref<Asset[]>([])
@@ -85,8 +85,55 @@ watch(
   }
 )
 
-const typeLabels = computed<Record<string, string>>(() => tm('filters.types') as Record<string, string>)
-const statusLabels = computed<Record<string, string>>(() => tm('filters.statuses') as Record<string, string>)
+function normalizeKey(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]/g, '_')
+}
+
+const typeLabel = computed(() => {
+  if (!asset.value?.type) return ''
+  const raw = normalizeKey(asset.value.type)
+  const key = `badges.types.${raw}`
+  return te(key) ? t(key) : asset.value.type
+})
+
+const statusLabel = computed(() => {
+  if (!asset.value?.status) return ''
+  const raw = normalizeKey(asset.value.status)
+  const key = `badges.statuses.${raw}`
+  return te(key) ? t(key) : asset.value.status
+})
+
+const displayName = computed(() => {
+  if (locale.value === 'ar' && (asset.value?.metadata as any)?.name_ar) {
+    return (asset.value?.metadata as any).name_ar
+  }
+  return asset.value?.name || ''
+})
+
+const displayDescription = computed(() => {
+  if (locale.value === 'ar' && (asset.value?.metadata as any)?.description_ar) {
+    return (asset.value?.metadata as any).description_ar
+  }
+  return asset.value?.description || t('assetDetail.noDescription')
+})
+
+function getCategoryName(cat?: { name: string; slug: string }): string {
+  if (!cat) return ''
+  const key = `categories.${normalizeKey(cat.slug)}`
+  return te(key) ? t(key) : cat.name
+}
+
+function getLicenseName(lic?: { name: string; slug: string }): string {
+  if (!lic) return ''
+  const key = `licenseNames.${normalizeKey(lic.slug)}`
+  return te(key) ? t(key) : lic.name
+}
+
+function getTagName(tag?: { name: string; slug: string }): string {
+  if (!tag) return ''
+  const key = `tags.${normalizeKey(tag.slug)}`
+  return te(key) ? t(key) : tag.name
+}
 </script>
 
 <template>
@@ -117,10 +164,10 @@ const statusLabels = computed<Record<string, string>>(() => tm('filters.statuses
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-2">
                 <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                  {{ typeLabels[asset.type] || asset.type }}
+                  {{ typeLabel }}
                 </span>
                 <Badge :variant="asset.status === 'PUBLISHED' ? 'success' : 'secondary'">
-                  {{ statusLabels[asset.status] || asset.status }}
+                  {{ statusLabel }}
                 </Badge>
                 <Badge v-if="asset.is_featured" variant="warning">
                   ★ {{ t('assetDetail.featured') }}
@@ -140,15 +187,15 @@ const statusLabels = computed<Record<string, string>>(() => tm('filters.statuses
                 {{ t('assetDetail.fontSpecimen') }}
               </div>
               <div v-else class="text-4xl font-bold text-slate-400">
-                {{ asset.name.charAt(0) }}
+                {{ displayName.charAt(0) }}
               </div>
             </div>
 
             <!-- Name, Description, and Tags -->
             <div class="mt-6 space-y-3">
-              <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ asset.name }}</h1>
+              <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ displayName }}</h1>
               <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                {{ asset.description || t('assetDetail.noDescription') }}
+                {{ displayDescription }}
               </p>
 
               <!-- Tags for Discovery Filtering -->
@@ -159,7 +206,7 @@ const statusLabels = computed<Record<string, string>>(() => tm('filters.statuses
                   :to="`/?tag=${t.slug}`"
                   class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-blue-950 transition-colors"
                 >
-                  #{{ t.name }}
+                  #{{ getTagName(t) }}
                 </NuxtLink>
               </div>
             </div>
@@ -220,7 +267,7 @@ const statusLabels = computed<Record<string, string>>(() => tm('filters.statuses
 
             <div v-if="asset.license" class="space-y-3 text-xs">
               <div class="font-semibold text-slate-900 dark:text-slate-100 text-sm">
-                {{ asset.license.name }}
+                {{ getLicenseName(asset.license) }}
               </div>
               <div class="flex flex-col gap-1.5 text-slate-600 dark:text-slate-400">
                 <div class="flex items-center justify-between">
@@ -257,7 +304,7 @@ const statusLabels = computed<Record<string, string>>(() => tm('filters.statuses
                 :to="`/?category=${asset.category.slug}`"
                 class="font-medium text-blue-600 hover:underline dark:text-blue-400"
               >
-                {{ asset.category.name }}
+                {{ getCategoryName(asset.category) }}
               </NuxtLink>
               <span v-else class="font-medium text-slate-800 dark:text-slate-200">{{ t('assetDetail.uncategorized') }}</span>
             </div>

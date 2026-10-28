@@ -58,7 +58,9 @@
       "resultsFor": "نتائج البحث عن «{term}»",
       "categoryIcons": "أيقونات {category}",
       "allAssets": "أصول الكتالوج",
-      "activeRole": "الدور النشط:"
+      "activeRole": "الدور النشط:",
+      "asset": "أصل",
+      "assets": "أصول"
     },
     "error": {
       "title": "تعذّر تحميل نتائج البحث",
@@ -447,5 +449,47 @@
       "exporting": "جارٍ تصدير {format} بمقاس {size}x{size}...",
       "defaultExporting": "جارٍ تصدير الملفات..."
     }
+  },
+  "badges": {
+    "types": {
+      "icon": "أيقونة",
+      "font": "خط",
+      "illustration": "رسم توضيحي",
+      "logo": "شعار",
+      "template": "قالب"
+    },
+    "statuses": {
+      "published": "منشور",
+      "draft": "مسودة",
+      "pending_review": "قيد المراجعة",
+      "archived": "مؤرشف"
+    }
+  },
+  "categories": {
+    "business": "أعمال",
+    "finance": "مالية",
+    "shopping": "تسوق",
+    "food": "طعام",
+    "technology": "تقنية",
+    "transportation": "نقل ومواصلات",
+    "communication": "اتصالات",
+    "education": "تعليم",
+    "medical": "صحة وطب",
+    "social": "شبكات اجتماعية",
+    "ui": "واجهات المستخدم"
+  },
+  "licenseNames": {
+    "mit": "ترخيص MIT",
+    "cc0_1_0": "المشاع الإبداعي CC0",
+    "platform_commercial": "ترخيص تجاري قياسي"
+  },
+  "tags": {
+    "minimal": "بسيط",
+    "outline": "محدد",
+    "solid": "مصمت",
+    "security": "أمان",
+    "cloud": "سحابي",
+    "finance": "مالية",
+    "database": "قواعد بيانات"
   }
 }
