@@ -56,3 +56,6 @@ export function sanitizeSvg(rawSvg: string): string {
 
   return cleaned.trim()
 }
+
+export const sanitizeSvgContent = sanitizeSvg
+

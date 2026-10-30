@@ -23,6 +23,7 @@
       "catalog": "Assets Catalog",
       "imageToIcon": "Image to Icon",
       "imageToSvg": "Image to SVG",
+      "iconEditor": "Icon Editor",
       "toolBadge": "Tool",
       "admin": "Admin & Governance",
       "audit": "Audit Logs"
@@ -596,6 +597,112 @@
       "compression": "Size Delta",
       "renderTime": "Trace Time",
       "trueVectorBadge": "100% True Vector (No Raster Embeds)"
+    }
+  },
+  "editor": {
+    "meta": {
+      "title": "Professional Icon Editor — Digital Assets Platform",
+      "description": "Design, customize, and edit vector icons with precision shapes, Bézier curves, typography, layers, and multi-format export."
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "tools": "Tools",
+      "iconEditor": "Professional Icon Editor"
+    },
+    "header": {
+      "title": "Professional Icon Editor",
+      "phaseBadge": "Phase 5",
+      "sampleButton": "Load Sample Icon",
+      "sampleLoaded": "Sample icon loaded successfully"
+    },
+    "toolbar": {
+      "renameTitle": "Click to rename icon document",
+      "unsavedChanges": "Unsaved changes",
+      "save": "Save Locally",
+      "savedSuccess": "Project saved locally to browser storage!",
+      "undo": "Undo",
+      "redo": "Redo",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "resetZoom": "Reset Zoom (100%)",
+      "toggleGrid": "Toggle Grid Overlay",
+      "snapToGrid": "Toggle Snap to Grid",
+      "previewMode": "Toggle Clean Preview Mode",
+      "shortcuts": "Keyboard Shortcuts",
+      "export": "Export Icon"
+    },
+    "tools": {
+      "select": "Select & Transform (V)",
+      "move": "Pan Viewport (H)",
+      "rect": "Rectangle Tool (R)",
+      "circle": "Circle Tool (C)",
+      "ellipse": "Ellipse Tool (E)",
+      "line": "Line Tool (L)",
+      "polygon": "Polygon / Star (P)",
+      "pen": "Curved Path / Pen (P)",
+      "text": "Text Tool (T)",
+      "importSvg": "Import SVG File",
+      "importRefImage": "Add Reference Image Guide"
+    },
+    "sidebar": {
+      "properties": "Properties",
+      "layers": "Layers"
+    },
+    "props": {
+      "geometry": "Geometry & Transform",
+      "cornerRadius": "Corner Curvature",
+      "rotation": "Rotation",
+      "opacity": "Opacity",
+      "typography": "Typography & Font",
+      "textContent": "Text String",
+      "fontSize": "Font Size (px)",
+      "textAlign": "Alignment",
+      "fill": "Fill Color",
+      "stroke": "Border & Stroke",
+      "strokeWidth": "Stroke Thickness",
+      "transparent": "No Color / Transparent",
+      "canvasSettings": "Canvas Settings",
+      "canvasSettingsSubtitle": "Overall icon artboard dimensions and background",
+      "dimensions": "Icon Frame Dimensions",
+      "presetSizes": "Standard Icon Presets",
+      "background": "Canvas Background",
+      "totalElements": "Total Vector Layers",
+      "duplicate": "Duplicate Element",
+      "delete": "Delete Element"
+    },
+    "layers": {
+      "title": "Layer Stack",
+      "count": "layers",
+      "empty": "No elements added yet. Pick a tool to draw on canvas.",
+      "toggleVisibility": "Toggle Layer Visibility",
+      "toggleLock": "Lock / Unlock Layer",
+      "bringForward": "Bring Forward",
+      "sendBackward": "Send Backward",
+      "delete": "Delete Layer"
+    },
+    "export": {
+      "title": "Export Icon Asset",
+      "subtitle": "Download vector SVG or high-resolution raster icon packages",
+      "format": "Export Format",
+      "fileName": "File Name",
+      "resolution": "Output Resolution",
+      "includeBackground": "Include canvas background in export",
+      "download": "Download File",
+      "downloaded": "Downloaded!"
+    },
+    "shortcuts": {
+      "title": "Keyboard Shortcuts",
+      "subtitle": "Boost your icon editing workflow with standard key bindings",
+      "undo": "Undo last action",
+      "redo": "Redo action",
+      "delete": "Delete selected element",
+      "selectAll": "Select all elements",
+      "copy": "Copy element to clipboard",
+      "paste": "Paste element from clipboard",
+      "duplicate": "Duplicate selected element",
+      "escape": "Deselect / Cancel tool",
+      "zoom": "Zoom in / Zoom out",
+      "pan": "Pan canvas viewport"
     }
   }
 }
