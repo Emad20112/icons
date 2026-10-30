@@ -94,9 +94,34 @@ const clientToCanvasCoords = (clientX: number, clientY: number): { x: number; y:
 // MOUSE & POINTER HANDLERS
 // ==========================================
 
+// Space key listener for pan mode
+const isSpacePressed = ref(false)
+
+const onCanvasKeyDown = (e: KeyboardEvent) => {
+  if (e.code === 'Space' && (e.target as HTMLElement)?.tagName !== 'INPUT' && (e.target as HTMLElement)?.tagName !== 'TEXTAREA') {
+    isSpacePressed.value = true
+  }
+}
+
+const onCanvasKeyUp = (e: KeyboardEvent) => {
+  if (e.code === 'Space') {
+    isSpacePressed.value = false
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onCanvasKeyDown)
+  window.addEventListener('keyup', onCanvasKeyUp)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onCanvasKeyDown)
+  window.removeEventListener('keyup', onCanvasKeyUp)
+})
+
 const handleCanvasMouseDown = (e: MouseEvent) => {
   // If clicking on empty canvas or middle click / space key -> Start Panning
-  if (e.button === 1 || e.spaceKey || props.activeTool === 'move') {
+  if (e.button === 1 || isSpacePressed.value || props.activeTool === 'move') {
     isPanning.value = true
     panStartMouseX = e.clientX - props.canvasTransform.panX
     panStartMouseY = e.clientY - props.canvasTransform.panY
@@ -105,7 +130,7 @@ const handleCanvasMouseDown = (e: MouseEvent) => {
   }
 
   // If a shape tool is active, create shape at click position
-  if (props.activeTool !== 'select' && props.activeTool !== 'move') {
+  if (props.activeTool !== 'select') {
     const coords = clientToCanvasCoords(e.clientX, e.clientY)
     const snappedX = snap(coords.x)
     const snappedY = snap(coords.y)

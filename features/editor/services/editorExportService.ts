@@ -5,7 +5,7 @@
 
 import type { EditorDocument, ExportOptions } from '../types/editor'
 import { SvgRenderer } from '../engine/svgRenderer'
-import { IcoEncoder } from '../../image-converter/utils/icoEncoder'
+import { encodeIco } from '../../image-converter/utils/icoEncoder'
 import { sanitizeFilename } from '../../../lib/sanitizer/filenameSanitizer'
 
 export interface ExportResult {
@@ -68,11 +68,27 @@ export class EditorExportService {
       }
 
       case 'ICO': {
-        // Render multi-frame or requested target dimension ICO
+        // Render target dimension ICO
         const primarySize = Math.min(Math.max(options.width, 16), 256)
         const canvas = await this.renderSvgToCanvas(doc, primarySize, primarySize, options.includeBackground)
-        const icoBuffer = await IcoEncoder.encodeSingleFrame(canvas)
-        const blob = new Blob([icoBuffer], { type: 'image/x-icon' })
+        const pngBlob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob(
+            (b) => {
+              if (b) resolve(b)
+              else reject(new Error('Failed to encode PNG for ICO.'))
+            },
+            'image/png'
+          )
+        })
+        const buffer = await pngBlob.arrayBuffer()
+        const icoBytes = encodeIco([
+          {
+            width: primarySize,
+            height: primarySize,
+            pngBytes: new Uint8Array(buffer)
+          }
+        ])
+        const blob = new Blob([icoBytes.buffer as ArrayBuffer], { type: 'image/x-icon' })
 
         return {
           blob,

@@ -15,6 +15,12 @@ export interface SvgImportResult {
   error?: string
 }
 
+interface SvgElementLike {
+  tagName: string
+  getAttribute: (name: string) => string | null
+  textContent?: string | null
+}
+
 export class EditorImportService {
   /**
    * Safely imports an SVG file/string into editable EditorElements inside the document.
@@ -30,25 +36,16 @@ export class EditorImportService {
       // 1. Sanitize against script injection and XSS
       const sanitized = sanitizeSvgContent(svgContent)
 
-      // 2. Parse into DOM tree
-      const parser = new DOMParser()
-      const doc = parser.parseFromString(sanitized, 'image/svg+xml')
-      const parseError = doc.querySelector('parsererror')
-      if (parseError) {
-        return { success: false, importedCount: 0, warnings, error: `SVG parse error: ${parseError.textContent}` }
+      // 2. Parse SVG into elements (isomorphic: DOMParser in browser, regex-safe parser in Node/SSR)
+      const parsed = this.parseSvgStructure(sanitized)
+      if (parsed.error) {
+        return { success: false, importedCount: 0, warnings, error: parsed.error }
       }
 
-      const svgEl = doc.querySelector('svg')
-      if (!svgEl) {
-        return { success: false, importedCount: 0, warnings, error: 'No root <svg> element found.' }
-      }
-
-      // 3. Inspect viewBox and dimensions
-      const viewBox = svgEl.getAttribute('viewBox')
-      if (viewBox) {
-        const parts = viewBox.trim().split(/[\s,]+/).map(Number)
+      // 3. Inspect viewBox and adapt dimensions
+      if (parsed.viewBox) {
+        const parts = parsed.viewBox.trim().split(/[\s,]+/).map(Number)
         if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
-          // If current doc is empty, adapt dimensions to imported viewBox
           if (core.getDocument().elements.length === 0) {
             core.setCanvasDimensions(parts[2], parts[3])
           }
@@ -57,11 +54,8 @@ export class EditorImportService {
 
       // 4. Extract child shape nodes
       const elements: EditorElement[] = []
-      const shapeNodes = svgEl.querySelectorAll('rect, circle, ellipse, line, polygon, path, text')
-
-      for (let i = 0; i < shapeNodes.length; i++) {
-        const node = shapeNodes[i] as SVGElement
-        const el = this.convertSvgNodeToElement(node, i + 1)
+      for (let i = 0; i < parsed.nodes.length; i++) {
+        const el = this.convertSvgNodeToElement(parsed.nodes[i], i + 1)
         if (el) {
           elements.push(el)
         }
@@ -94,6 +88,71 @@ export class EditorImportService {
         error: err?.message || 'Failed to import SVG.'
       }
     }
+  }
+
+  private static parseSvgStructure(svgString: string): {
+    viewBox: string | null
+    nodes: SvgElementLike[]
+    error?: string
+  } {
+    if (typeof DOMParser !== 'undefined') {
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(svgString, 'image/svg+xml')
+      const parseError = doc.querySelector('parsererror')
+      if (parseError) {
+        return { viewBox: null, nodes: [], error: `SVG parse error: ${parseError.textContent}` }
+      }
+      const svgEl = doc.querySelector('svg')
+      if (!svgEl) {
+        return { viewBox: null, nodes: [], error: 'No root <svg> element found.' }
+      }
+      const viewBox = svgEl.getAttribute('viewBox')
+      const shapeNodes = svgEl.querySelectorAll('rect, circle, ellipse, line, polygon, path, text')
+      const nodes: SvgElementLike[] = []
+      for (let i = 0; i < shapeNodes.length; i++) {
+        const n = shapeNodes[i] as SVGElement
+        nodes.push({
+          tagName: n.tagName.toLowerCase(),
+          getAttribute: (attr: string) => n.getAttribute(attr),
+          textContent: n.textContent
+        })
+      }
+      return { viewBox, nodes }
+    }
+
+    // Node.js / Testing environment fallback
+    const svgMatch = svgString.match(/<svg\b([^>]*)>/i)
+    if (!svgMatch) {
+      return { viewBox: null, nodes: [], error: 'No root <svg> element found.' }
+    }
+
+    const svgAttrs = svgMatch[1]
+    const viewBoxMatch = svgAttrs.match(/viewBox=["']([^"']+)["']/i)
+    const viewBox = viewBoxMatch ? viewBoxMatch[1] : null
+
+    const nodes: SvgElementLike[] = []
+    const tagRegex = /<(rect|circle|ellipse|line|polygon|path|text)\b([^>]*)(?:\/?>([\s\S]*?)<\/\1>|\/?>)/gi
+    let match: RegExpExecArray | null
+
+    while ((match = tagRegex.exec(svgString)) !== null) {
+      const tagName = match[1].toLowerCase()
+      const attrString = match[2]
+      const innerContent = match[3] || ''
+
+      const getAttribute = (name: string): string | null => {
+        const attrRegex = new RegExp(`(?:^|\\s)${name}\\s*=\\s*["']([^"']*)["']`, 'i')
+        const attrMatch = attrString.match(attrRegex)
+        return attrMatch ? attrMatch[1] : null
+      }
+
+      nodes.push({
+        tagName,
+        getAttribute,
+        textContent: innerContent.replace(/<[^>]+>/g, '').trim()
+      })
+    }
+
+    return { viewBox, nodes }
   }
 
   /**
@@ -142,7 +201,7 @@ export class EditorImportService {
     })
   }
 
-  private static convertSvgNodeToElement(node: SVGElement, index: number): EditorElement | null {
+  private static convertSvgNodeToElement(node: SvgElementLike, index: number): EditorElement | null {
     const tagName = node.tagName.toLowerCase()
     const fill = node.getAttribute('fill') || '#0f172a'
     const stroke = node.getAttribute('stroke') || 'none'
