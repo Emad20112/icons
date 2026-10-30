@@ -1,4 +1,4 @@
-import { ref, reactive, computed, watch, onUnmounted } from 'vue'
+import { ref, shallowRef, reactive, computed, watch, onUnmounted } from 'vue'
 import type {
   CropArea,
   CropPreset,
@@ -16,7 +16,7 @@ export function useImageConverter() {
   const file = ref<File | null>(null)
   const fileName = ref<string>('icon')
   const sourceUrl = ref<string | null>(null)
-  const sourceImage = ref<HTMLImageElement | null>(null)
+  const sourceImage = shallowRef<HTMLImageElement | null>(null)
   const metadata = ref<ImageMetadata | null>(null)
 
   // Options
