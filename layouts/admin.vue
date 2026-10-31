@@ -19,39 +19,39 @@ onMounted(() => {
     <AppHeader />
 
     <!-- Sub-navigation for Admin -->
-    <div class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-      <Container class="flex items-center gap-6 py-3 text-xs font-medium">
+    <div class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 transition-colors">
+      <Container class="flex items-center gap-6 py-3 text-xs font-medium overflow-x-auto whitespace-nowrap">
         <NuxtLink
           to="/admin"
-          class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors shrink-0"
           exact-active-class="text-blue-600 dark:text-blue-400 font-semibold"
         >
           {{ t('admin.nav.overview') }}
         </NuxtLink>
         <NuxtLink
           to="/admin/assets"
-          class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors shrink-0"
           exact-active-class="text-blue-600 dark:text-blue-400 font-semibold"
         >
           {{ t('admin.nav.assets') }}
         </NuxtLink>
         <NuxtLink
           to="/admin/categories"
-          class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors shrink-0"
           exact-active-class="text-blue-600 dark:text-blue-400 font-semibold"
         >
           {{ t('admin.nav.categories') }}
         </NuxtLink>
         <NuxtLink
           to="/admin/licenses"
-          class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors shrink-0"
           exact-active-class="text-blue-600 dark:text-blue-400 font-semibold"
         >
           {{ t('admin.nav.licenses') }}
         </NuxtLink>
         <NuxtLink
           to="/admin/audit"
-          class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors shrink-0"
           exact-active-class="text-blue-600 dark:text-blue-400 font-semibold"
         >
           {{ t('admin.nav.audit') }}

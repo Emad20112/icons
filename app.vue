@@ -3,9 +3,16 @@
 // The negotiated locale is resolved server-side from the cookie, so `dir`
 // is already correct before the first paint.
 import { SUPPORTED_LOCALES, getDirection } from '~/i18n/locales'
+import { useTheme } from '~/composables/useTheme'
+import { onMounted } from 'vue'
 
 const { locale } = useI18n()
 const head = useLocaleHead({ seo: true })
+const { isDark, initTheme } = useTheme()
+
+onMounted(() => {
+  initTheme()
+})
 
 const currentDir = computed(() => head.value?.htmlAttrs?.dir || getDirection(locale.value))
 const currentLang = computed(() => head.value?.htmlAttrs?.lang || (locale.value === 'ar' ? 'ar-SA' : 'en-US'))
@@ -28,7 +35,7 @@ useHead(() => ({ link: hreflangLinks.value }))
 
 <template>
   <div>
-    <Html :lang="currentLang" :dir="currentDir">
+    <Html :lang="currentLang" :dir="currentDir" :class="{ dark: isDark }">
       <Head>
         <Link
           v-for="link in head.link || []"
