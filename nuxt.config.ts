@@ -64,6 +64,12 @@ export default defineNuxtConfig({
           type: 'image/svg+xml',
           href: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%232563eb'/%3E%3Cpath d='M12 4 4 8l8 4 8-4-8-4Z' fill='%23fff'/%3E%3Cpath d='m4 12 8 4 8-4' stroke='%23fff' stroke-width='1.6' fill='none'/%3E%3Cpath d='m4 16 8 4 8-4' stroke='%23fff' stroke-width='1.6' fill='none'/%3E%3C/svg%3E"
         }
+      ],
+      script: [
+        {
+          innerHTML: "(function(){try{var t=localStorage.getItem('theme_mode');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}}catch(e){}})();",
+          type: 'text/javascript'
+        }
       ]
     }
   },

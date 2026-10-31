@@ -31,7 +31,15 @@
     "role": "الدور:",
     "signIn": "تسجيل الدخول",
     "language": "اللغة",
-    "selectLanguage": "اختر اللغة"
+    "selectLanguage": "اختر اللغة",
+    "toggleTheme": "تبديل المظهر",
+    "themeLight": "الوضع الفاتح",
+    "themeDark": "الوضع الداكن",
+    "menu": "قائمة التصفح",
+    "closeMenu": "إغلاق القائمة",
+    "toolsSection": "أدوات التصميم والتحويل",
+    "adminSection": "الإدارة والأمان",
+    "switchRoleTo": "التبديل إلى دور"
   },
   "footer": {
     "brand": "منصة الأصول الرقمية",

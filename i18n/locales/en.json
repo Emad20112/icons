@@ -31,7 +31,15 @@
     "role": "Role:",
     "signIn": "Sign In",
     "language": "Language",
-    "selectLanguage": "Select language"
+    "selectLanguage": "Select language",
+    "toggleTheme": "Toggle theme",
+    "themeLight": "Light Mode",
+    "themeDark": "Dark Mode",
+    "menu": "Navigation menu",
+    "closeMenu": "Close menu",
+    "toolsSection": "Creation & Conversion Tools",
+    "adminSection": "Management & Security",
+    "switchRoleTo": "Switch role to"
   },
   "footer": {
     "brand": "Digital Assets Platform",
