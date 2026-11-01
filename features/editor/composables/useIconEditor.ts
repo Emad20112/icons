@@ -329,9 +329,12 @@ export function useIconEditor() {
   // DOCUMENT IMPORT / EXPORT
   // ==========================================
 
-  const importSvg = async (svgContent: string) => {
+  const importSvg = async (svgContent: string, docName?: string) => {
     const res = await EditorImportService.importSvgString(svgContent, core)
     if (res.success) {
+      if (docName) {
+        core.setDocumentName(docName)
+      }
       history.clear()
     }
     return res

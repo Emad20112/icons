@@ -183,9 +183,26 @@ const handleGlobalKeyDown = (e: KeyboardEvent) => {
   }
 }
 
+const route = useRoute()
+
 onMounted(() => {
   window.addEventListener('keydown', handleGlobalKeyDown)
-  // Try loading previous autosaved local session if exists
+
+  // 1. Check if an SVG was sent from Catalog or Vectorizer
+  if (typeof window !== 'undefined') {
+    const pendingSvg = sessionStorage.getItem('pending_editor_svg')
+    const pendingTitle = sessionStorage.getItem('pending_editor_title') || (route.query.title as string)
+
+    if (pendingSvg) {
+      importSvg(pendingSvg, pendingTitle || 'Imported Icon')
+      sessionStorage.removeItem('pending_editor_svg')
+      sessionStorage.removeItem('pending_editor_title')
+      showNotification(t('editor.importedSuccess'))
+      return
+    }
+  }
+
+  // 2. Try loading previous autosaved local session if exists
   loadFromLocalStorage()
 })
 
@@ -258,9 +275,9 @@ onUnmounted(() => {
     />
 
     <!-- Main Workspace: 3-column responsive layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start min-h-[580px]">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start min-h-[480px]">
       <!-- Column 1: Left Creation Tools (1 Col) -->
-      <div class="lg:col-span-1 flex lg:flex-col justify-center">
+      <div class="lg:col-span-1 flex lg:flex-col justify-center w-full overflow-x-auto pb-1 lg:pb-0">
         <EditorLeftToolbar
           :active-tool="activeTool"
           @update:active-tool="t => activeTool = t"
@@ -270,7 +287,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Column 2: Center Interactive Canvas (7 Cols) -->
-      <div class="lg:col-span-7 xl:col-span-8 h-[580px]">
+      <div class="lg:col-span-7 xl:col-span-8 h-[420px] sm:h-[500px] lg:h-[580px] w-full min-w-0">
         <EditorCanvas
           :doc="doc"
           :selected-ids="selectedIds"
@@ -288,7 +305,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Column 3: Right Properties & Layers Panel (4 Cols) -->
-      <div class="lg:col-span-4 xl:col-span-3 space-y-3">
+      <div class="lg:col-span-4 xl:col-span-3 space-y-3 w-full">
         <!-- Tab Switcher for Properties vs Layers -->
         <div class="grid grid-cols-2 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold">
           <button

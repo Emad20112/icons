@@ -88,6 +88,15 @@ const loadSampleImage = () => {
     }
   }, 'image/png')
 }
+
+const openInEditor = () => {
+  if (!result.value?.svgString) return
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('pending_editor_svg', result.value.svgString)
+    sessionStorage.setItem('pending_editor_title', options.value.preset ? `Vectorized (${options.value.preset})` : 'Vectorized Icon')
+  }
+  navigateTo('/tools/icon-editor?source=vectorizer')
+}
 </script>
 
 <template>
@@ -193,6 +202,7 @@ const loadSampleImage = () => {
         @download="() => downloadSvg()"
         @copy="copySvgCode"
         @reset="reset"
+        @open-in-editor="openInEditor"
       />
     </div>
   </Container>

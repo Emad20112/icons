@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Download, Copy, Check, RotateCcw } from 'lucide-vue-next'
+import { Download, Copy, Check, RotateCcw, PenTool } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
@@ -12,6 +12,7 @@ const emit = defineEmits<{
   (e: 'download'): void
   (e: 'copy'): void
   (e: 'reset'): void
+  (e: 'open-in-editor'): void
 }>()
 
 const { t } = useI18n()
@@ -38,7 +39,18 @@ const handleCopy = () => {
       <span>{{ t('vectorizer.preview.resetImage') }}</span>
     </button>
 
-    <div class="flex items-center gap-2.5">
+    <div class="flex flex-wrap items-center gap-2.5">
+      <!-- Open in Icon Editor -->
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-semibold transition-colors shadow-xs"
+        :disabled="!hasResult || isProcessing"
+        @click="emit('open-in-editor')"
+      >
+        <PenTool class="w-4 h-4" />
+        <span>{{ t('vectorizer.preview.openInEditor') }}</span>
+      </button>
+
       <!-- Copy SVG Code -->
       <button
         type="button"

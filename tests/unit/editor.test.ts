@@ -281,4 +281,47 @@ describe('Phase 5: Professional Icon Editor Engine Suite', () => {
       expect(res.error).toBeDefined()
     })
   })
+
+  describe('7. Component Code Export Service (Vue 3 & React)', () => {
+    it('generates a clean Vue 3 single file component with typed props', async () => {
+      const { EditorCodeExportService } = await import('../../features/editor/services/editorCodeExportService')
+      const rect = core.createRect(10, 10, 40, 40)
+      rect.fill = '#3b82f6'
+      core.addElement(rect)
+
+      const vueCode = EditorCodeExportService.generateVue3Component(core.getDocument(), {
+        componentName: 'RocketIcon',
+        withProps: true
+      })
+
+      expect(vueCode).toContain('RocketIcon.vue')
+      expect(vueCode).toContain('<script setup lang="ts">')
+      expect(vueCode).toContain('defineProps<Props>()')
+      expect(vueCode).toContain('<template>')
+      expect(vueCode).toContain(':viewBox')
+      expect(vueCode).toContain('<rect')
+      expect(vueCode).toContain('fill="#3b82f6"')
+    })
+
+    it('generates a clean React TSX functional component with props spreading', async () => {
+      const { EditorCodeExportService } = await import('../../features/editor/services/editorCodeExportService')
+      const circle = core.createCircle(50, 50, 25)
+      circle.fill = '#ef4444'
+      circle.strokeWidth = 3
+      core.addElement(circle)
+
+      const reactCode = EditorCodeExportService.generateReactComponent(core.getDocument(), {
+        componentName: 'HeartIcon',
+        typescript: true
+      })
+
+      expect(reactCode).toContain('HeartIcon.tsx')
+      expect(reactCode).toContain("import React from 'react'")
+      expect(reactCode).toContain('export interface HeartIconProps extends React.SVGProps<SVGSVGElement>')
+      expect(reactCode).toContain('export const HeartIcon: React.FC<HeartIconProps>')
+      expect(reactCode).toContain('strokeWidth=')
+      expect(reactCode).toContain('{...props}')
+      expect(reactCode).toContain('export default HeartIcon')
+    })
+  })
 })

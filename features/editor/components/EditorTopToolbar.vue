@@ -50,14 +50,14 @@ const handleNameBlur = (e: Event) => {
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center justify-between gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
+  <div class="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 p-2.5 sm:p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
     <!-- Left: Project Name & Save Indicator -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2 sm:gap-3">
       <div class="flex items-center gap-2">
         <input
           type="text"
           :value="docName"
-          class="font-bold text-sm sm:text-base text-slate-900 dark:text-white bg-transparent border-b border-transparent hover:border-slate-300 dark:hover:border-slate-700 focus:border-blue-500 focus:outline-none px-1 py-0.5 max-w-[180px] sm:max-w-[260px] truncate"
+          class="font-bold text-sm sm:text-base text-slate-900 dark:text-white bg-transparent border-b border-transparent hover:border-slate-300 dark:hover:border-slate-700 focus:border-blue-500 focus:outline-none px-1 py-0.5 max-w-[140px] sm:max-w-[260px] truncate"
           :title="t('editor.toolbar.renameTitle')"
           @blur="handleNameBlur"
           @keydown.enter="($event.target as HTMLInputElement).blur()"
@@ -81,7 +81,7 @@ const handleNameBlur = (e: Event) => {
     </div>
 
     <!-- Center: Undo/Redo, Zoom, Grid, Snap, Preview -->
-    <div class="flex items-center gap-1.5 sm:gap-2">
+    <div class="flex items-center gap-1 sm:gap-2 overflow-x-auto max-w-full py-0.5">
       <!-- Undo / Redo Group -->
       <div class="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
         <button

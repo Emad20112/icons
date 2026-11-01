@@ -77,7 +77,7 @@ const handleImageUpload = (e: Event) => {
 </script>
 
 <template>
-  <div class="flex sm:flex-col items-center gap-1.5 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-x-auto sm:overflow-visible">
+  <div class="flex lg:flex-col items-center gap-1.5 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs w-full lg:w-auto overflow-x-auto lg:overflow-visible justify-start lg:justify-center">
     <!-- Hidden File Inputs -->
     <input
       ref="svgFileInputRef"
@@ -112,7 +112,7 @@ const handleImageUpload = (e: Event) => {
     </button>
 
     <!-- Divider -->
-    <div class="w-px h-6 sm:w-6 sm:h-px bg-slate-200 dark:bg-slate-800 my-0.5"></div>
+    <div class="w-px h-6 lg:w-6 lg:h-px bg-slate-200 dark:bg-slate-800 my-0.5 shrink-0"></div>
 
     <!-- Shapes & Creation Tools -->
     <button
@@ -132,7 +132,7 @@ const handleImageUpload = (e: Event) => {
     </button>
 
     <!-- Divider -->
-    <div class="w-px h-6 sm:w-6 sm:h-px bg-slate-200 dark:bg-slate-800 my-0.5"></div>
+    <div class="w-px h-6 lg:w-6 lg:h-px bg-slate-200 dark:bg-slate-800 my-0.5 shrink-0"></div>
 
     <!-- Import SVG Tool -->
     <button

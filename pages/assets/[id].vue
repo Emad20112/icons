@@ -11,6 +11,7 @@ import AssetCard from '../../components/assets/AssetCard.vue'
 import { useAuth } from '../../composables/useAuth'
 import { useToast } from '../../composables/useToast'
 import { useAssets } from '../../composables/useAssets'
+import { PenTool } from 'lucide-vue-next'
 import type { Asset, AssetStatus } from '../../types/database'
 
 const route = useRoute()
@@ -134,6 +135,58 @@ function getTagName(tag?: { name: string; slug: string }): string {
   const key = `tags.${normalizeKey(tag.slug)}`
   return te(key) ? t(key) : tag.name
 }
+
+const hasSvgFile = computed(() => {
+  return asset.value?.files?.some(f => f.format?.toUpperCase() === 'SVG' || f.mime_type?.includes('svg'))
+})
+
+async function getSvgContent(file?: any): Promise<string> {
+  if (file?.metadata?.rawContent) {
+    return file.metadata.rawContent
+  }
+  const firstSvg = asset.value?.files?.find(f => f.format?.toUpperCase() === 'SVG' || f.mime_type?.includes('svg'))
+  if (firstSvg?.metadata?.rawContent) {
+    return firstSvg.metadata.rawContent
+  }
+  if (asset.value?.files?.[0]?.metadata?.rawContent) {
+    return asset.value.files[0].metadata.rawContent
+  }
+
+  const url = file?.metadata?.fullUrl || firstSvg?.metadata?.fullUrl
+  if (url && typeof window !== 'undefined') {
+    try {
+      const resp = await fetch(url)
+      if (resp.ok) {
+        return await resp.text()
+      }
+    } catch (err) {
+      console.warn('Could not fetch SVG content directly:', err)
+    }
+  }
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+    <rect width="256" height="256" rx="40" fill="#eff6ff" />
+    <circle cx="128" cy="128" r="64" fill="#3b82f6" />
+  </svg>`
+}
+
+async function openInEditor() {
+  const svgText = await getSvgContent()
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('pending_editor_svg', svgText)
+    sessionStorage.setItem('pending_editor_title', displayName.value || asset.value?.name || 'Catalog Icon')
+  }
+  navigateTo(`/tools/icon-editor?source=catalog&title=${encodeURIComponent(displayName.value || asset.value?.name || 'Catalog Icon')}`)
+}
+
+async function openFileInEditor(file: any) {
+  const svgText = await getSvgContent(file)
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('pending_editor_svg', svgText)
+    sessionStorage.setItem('pending_editor_title', displayName.value || asset.value?.name || 'Catalog Icon')
+  }
+  navigateTo(`/tools/icon-editor?source=catalog&title=${encodeURIComponent(displayName.value || asset.value?.name || 'Catalog Icon')}`)
+}
 </script>
 
 <template>
@@ -191,6 +244,28 @@ function getTagName(tag?: { name: string; slug: string }): string {
               </div>
             </div>
 
+            <!-- Actions Bar: Edit in Icon Editor -->
+            <div v-if="hasSvgFile || asset.type === 'ICON'" class="mt-4 flex flex-wrap items-center justify-between gap-3 p-3 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 rounded-xl">
+              <div class="flex items-center gap-2.5">
+                <div class="p-1.5 rounded-lg bg-blue-600 text-white">
+                  <PenTool class="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">
+                    {{ t('assetDetail.editorBannerTitle') }}
+                  </h4>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                    {{ t('assetDetail.editorBannerDesc') }}
+                  </p>
+                </div>
+              </div>
+
+              <Button size="sm" variant="primary" class="gap-1.5 text-xs font-bold" @click="openInEditor">
+                <PenTool class="w-3.5 h-3.5" />
+                <span>{{ t('assetDetail.openInEditor') }}</span>
+              </Button>
+            </div>
+
             <!-- Name, Description, and Tags -->
             <div class="mt-6 space-y-3">
               <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">{{ displayName }}</h1>
@@ -242,16 +317,29 @@ function getTagName(tag?: { name: string; slug: string }): string {
                   </div>
                 </div>
 
-                <a
-                  :href="file.metadata?.fullUrl || '#'"
-                  target="_blank"
-                  download
-                  class="inline-flex items-center"
-                >
-                  <Button size="sm" variant="outline">
-                    {{ t('assetDetail.download', { format: file.format }) }}
+                <div class="flex items-center gap-2">
+                  <Button
+                    v-if="file.format.toUpperCase() === 'SVG' || file.mime_type.includes('svg')"
+                    size="sm"
+                    variant="secondary"
+                    class="gap-1.5 text-xs"
+                    @click="openFileInEditor(file)"
+                  >
+                    <PenTool class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                    <span class="hidden sm:inline">{{ t('assetDetail.openInEditor') }}</span>
                   </Button>
-                </a>
+
+                  <a
+                    :href="file.metadata?.fullUrl || '#'"
+                    target="_blank"
+                    download
+                    class="inline-flex items-center"
+                  >
+                    <Button size="sm" variant="outline">
+                      {{ t('assetDetail.download', { format: file.format }) }}
+                    </Button>
+                  </a>
+                </div>
               </div>
             </div>
           </div>

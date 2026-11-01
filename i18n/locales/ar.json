@@ -153,6 +153,9 @@
     "manifestDescription": "ملفات ثنائية منفصلة عن بيانات PostgreSQL الوصفية. المسارات مقسّمة منطقيًا.",
     "noFiles": "لا يوجد ملف ثنائي مرفق بهذه المسودة بعد.",
     "download": "تحميل {format}",
+    "openInEditor": "تعديل في المحرر",
+    "editorBannerTitle": "تعديل الأيقونة في محرر الأيقونات",
+    "editorBannerDesc": "فتح الأيقونة مباشرة للتعديل وإعادة التشكيل الهندسي وتغيير الألوان والتصدير الفوري",
     "licenseTitle": "الترخيص والشروط",
     "commercialUse": "الاستخدام التجاري:",
     "standaloneResale": "إعادة البيع المنفرد:",
@@ -592,6 +595,7 @@
       "copyCode": "نسخ كود SVG",
       "copied": "تم النسخ إلى الحافظة!",
       "downloadSvg": "تنزيل ملف SVG",
+      "openInEditor": "تعديل في المحرر",
       "resetImage": "رفع صورة جديدة",
       "codeTitle": "كود SVG المتجهي المطهّر"
     },
@@ -688,11 +692,22 @@
       "sendBackward": "تأخير للخلف",
       "delete": "حذف الطبقة"
     },
+    "importedSuccess": "تم استيراد الأيقونة إلى المحرر بنجاح!",
     "export": {
       "title": "تصدير أصل الأيقونة",
       "subtitle": "تنزيل SVG متجهي أو حزم أيقونات نقطية فائقة النقاء",
+      "codeSubtitle": "توليد كود مكون جاهز للإنتاج للاستخدام الفوري في مشاريع Vue 3 و React",
+      "tabs": {
+        "files": "تنزيل الملفات",
+        "code": "كود المكون (Vue / React)"
+      },
       "format": "صيغة التصدير",
       "fileName": "اسم الملف",
+      "framework": "إطار العمل",
+      "componentName": "اسم المكون (PascalCase)",
+      "withProps": "دعم الخصائص الديناميكية (size, color, class)",
+      "copyCode": "نسخ كود المكون",
+      "copiedCode": "تم النسخ بنجاح!",
       "resolution": "دقة المخرج",
       "includeBackground": "تضمين لون الخلفية في التصدير",
       "download": "تنزيل الملف",

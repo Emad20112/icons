@@ -153,6 +153,9 @@
     "manifestDescription": "Binary files decoupled from PostgreSQL metadata. Paths are partitioned logically.",
     "noFiles": "No binary file attached to this draft yet.",
     "download": "Download {format}",
+    "openInEditor": "Edit in Icon Editor",
+    "editorBannerTitle": "Edit Icon in Professional Editor",
+    "editorBannerDesc": "Open this icon directly to reshape geometries, adjust Bézier curves, restyle colors, and export.",
     "licenseTitle": "License & Terms",
     "commercialUse": "Commercial Use:",
     "standaloneResale": "Standalone Resale:",
@@ -592,6 +595,7 @@
       "copyCode": "Copy SVG Code",
       "copied": "Copied to Clipboard!",
       "downloadSvg": "Download SVG",
+      "openInEditor": "Edit in Icon Editor",
       "resetImage": "Upload New Image",
       "codeTitle": "Sanitized Vector SVG Code"
     },
@@ -688,11 +692,22 @@
       "sendBackward": "Send Backward",
       "delete": "Delete Layer"
     },
+    "importedSuccess": "Icon successfully imported into Editor!",
     "export": {
       "title": "Export Icon Asset",
       "subtitle": "Download vector SVG or high-resolution raster icon packages",
+      "codeSubtitle": "Generate production-ready component code for immediate use in Vue 3 and React projects",
+      "tabs": {
+        "files": "File Downloads",
+        "code": "Component Code (Vue / React)"
+      },
       "format": "Export Format",
       "fileName": "File Name",
+      "framework": "Framework",
+      "componentName": "Component Name (PascalCase)",
+      "withProps": "Support dynamic props (size, color, class)",
+      "copyCode": "Copy Snippet",
+      "copiedCode": "Copied!",
       "resolution": "Output Resolution",
       "includeBackground": "Include canvas background in export",
       "download": "Download File",
