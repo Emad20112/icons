@@ -9,6 +9,13 @@ import type {
   UserRole,
   AssetStatus
 } from '../../types/database'
+export type { UserRole }
+import type {
+  FontFamily,
+  FontFile,
+  FontImportBatch,
+  FontAiJob
+} from '../../types/fonts'
 import { ValidationError, AuthorizationError, NotFoundError } from '../../lib/errors/AppError'
 
 /**
@@ -27,6 +34,12 @@ class InMemoryDatabaseStore {
   public auditLogs: AuditLog[] = []
   public storageBuckets: Map<string, Map<string, { buffer: Buffer | string; mimeType: string; size: number }>> = new Map()
 
+  // Phase 6: Font Library Collections
+  public fontFamilies: Map<string, FontFamily> = new Map()
+  public fontFiles: Map<string, FontFile> = new Map()
+  public fontImportBatches: Map<string, FontImportBatch> = new Map()
+  public fontAiJobs: Map<string, FontAiJob> = new Map()
+
   constructor() {
     this.seedDefaults()
   }
@@ -35,6 +48,7 @@ class InMemoryDatabaseStore {
     // 1. Initial Storage Buckets
     this.storageBuckets.set('assets', new Map())
     this.storageBuckets.set('temp-uploads', new Map())
+    this.storageBuckets.set('fonts', new Map())
 
     // 2. Initial Admin & Test Profiles
     const adminId = 'a0000000-0000-0000-0000-000000000001'
@@ -436,16 +450,305 @@ class InMemoryDatabaseStore {
       bucket.set(filePath, { buffer: f.content, mimeType: 'image/svg+xml', size: f.content.length })
     }
 
+    // 7. Seed Phase 6 Font Library Collections
+    this.seedFontsDefaults()
+
     // Initial Audit Log
     this.auditLogs.push({
-      id: 'aud-0000-0000-0000-000000000001',
+      id: 'aud-0000-0000-0000-0000-000000000001',
       actor_id: adminId,
       action: 'SYSTEM_BOOTSTRAP',
       entity_type: 'SYSTEM',
       entity_id: 'phase-0-foundation',
-      metadata: { version: '0.1.0', modules: ['RLS', 'Storage', 'Audit', 'Assets'] },
+      metadata: { version: '0.1.0', modules: ['RLS', 'Storage', 'Audit', 'Assets', 'Fonts'] },
       ip_address: '127.0.0.1',
       created_at: new Date().toISOString()
+    })
+  }
+
+  private seedFontsDefaults() {
+    const fontsBucket = this.storageBuckets.get('fonts')!
+
+    // 1. Cairo Font Family (Arabic Kufi / Sans-Serif)
+    const cairoId = 'f1000000-0000-0000-0000-000000000001'
+    this.fontFamilies.set(cairoId, {
+      id: cairoId,
+      name: 'Cairo',
+      slug: 'cairo',
+      display_name: 'Cairo (القاهرة)',
+      description: 'A contemporary multilingual Arabic and Latin typeface family based on Kufi geometry.',
+      designer: 'Mohamed Gaber',
+      foundry: 'Kief Type Foundry',
+      primary_category: 'sans_serif',
+      secondary_categories: ['display'],
+      arabic_style: 'kufi',
+      language_support: ['arabic', 'latin'],
+      style_tags: ['modern', 'geometric', 'branding', 'screen'],
+      recommended_usage: ['headings', 'ui', 'branding', 'posters'],
+      preview_image_path: 'fonts/previews/cairo.svg',
+      preview_text_sample: 'القاهرة عاصمة التاريخ والحضارة — Modern Design & Geometry',
+      license_type: 'OFL',
+      license_url: 'https://openfontlicense.org',
+      publication_status: 'PUBLISHED',
+      ai_classification_status: 'approved',
+      ai_confidence: 0.96,
+      created_at: new Date('2026-10-01T10:00:00Z').toISOString(),
+      updated_at: new Date('2026-10-01T10:00:00Z').toISOString()
+    })
+
+    const cairoFiles = [
+      { id: 'ff100000-0000-0000-0000-000000000001', family_id: cairoId, name: 'Cairo-Regular.ttf', weight: 400, style: 'normal' as const, format: 'TTF' as const },
+      { id: 'ff100000-0000-0000-0000-000000000002', family_id: cairoId, name: 'Cairo-Bold.ttf', weight: 700, style: 'normal' as const, format: 'TTF' as const },
+      { id: 'ff100000-0000-0000-0000-000000000003', family_id: cairoId, name: 'Cairo-Light.ttf', weight: 300, style: 'normal' as const, format: 'TTF' as const }
+    ]
+    for (const f of cairoFiles) {
+      const storagePath = `fonts/cairo/${f.name}`
+      this.fontFiles.set(f.id, {
+        id: f.id,
+        family_id: f.family_id,
+        file_name: f.name,
+        storage_path: storagePath,
+        file_format: f.format,
+        file_size: 142800,
+        sha256_hash: `hash_${f.name.replace(/[^a-z0-9]/gi, '')}_sample`,
+        weight: f.weight,
+        style: f.style,
+        subfamily_name: f.weight === 700 ? 'Bold' : f.weight === 300 ? 'Light' : 'Regular',
+        postscript_name: `Cairo-${f.weight === 700 ? 'Bold' : f.weight === 300 ? 'Light' : 'Regular'}`,
+        is_variable: false,
+        character_count: 654,
+        unicode_ranges: ['Basic Latin', 'Arabic', 'Arabic Extended-A'],
+        created_at: new Date('2026-10-01T10:00:00Z').toISOString()
+      })
+      fontsBucket.set(storagePath, { buffer: `MOCK_FONT_BINARY_${f.name}`, mimeType: 'font/ttf', size: 142800 })
+    }
+
+    // 2. Amiri Font Family (Arabic Naskh / Classical Serif)
+    const amiriId = 'f1000000-0000-0000-0000-000000000002'
+    this.fontFamilies.set(amiriId, {
+      id: amiriId,
+      name: 'Amiri',
+      slug: 'amiri',
+      display_name: 'Amiri (الأميري)',
+      description: 'A classical Arabic typeface in Naskh style for book typography and editorial text.',
+      designer: 'Khaled Hosny',
+      foundry: 'Amiri Project',
+      primary_category: 'serif',
+      secondary_categories: ['book', 'editorial'],
+      arabic_style: 'naskh',
+      language_support: ['arabic', 'latin'],
+      style_tags: ['classical', 'editorial', 'calligraphic', 'traditional'],
+      recommended_usage: ['body', 'editorial', 'books', 'literature'],
+      preview_image_path: 'fonts/previews/amiri.svg',
+      preview_text_sample: 'إنما الأمم الأخلاق ما بقيت — Classical Arabic Literature',
+      license_type: 'OFL',
+      license_url: 'https://openfontlicense.org',
+      publication_status: 'PUBLISHED',
+      ai_classification_status: 'approved',
+      ai_confidence: 0.98,
+      created_at: new Date('2026-10-02T10:00:00Z').toISOString(),
+      updated_at: new Date('2026-10-02T10:00:00Z').toISOString()
+    })
+
+    const amiriFiles = [
+      { id: 'ff100000-0000-0000-0000-000000000004', family_id: amiriId, name: 'Amiri-Regular.ttf', weight: 400, style: 'normal' as const, format: 'TTF' as const },
+      { id: 'ff100000-0000-0000-0000-000000000005', family_id: amiriId, name: 'Amiri-Bold.ttf', weight: 700, style: 'normal' as const, format: 'TTF' as const },
+      { id: 'ff100000-0000-0000-0000-000000000006', family_id: amiriId, name: 'Amiri-Italic.ttf', weight: 400, style: 'italic' as const, format: 'TTF' as const }
+    ]
+    for (const f of amiriFiles) {
+      const storagePath = `fonts/amiri/${f.name}`
+      this.fontFiles.set(f.id, {
+        id: f.id,
+        family_id: f.family_id,
+        file_name: f.name,
+        storage_path: storagePath,
+        file_format: f.format,
+        file_size: 210400,
+        sha256_hash: `hash_${f.name.replace(/[^a-z0-9]/gi, '')}_sample`,
+        weight: f.weight,
+        style: f.style,
+        subfamily_name: f.style === 'italic' ? 'Italic' : f.weight === 700 ? 'Bold' : 'Regular',
+        postscript_name: `Amiri-${f.style === 'italic' ? 'Italic' : f.weight === 700 ? 'Bold' : 'Regular'}`,
+        is_variable: false,
+        character_count: 1420,
+        unicode_ranges: ['Basic Latin', 'Arabic', 'Arabic Presentation Forms'],
+        created_at: new Date('2026-10-02T10:00:00Z').toISOString()
+      })
+      fontsBucket.set(storagePath, { buffer: `MOCK_FONT_BINARY_${f.name}`, mimeType: 'font/ttf', size: 210400 })
+    }
+
+    // 3. Tajawal Font Family (Arabic Modern / Clean Sans)
+    const tajawalId = 'f1000000-0000-0000-0000-000000000003'
+    this.fontFamilies.set(tajawalId, {
+      id: tajawalId,
+      name: 'Tajawal',
+      slug: 'tajawal',
+      display_name: 'Tajawal (تجوال)',
+      description: 'A crisp, modern Arabic-Latin typeface tailored for responsive user interfaces and mobile screens.',
+      designer: 'Boutros Fonts',
+      foundry: 'Google Fonts',
+      primary_category: 'sans_serif',
+      secondary_categories: ['ui'],
+      arabic_style: 'modern',
+      language_support: ['arabic', 'latin'],
+      style_tags: ['minimal', 'clean', 'screen', 'ui'],
+      recommended_usage: ['ui', 'mobile', 'headings', 'apps'],
+      preview_image_path: 'fonts/previews/tajawal.svg',
+      preview_text_sample: 'تصميم تجارب رقمية عصرية — Crisp User Interfaces',
+      license_type: 'OFL',
+      license_url: 'https://openfontlicense.org',
+      publication_status: 'PUBLISHED',
+      ai_classification_status: 'approved',
+      ai_confidence: 0.94,
+      created_at: new Date('2026-10-03T10:00:00Z').toISOString(),
+      updated_at: new Date('2026-10-03T10:00:00Z').toISOString()
+    })
+
+    const tajawalFiles = [
+      { id: 'ff100000-0000-0000-0000-000000000007', family_id: tajawalId, name: 'Tajawal-Regular.ttf', weight: 400, style: 'normal' as const, format: 'TTF' as const },
+      { id: 'ff100000-0000-0000-0000-000000000008', family_id: tajawalId, name: 'Tajawal-Medium.ttf', weight: 500, style: 'normal' as const, format: 'TTF' as const },
+      { id: 'ff100000-0000-0000-0000-000000000009', family_id: tajawalId, name: 'Tajawal-Bold.ttf', weight: 700, style: 'normal' as const, format: 'TTF' as const }
+    ]
+    for (const f of tajawalFiles) {
+      const storagePath = `fonts/tajawal/${f.name}`
+      this.fontFiles.set(f.id, {
+        id: f.id,
+        family_id: f.family_id,
+        file_name: f.name,
+        storage_path: storagePath,
+        file_format: f.format,
+        file_size: 154000,
+        sha256_hash: `hash_${f.name.replace(/[^a-z0-9]/gi, '')}_sample`,
+        weight: f.weight,
+        style: f.style,
+        subfamily_name: f.weight === 700 ? 'Bold' : f.weight === 500 ? 'Medium' : 'Regular',
+        postscript_name: `Tajawal-${f.weight === 700 ? 'Bold' : f.weight === 500 ? 'Medium' : 'Regular'}`,
+        is_variable: false,
+        character_count: 890,
+        unicode_ranges: ['Basic Latin', 'Arabic'],
+        created_at: new Date('2026-10-03T10:00:00Z').toISOString()
+      })
+      fontsBucket.set(storagePath, { buffer: `MOCK_FONT_BINARY_${f.name}`, mimeType: 'font/ttf', size: 154000 })
+    }
+
+    // 4. Inter Font Family (Latin UI / Clean Sans)
+    const interId = 'f1000000-0000-0000-0000-000000000004'
+    this.fontFamilies.set(interId, {
+      id: interId,
+      name: 'Inter',
+      slug: 'inter',
+      display_name: 'Inter Display',
+      description: 'A typeface specially designed for computer screens with tall x-height and high readability.',
+      designer: 'Rasmus Andersson',
+      foundry: 'rsms',
+      primary_category: 'sans_serif',
+      secondary_categories: ['screen', 'ui'],
+      language_support: ['latin', 'cyrillic', 'greek'],
+      style_tags: ['ui', 'geometric', 'screen', 'clean'],
+      recommended_usage: ['ui', 'dashboards', 'programming', 'body'],
+      preview_image_path: 'fonts/previews/inter.svg',
+      preview_text_sample: 'Inter is crafted for high-density computer screens and user interfaces',
+      license_type: 'OFL',
+      license_url: 'https://openfontlicense.org',
+      publication_status: 'PUBLISHED',
+      ai_classification_status: 'approved',
+      ai_confidence: 0.99,
+      created_at: new Date('2026-10-04T10:00:00Z').toISOString(),
+      updated_at: new Date('2026-10-04T10:00:00Z').toISOString()
+    })
+
+    const interFiles = [
+      { id: 'ff100000-0000-0000-0000-000000000010', family_id: interId, name: 'Inter-Regular.woff2', weight: 400, style: 'normal' as const, format: 'WOFF2' as const },
+      { id: 'ff100000-0000-0000-0000-000000000011', family_id: interId, name: 'Inter-SemiBold.woff2', weight: 600, style: 'normal' as const, format: 'WOFF2' as const },
+      { id: 'ff100000-0000-0000-0000-000000000012', family_id: interId, name: 'Inter-Bold.woff2', weight: 700, style: 'normal' as const, format: 'WOFF2' as const }
+    ]
+    for (const f of interFiles) {
+      const storagePath = `fonts/inter/${f.name}`
+      this.fontFiles.set(f.id, {
+        id: f.id,
+        family_id: f.family_id,
+        file_name: f.name,
+        storage_path: storagePath,
+        file_format: f.format,
+        file_size: 98000,
+        sha256_hash: `hash_${f.name.replace(/[^a-z0-9]/gi, '')}_sample`,
+        weight: f.weight,
+        style: f.style,
+        subfamily_name: f.weight === 700 ? 'Bold' : f.weight === 600 ? 'SemiBold' : 'Regular',
+        postscript_name: `Inter-${f.weight === 700 ? 'Bold' : f.weight === 600 ? 'SemiBold' : 'Regular'}`,
+        is_variable: false,
+        character_count: 2450,
+        unicode_ranges: ['Basic Latin', 'Latin-1 Supplement', 'Cyrillic'],
+        created_at: new Date('2026-10-04T10:00:00Z').toISOString()
+      })
+      fontsBucket.set(storagePath, { buffer: `MOCK_FONT_BINARY_${f.name}`, mimeType: 'font/woff2', size: 98000 })
+    }
+
+    // 5. Pending review draft font for testing RLS & AI review
+    const arefId = 'f1000000-0000-0000-0000-000000000005'
+    this.fontFamilies.set(arefId, {
+      id: arefId,
+      name: 'Aref Ruqaa',
+      slug: 'aref-ruqaa',
+      display_name: 'Aref Ruqaa (عارف رقعة)',
+      description: 'An expressive Arabic typeface designed for titles based on the Ruqah calligraphic style.',
+      designer: 'Abdullah Aref',
+      primary_category: 'script',
+      secondary_categories: ['display'],
+      arabic_style: 'ruqah',
+      language_support: ['arabic', 'latin'],
+      style_tags: ['calligraphic', 'handwritten', 'traditional'],
+      recommended_usage: ['headings', 'titles', 'posters'],
+      license_type: 'OFL',
+      publication_status: 'PENDING_REVIEW',
+      ai_classification_status: 'needs_review',
+      ai_confidence: 0.88,
+      created_at: new Date('2026-10-05T10:00:00Z').toISOString(),
+      updated_at: new Date('2026-10-05T10:00:00Z').toISOString()
+    })
+
+    // Seed AI Jobs for testing the review workflow
+    const arefJobId = 'aij-0000-0000-0000-000000000001'
+    this.fontAiJobs.set(arefJobId, {
+      id: arefJobId,
+      family_id: arefId,
+      model_name: 'gemini-3.8-flash',
+      prompt_version: 'v1.0.0',
+      status: 'NEEDS_REVIEW',
+      predicted_category: 'arabic_calligraphy',
+      predicted_arabic_style: 'ruqah',
+      confidence_score: 0.88,
+      style_tags: ['calligraphic', 'handwritten', 'traditional', 'expressive'],
+      recommended_usage: ['headings', 'titles', 'posters', 'branding'],
+      raw_ai_response: {
+        category: 'arabic_calligraphy',
+        arabicStyle: 'ruqah',
+        tags: ['calligraphic', 'handwritten', 'traditional', 'expressive'],
+        mood: ['expressive', 'warm', 'artistic'],
+        contrast: 'medium',
+        intendedUse: ['headline', 'display'],
+        confidence: 0.88,
+        descriptionAr: 'خط عارف رقعة مستوحى من الخط الرقعي اليدوي ومثالي للعناوين والملصقات الفنية.',
+        descriptionEn: 'Aref Ruqaa is an expressive Arabic typeface rooted in traditional Ruqah calligraphy.'
+      },
+      created_at: new Date('2026-10-05T10:05:00Z').toISOString()
+    })
+
+    const cairoJobId = 'aij-0000-0000-0000-000000000002'
+    this.fontAiJobs.set(cairoJobId, {
+      id: cairoJobId,
+      family_id: cairoId,
+      model_name: 'gemini-3.8-flash',
+      prompt_version: 'v1.0.0',
+      status: 'APPROVED',
+      predicted_category: 'arabic_modern',
+      predicted_arabic_style: 'kufi',
+      confidence_score: 0.96,
+      style_tags: ['modern', 'geometric', 'branding', 'screen'],
+      recommended_usage: ['headings', 'ui', 'branding', 'posters'],
+      reviewer_id: 'u1000000-0000-0000-0000-000000000001',
+      reviewed_at: new Date('2026-10-01T10:15:00Z').toISOString(),
+      created_at: new Date('2026-10-01T10:05:00Z').toISOString()
     })
   }
 
@@ -459,6 +762,16 @@ class InMemoryDatabaseStore {
       if (asset.status === 'PUBLISHED') return true
       // Authors see their own drafts and pending review assets
       if (currentUserId && asset.author_id === currentUserId) return true
+      return false
+    })
+  }
+
+  // Row Level Security Query Filter for Font Families
+  public filterFontFamiliesByRLS(currentUserId: string | null, currentUserRole: UserRole | null): FontFamily[] {
+    const list = Array.from(this.fontFamilies.values())
+    return list.filter((family) => {
+      if (currentUserRole === 'ADMIN') return true
+      if (family.publication_status === 'PUBLISHED') return true
       return false
     })
   }
