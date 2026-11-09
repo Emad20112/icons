@@ -1,23 +1,60 @@
 import { defineEventHandler, getQuery, createError, setHeader, setResponseStatus } from 'h3'
-import { SvgSanitizer } from '../../../icon-platform-backend/src/security/svgSanitizer'
-import { RequestValidator } from '../../../icon-platform-backend/src/security/validator'
-import { iconifyClient } from '../../../icon-platform-backend/src/client/iconifyClient'
-import { BoundedLruCache } from '../../../icon-platform-backend/src/cache/lruCache'
-import { requestCoalescer } from '../../../icon-platform-backend/src/cache/requestCoalescer'
-import { rateLimiter } from '../../../icon-platform-backend/src/security/rateLimiter'
 
-// In-process caches for local proxy mode
-const proxySearchCache = new BoundedLruCache({ maxEntries: 2000, defaultTtlMs: 120000 })
-const proxyCollectionsCache = new BoundedLruCache({ maxEntries: 100, defaultTtlMs: 3600000 })
-const proxyIconCache = new BoundedLruCache({ maxEntries: 2000, defaultTtlMs: 600000 })
-const proxySvgCache = new BoundedLruCache<string>({ maxEntries: 2000, defaultTtlMs: 600000 })
+// Official Iconify API endpoint
+const ICONIFY_API_BASE = 'https://api.iconify.design'
+
+// Strict regex patterns for input validation
+const PREFIX_REGEX = /^[a-z0-9][a-z0-9-]{0,31}$/
+const NAME_REGEX = /^[a-z0-9][a-z0-9-_]{0,63}$/
+const COLOR_REGEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
+
+// In-memory bounded cache for Nitro proxy
+interface CacheItem<T> {
+  data: T
+  expiresAt: number
+}
+const cache = new Map<string, CacheItem<any>>()
+const MAX_CACHE_SIZE = 1500
+
+function getFromCache<T>(key: string): T | null {
+  const item = cache.get(key)
+  if (!item) return null
+  if (Date.now() > item.expiresAt) {
+    cache.delete(key)
+    return null
+  }
+  return item.data as T
+}
+
+function setInCache<T>(key: string, data: T, ttlMs: number) {
+  if (cache.size >= MAX_CACHE_SIZE) {
+    const oldestKey = cache.keys().next().value
+    if (oldestKey) cache.delete(oldestKey)
+  }
+  cache.set(key, { data, expiresAt: Date.now() + ttlMs })
+}
+
+// In-flight request deduplication map
+const inFlightRequests = new Map<string, Promise<any>>()
+
+async function coalesce<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  const existing = inFlightRequests.get(key)
+  if (existing) {
+    return existing as Promise<T>
+  }
+  const promise = fn().finally(() => {
+    inFlightRequests.delete(key)
+  })
+  inFlightRequests.set(key, promise)
+  return promise
+}
 
 export default defineEventHandler(async (event) => {
   const path = event.context.params?.path || ''
   const query = getQuery(event)
   const clientIp = (event.node.req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || event.node.req.socket.remoteAddress || '127.0.0.1'
 
-  // If external backend URL is configured via environment, proxy directly to it
+  // If remote backend URL is provided, forward to the decoupled backend service
   const remoteBackendUrl = process.env.ICONIFY_BACKEND_URL || process.env.VITE_ICONIFY_BACKEND_URL
   if (remoteBackendUrl) {
     const cleanRemote = remoteBackendUrl.replace(/\/+$/, '')
@@ -26,7 +63,7 @@ export default defineEventHandler(async (event) => {
       const response = await fetch(targetUrl, {
         headers: {
           'x-forwarded-for': clientIp,
-          'Accept': event.node.req.headers['accept'] || 'application/json',
+          'Accept': (event.node.req.headers['accept'] as string) || 'application/json',
         },
       })
       setResponseStatus(event, response.status)
@@ -38,71 +75,105 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // --- In-Process High-Performance Engine (Identical logic to icon-platform-backend) ---
+  // --- Self-contained Nitro Gateway Proxy (No cross-imports to backend) ---
 
-  // 1. Search: /api/v1/iconify/search
+  // 1. Search icons: /api/v1/iconify/search
   if (path === 'search') {
-    rateLimiter.enforce(`proxy_search:${clientIp}`, 30)
-    const q = RequestValidator.validateSearchQuery(query.query || query.q)
-    const { limit, start } = RequestValidator.validatePagination(query.limit, query.start)
-    const prefix = query.prefix || query.collection ? RequestValidator.validatePrefix(String(query.prefix || query.collection)) : undefined
-    const category = query.category ? String(query.category).substring(0, 50) : undefined
+    const rawQuery = String(query.q || query.query || '').trim()
+    if (!rawQuery || rawQuery.length < 2) {
+      throw createError({ statusCode: 400, statusMessage: 'Search query must be at least 2 characters' })
+    }
+    const cleanQuery = rawQuery.slice(0, 100)
+    const limit = Math.max(1, Math.min(100, parseInt(String(query.limit || '40'), 10) || 40))
+    const start = Math.max(0, parseInt(String(query.start || '0'), 10) || 0)
+    const prefix = query.prefix || query.collection ? String(query.prefix || query.collection).trim().toLowerCase() : ''
 
-    const cacheKey = `search:${q}:${prefix || 'all'}:${category || 'all'}:${limit}:${start}`
-    const cached = proxySearchCache.get(cacheKey)
+    if (prefix && !PREFIX_REGEX.test(prefix)) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid collection prefix' })
+    }
+
+    const cacheKey = `search:${cleanQuery}:${prefix || 'all'}:${limit}:${start}`
+    const cached = getFromCache(cacheKey)
     if (cached) {
       setHeader(event, 'x-cache', 'HIT')
       return cached
     }
 
-    const result = await requestCoalescer.execute(cacheKey, async () => {
-      return await iconifyClient.search({ query: q, limit, start, prefix, category })
+    const result = await coalesce(cacheKey, async () => {
+      const params = new URLSearchParams({
+        query: cleanQuery,
+        limit: limit.toString(),
+        start: start.toString(),
+      })
+      if (prefix) {
+        params.set('prefix', prefix)
+      }
+      const upstreamRes = await fetch(`${ICONIFY_API_BASE}/search?${params.toString()}`, {
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(6000),
+      })
+      if (!upstreamRes.ok) {
+        throw createError({ statusCode: upstreamRes.status, statusMessage: 'Iconify API upstream error' })
+      }
+      return await upstreamRes.json()
     })
 
-    proxySearchCache.set(cacheKey, result)
+    setInCache(cacheKey, result, 60000) // 1 min TTL
     setHeader(event, 'x-cache', 'MISS')
     return result
   }
 
-  // 2. Collections: /api/v1/iconify/collections
+  // 2. Collections catalog: /api/v1/iconify/collections
   if (path === 'collections') {
-    rateLimiter.enforce(`proxy_collections:${clientIp}`, 40)
-    const prefixes = query.prefixes ? String(query.prefixes).split(',').map(p => p.trim()) : undefined
-    const cacheKey = `collections:${prefixes ? prefixes.sort().join(',') : 'all'}`
-
-    const cached = proxyCollectionsCache.get(cacheKey)
+    const cacheKey = 'collections:all'
+    const cached = getFromCache(cacheKey)
     if (cached) {
       setHeader(event, 'x-cache', 'HIT')
       return cached
     }
 
-    const result = await requestCoalescer.execute(cacheKey, async () => {
-      return await iconifyClient.getCollections(prefixes)
+    const result = await coalesce(cacheKey, async () => {
+      const upstreamRes = await fetch(`${ICONIFY_API_BASE}/collections`, {
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(8000),
+      })
+      if (!upstreamRes.ok) {
+        throw createError({ statusCode: upstreamRes.status, statusMessage: 'Iconify API upstream error' })
+      }
+      return await upstreamRes.json()
     })
 
-    proxyCollectionsCache.set(cacheKey, result)
+    setInCache(cacheKey, result, 3600000) // 1 hour TTL
     setHeader(event, 'x-cache', 'MISS')
     return result
   }
 
   // 3. Collection details: /api/v1/iconify/collections/:prefix
   if (path.startsWith('collections/')) {
-    const prefix = path.replace('collections/', '')
-    rateLimiter.enforce(`proxy_collections:${clientIp}`, 40)
-    const cleanPrefix = RequestValidator.validatePrefix(prefix)
-    const cacheKey = `collection_meta:${cleanPrefix}`
+    const rawPrefix = path.replace('collections/', '').trim().toLowerCase()
+    if (!PREFIX_REGEX.test(rawPrefix)) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid collection prefix format' })
+    }
 
-    const cached = proxyCollectionsCache.get(cacheKey)
+    const cacheKey = `collection:${rawPrefix}`
+    const cached = getFromCache(cacheKey)
     if (cached) {
       setHeader(event, 'x-cache', 'HIT')
       return cached
     }
 
-    const result = await requestCoalescer.execute(cacheKey, async () => {
-      return await iconifyClient.getCollectionDetails(cleanPrefix)
+    const result = await coalesce(cacheKey, async () => {
+      const upstreamRes = await fetch(`${ICONIFY_API_BASE}/collection?prefix=${encodeURIComponent(rawPrefix)}`, {
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(6000),
+      })
+      if (!upstreamRes.ok) {
+        throw createError({ statusCode: upstreamRes.status, statusMessage: 'Collection not found' })
+      }
+      return await upstreamRes.json()
     })
 
-    proxyCollectionsCache.set(cacheKey, result)
+    setInCache(cacheKey, result, 3600000)
     setHeader(event, 'x-cache', 'MISS')
     return result
   }
@@ -110,35 +181,51 @@ export default defineEventHandler(async (event) => {
   // 4. Standalone SVG: /api/v1/iconify/:prefix/:name/svg
   const svgMatch = path.match(/^([^/]+)\/([^/]+)\/svg$/)
   if (svgMatch) {
-    const prefix = RequestValidator.validatePrefix(svgMatch[1])
-    const name = RequestValidator.validateIconName(svgMatch[2])
-    const color = RequestValidator.validateColor(query.color)
-    const size = RequestValidator.validateDimension(query.size)
-    const customWidth = RequestValidator.validateDimension(query.width)
-    const customHeight = RequestValidator.validateDimension(query.height)
+    const prefix = svgMatch[1].trim().toLowerCase()
+    const name = svgMatch[2].trim().toLowerCase()
+
+    if (!PREFIX_REGEX.test(prefix) || !NAME_REGEX.test(name)) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid icon identifier parameters' })
+    }
+
+    const color = query.color ? String(query.color).trim() : ''
+    const size = query.size ? String(query.size).trim() : ''
     const isDownload = query.download === 'true' || query.download === '1'
 
-    rateLimiter.enforce(`proxy_svg:${clientIp}`, 60)
-    const cacheKey = `svg:${prefix}:${name}:${color || 'def'}:${size || 'auto'}:${customWidth || 'w'}:${customHeight || 'h'}`
+    const cacheKey = `svg:${prefix}:${name}:${color || 'def'}:${size || 'def'}`
+    let svgDoc = getFromCache<string>(cacheKey)
 
-    let svgDoc = proxySvgCache.get(cacheKey)
     if (!svgDoc) {
-      svgDoc = await requestCoalescer.execute(cacheKey, async () => {
-        const iconData = await iconifyClient.getIconData(prefix, name)
-        return SvgSanitizer.buildSvg({
-          body: iconData.body,
-          width: iconData.width,
-          height: iconData.height,
-          left: iconData.left,
-          top: iconData.top,
-          color,
-          size,
-          customWidth,
-          customHeight,
+      svgDoc = await coalesce(cacheKey, async () => {
+        const upstreamUrl = new URL(`${ICONIFY_API_BASE}/${prefix}/${name}.svg`)
+        if (color && COLOR_REGEX.test(color)) {
+          upstreamUrl.searchParams.set('color', color)
+        }
+        if (size && /^[0-9]+(px|em|rem|%)?$/.test(size)) {
+          upstreamUrl.searchParams.set('width', size)
+          upstreamUrl.searchParams.set('height', size)
+        }
+
+        const upstreamRes = await fetch(upstreamUrl.toString(), {
+          signal: AbortSignal.timeout(6000),
         })
+        if (!upstreamRes.ok) {
+          throw createError({ statusCode: upstreamRes.status, statusMessage: 'Icon SVG not found' })
+        }
+        let rawSvg = await upstreamRes.text()
+
+        // Sanitize dangerous content
+        rawSvg = rawSvg
+          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+          .replace(/<foreignObject\b[^<]*(?:(?!<\/foreignObject>)<[^<]*)*<\/foreignObject>/gi, '')
+          .replace(/\s+on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+          .replace(/\s+href\s*=\s*["'](?:javascript|vbscript|data):[^"']*["']/gi, '')
+
+        return rawSvg
       })
+
       if (svgDoc) {
-        proxySvgCache.set(cacheKey, svgDoc)
+        setInCache(cacheKey, svgDoc, 1800000) // 30 min TTL
       }
     }
 
@@ -155,23 +242,32 @@ export default defineEventHandler(async (event) => {
   // 5. Icon data: /api/v1/iconify/:prefix/:name
   const iconMatch = path.match(/^([^/]+)\/([^/]+)$/)
   if (iconMatch) {
-    const prefix = RequestValidator.validatePrefix(iconMatch[1])
-    const name = RequestValidator.validateIconName(iconMatch[2])
+    const prefix = iconMatch[1].trim().toLowerCase()
+    const name = iconMatch[2].trim().toLowerCase()
 
-    rateLimiter.enforce(`proxy_icon:${clientIp}`, 80)
-    const cacheKey = `icon:${prefix}:${name}`
+    if (!PREFIX_REGEX.test(prefix) || !NAME_REGEX.test(name)) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid icon identifier parameters' })
+    }
 
-    const cached = proxyIconCache.get(cacheKey)
+    const cacheKey = `icon_data:${prefix}:${name}`
+    const cached = getFromCache(cacheKey)
     if (cached) {
       setHeader(event, 'x-cache', 'HIT')
       return cached
     }
 
-    const result = await requestCoalescer.execute(cacheKey, async () => {
-      return await iconifyClient.getIconData(prefix, name)
+    const result = await coalesce(cacheKey, async () => {
+      const upstreamRes = await fetch(`${ICONIFY_API_BASE}/${prefix}.json?icons=${name}`, {
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(6000),
+      })
+      if (!upstreamRes.ok) {
+        throw createError({ statusCode: upstreamRes.status, statusMessage: 'Icon data not found' })
+      }
+      return await upstreamRes.json()
     })
 
-    proxyIconCache.set(cacheKey, result)
+    setInCache(cacheKey, result, 1800000)
     setHeader(event, 'x-cache', 'MISS')
     return result
   }
