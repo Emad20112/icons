@@ -193,7 +193,7 @@ onMounted(() => {
                   <Edit class="w-4 h-4 me-1.5" />
                   تعديل
                 </Button>
-                <Button variant="danger" size="sm" @click="handleDelete">
+                <Button variant="destructive" size="sm" @click="handleDelete">
                   <Trash2 class="w-4 h-4 me-1.5" />
                   حذف
                 </Button>
@@ -302,7 +302,7 @@ onMounted(() => {
 
     <!-- Edit Repository Modal -->
     <Modal
-      :is-open="isEditModalOpen"
+      :open="isEditModalOpen"
       title="تعديل بيانات المستودع"
       @close="isEditModalOpen = false"
     >

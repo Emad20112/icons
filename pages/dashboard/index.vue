@@ -137,7 +137,7 @@ onMounted(() => {
                   <h1 class="text-2xl font-black text-slate-900 dark:text-white">
                     {{ dashboardData.user?.display_name || dashboardData.user?.username }}
                   </h1>
-                  <Badge v-if="dashboardData.user?.role === 'ADMIN'" variant="primary" size="sm">مسؤول</Badge>
+                  <Badge v-if="dashboardData.user?.role === 'ADMIN'" variant="default">مسؤول</Badge>
                 </div>
                 <div class="flex items-center justify-center sm:justify-start gap-2 text-xs">
                   <NuxtLink
@@ -439,7 +439,7 @@ onMounted(() => {
 
     <!-- Create Repo Modal -->
     <Modal
-      :is-open="isCreateRepoModalOpen"
+      :open="isCreateRepoModalOpen"
       title="إنشاء مستودع جديد"
       @close="isCreateRepoModalOpen = false"
     >

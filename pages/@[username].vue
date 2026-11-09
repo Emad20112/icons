@@ -94,7 +94,7 @@ onMounted(() => {
                   </h1>
                   <div class="flex items-center justify-center sm:justify-start gap-2 mt-1">
                     <span class="font-mono text-sm text-blue-600 dark:text-blue-400 font-bold">@{{ profileData.profile.username }}</span>
-                    <Badge v-if="profileData.profile.role === 'ADMIN'" variant="primary" size="sm">إدارة المنصة</Badge>
+                    <Badge v-if="profileData.profile.role === 'ADMIN'" variant="default">إدارة المنصة</Badge>
                   </div>
                 </div>
 

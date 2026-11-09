@@ -202,7 +202,7 @@ onMounted(() => {
 
     <!-- Create Repository Modal -->
     <Modal
-      :is-open="isCreateModalOpen"
+      :open="isCreateModalOpen"
       title="إنشاء مستودع جديد"
       @close="isCreateModalOpen = false"
     >

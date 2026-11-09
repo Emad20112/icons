@@ -1,5 +1,9 @@
-import { dbStore } from '../../utils/mockStore'
-import { getAuthContext } from '../../utils/supabaseClient'
+import { defineEventHandler, createError } from 'h3'
+import { dbStore } from '~/server/utils/mockStore'
+import { getAuthContext } from '~/server/utils/supabaseClient'
+import type { Repository, RepositoryItem } from '~/types/repositories'
+import type { Asset, AuditLog } from '~/types/database'
+import type { FontFamily } from '~/types/fonts'
 
 export default defineEventHandler(async (event) => {
   const auth = await getAuthContext(event)
@@ -11,30 +15,30 @@ export default defineEventHandler(async (event) => {
   const isAdmin = auth.role === 'ADMIN'
 
   // 1. User repositories
-  const repos = Array.from(dbStore.repositories.values()).filter(r => r.owner_id === userId || (isAdmin && r.visibility === 'PUBLIC'))
+  const repos = Array.from(dbStore.repositories.values()).filter((r: Repository) => r.owner_id === userId || (isAdmin && r.visibility === 'PUBLIC'))
 
   // 2. User icons/assets
-  const assets = Array.from(dbStore.assets.values()).filter(a => a.author_id === userId)
+  const assets = Array.from(dbStore.assets.values()).filter((a: Asset) => a.author_id === userId)
 
   // 3. Fonts in user's repositories or authored by user
-  const repoIds = new Set(repos.map(r => r.id))
+  const repoIds = new Set(repos.map((r: Repository) => r.id))
   const fontIds = Array.from(dbStore.repositoryItems.values())
-    .filter(ri => ri.item_type === 'FONT' && repoIds.has(ri.repository_id))
-    .map(ri => ri.item_id)
+    .filter((ri: RepositoryItem) => ri.item_type === 'FONT' && repoIds.has(ri.repository_id))
+    .map((ri: RepositoryItem) => ri.item_id)
 
-  const fonts = Array.from(dbStore.fontFamilies.values()).filter(f => fontIds.includes(f.id))
+  const fonts = Array.from(dbStore.fontFamilies.values()).filter((f: FontFamily) => fontIds.includes(f.id))
 
   // 4. Favorites (assets favorited by this user)
   const favoriteAssetIds = new Set(
     dbStore.auditLogs
-      .filter(l => l.actor_id === userId && l.action === 'FAVORITE_ASSET')
-      .map(l => l.entity_id)
+      .filter((l: AuditLog) => l.actor_id === userId && l.action === 'FAVORITE_ASSET')
+      .map((l: AuditLog) => l.entity_id)
   )
-  const favorites = Array.from(dbStore.assets.values()).filter(a => favoriteAssetIds.has(a.id))
+  const favorites = Array.from(dbStore.assets.values()).filter((a: Asset) => favoriteAssetIds.has(a.id))
 
   // 5. Statistics aggregation
-  const totalDownloads = assets.reduce((sum, a) => sum + (a.download_count || 0), 0)
-  const totalFavorites = assets.reduce((sum, a) => sum + (a.favorite_count || 0), 0)
+  const totalDownloads = assets.reduce((sum: number, a: Asset) => sum + (a.download_count || 0), 0)
+  const totalFavorites = assets.reduce((sum: number, a: Asset) => sum + (a.favorite_count || 0), 0)
 
   return {
     success: true,

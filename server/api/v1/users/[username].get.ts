@@ -1,6 +1,10 @@
-import { AuthService } from '../../../services/authService'
-import { dbStore } from '../../../utils/mockStore'
-import { getAuthContext } from '../../../utils/supabaseClient'
+import { defineEventHandler, getRouterParam, createError } from 'h3'
+import { AuthService } from '~/server/services/authService'
+import { dbStore } from '~/server/utils/mockStore'
+import { getAuthContext } from '~/server/utils/supabaseClient'
+import type { Repository, RepositoryItem } from '~/types/repositories'
+import type { Asset } from '~/types/database'
+import type { FontFamily } from '~/types/fonts'
 
 export default defineEventHandler(async (event) => {
   const username = getRouterParam(event, 'username')
@@ -20,26 +24,26 @@ export default defineEventHandler(async (event) => {
   const isAdmin = auth.role === 'ADMIN'
 
   // Fetch user's public repositories (or all if owner/admin)
-  const repos = Array.from(dbStore.repositories.values()).filter(r => {
+  const repos = (Array.from(dbStore.repositories.values()) as Repository[]).filter((r: Repository) => {
     if (r.owner_id !== profile.id) return false
     if (r.visibility === 'PUBLIC') return true
     return isOwner || isAdmin
   })
 
   // Fetch user's published assets (or all if owner/admin)
-  const assets = Array.from(dbStore.assets.values()).filter(a => {
+  const assets = (Array.from(dbStore.assets.values()) as Asset[]).filter((a: Asset) => {
     if (a.author_id !== profile.id) return false
     if (a.status === 'PUBLISHED') return true
     return isOwner || isAdmin
   })
 
   // Fetch fonts associated with user's repositories or authored by user
-  const repoIds = new Set(repos.map(r => r.id))
-  const fontIdsInRepos = Array.from(dbStore.repositoryItems.values())
-    .filter(ri => ri.item_type === 'FONT' && repoIds.has(ri.repository_id))
-    .map(ri => ri.item_id)
+  const repoIds = new Set(repos.map((r: Repository) => r.id))
+  const fontIdsInRepos = (Array.from(dbStore.repositoryItems.values()) as RepositoryItem[])
+    .filter((ri: RepositoryItem) => ri.item_type === 'FONT' && repoIds.has(ri.repository_id))
+    .map((ri: RepositoryItem) => ri.item_id)
 
-  const fonts = Array.from(dbStore.fontFamilies.values()).filter(f =>
+  const fonts = (Array.from(dbStore.fontFamilies.values()) as FontFamily[]).filter((f: FontFamily) =>
     fontIdsInRepos.includes(f.id) || (isOwner && f.publication_status === 'PUBLISHED')
   )
 
