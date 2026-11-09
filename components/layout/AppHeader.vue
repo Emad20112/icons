@@ -137,6 +137,21 @@ onUnmounted(() => {
             </span>
           </NuxtLink>
           <NuxtLink
+            to="/repositories"
+            class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors whitespace-nowrap flex items-center gap-1.5"
+            active-class="text-blue-600 dark:text-blue-400 font-semibold"
+          >
+            <span>المستودعات</span>
+          </NuxtLink>
+          <NuxtLink
+            v-if="user"
+            to="/dashboard"
+            class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors whitespace-nowrap flex items-center gap-1.5 font-semibold text-blue-600 dark:text-blue-400"
+            active-class="text-blue-700 dark:text-blue-300 font-bold"
+          >
+            <span>لوحة التحكم</span>
+          </NuxtLink>
+          <NuxtLink
             to="/admin"
             class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors whitespace-nowrap"
             active-class="text-blue-600 dark:text-blue-400 font-semibold"
@@ -194,7 +209,7 @@ onUnmounted(() => {
         </div>
 
         <!-- User Info / Avatar -->
-        <div v-if="user" class="hidden sm:flex items-center gap-2 ps-2 border-s border-slate-200 dark:border-slate-700 shrink-0">
+        <NuxtLink v-if="user" to="/dashboard" class="hidden sm:flex items-center gap-2 ps-2 border-s border-slate-200 dark:border-slate-700 shrink-0 hover:opacity-80 transition">
           <img
             :src="user.avatar_url || 'https://api.dicebear.com/7.x/identicon/svg?seed=user'"
             :alt="user.display_name || user.email"
@@ -204,11 +219,11 @@ onUnmounted(() => {
             <div class="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[110px]">
               {{ user.display_name || user.email.split('@')[0] }}
             </div>
-            <div class="text-[10px] text-slate-500 dark:text-slate-400">
-              {{ role === 'ADMIN' ? t('roles.admin') : t('roles.user') }}
+            <div class="text-[10px] text-blue-600 dark:text-blue-400 font-mono">
+              @{{ user.username || 'user' }}
             </div>
           </div>
-        </div>
+        </NuxtLink>
         <div v-else class="hidden sm:flex items-center gap-2 shrink-0">
           <NuxtLink to="/auth/login">
             <Button size="sm" variant="outline">{{ t('header.signIn') }}</Button>
@@ -307,6 +322,27 @@ onUnmounted(() => {
               <span class="rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-bold px-1.5 py-0.5">
                 AI
               </span>
+            </NuxtLink>
+
+            <NuxtLink
+              to="/repositories"
+              class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[44px]"
+              active-class="bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-semibold"
+              @click="closeMobileMenu"
+            >
+              <FolderGit2 class="h-4 w-4 text-blue-500" />
+              <span>المستودعات</span>
+            </NuxtLink>
+
+            <NuxtLink
+              v-if="user"
+              to="/dashboard"
+              class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors min-h-[44px]"
+              active-class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold"
+              @click="closeMobileMenu"
+            >
+              <LayoutGrid class="h-4 w-4 text-blue-600" />
+              <span>لوحة التحكم</span>
             </NuxtLink>
           </div>
 

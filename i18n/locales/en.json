@@ -25,6 +25,8 @@
       "imageToSvg": "Image to SVG",
       "iconEditor": "Icon Editor",
       "fonts": "Fonts",
+      "repositories": "Repositories",
+      "dashboard": "Dashboard",
       "toolBadge": "Tool",
       "admin": "Admin & Governance",
       "audit": "Audit Logs"
