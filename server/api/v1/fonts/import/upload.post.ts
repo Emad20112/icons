@@ -8,67 +8,116 @@ import { FontAiClassificationService } from '~/server/services/fontAiClassificat
 import { dbStore } from '~/server/utils/mockStore'
 import type { FontFamily, FontFile } from '~/types/fonts'
 
-export default defineEventHandler(async (event) => {
-  let zipBuffer: Buffer | null = null
-  let zipFileName = 'fonts-import.zip'
+interface ExtractedFontInputEntry {
+  fileName: string
+  buffer: Buffer
+  format: 'ttf' | 'otf' | 'woff' | 'woff2'
+  sha256: string
+}
 
-  // Try reading multipart form data
+export default defineEventHandler(async (event) => {
+  const fontEntries: ExtractedFontInputEntry[] = []
+  let primaryFileName = 'fonts-import'
+
+  // Try reading multipart form data (supports single or multiple font files, or zip archives)
   const multipart = await readMultipartFormData(event).catch(() => null)
   if (multipart && multipart.length > 0) {
-    const filePart = multipart.find(p => p.name === 'file' || p.filename?.endsWith('.zip'))
-    if (filePart && filePart.data) {
-      zipBuffer = filePart.data
-      zipFileName = filePart.filename || zipFileName
+    const fileParts = multipart.filter(p => p.data && p.data.length > 0 && (p.filename || p.name))
+    for (const part of fileParts) {
+      const fileName = part.filename || part.name || 'font.ttf'
+      if (primaryFileName === 'fonts-import') primaryFileName = fileName
+
+      const isZip = (part.data.length >= 4 && part.data[0] === 0x50 && part.data[1] === 0x4b) || fileName.toLowerCase().endsWith('.zip')
+      if (isZip) {
+        const zipRes = await FontZipImportService.extractAndValidateZip(part.data, fileName)
+        fontEntries.push(...zipRes.entries)
+      } else {
+        // Direct font file
+        const magic = FontStorageService.inspectMagicBytes(part.data)
+        if (magic.valid && magic.format) {
+          const hash = FontStorageService.calculateSha256(part.data)
+          fontEntries.push({
+            fileName,
+            buffer: part.data,
+            format: magic.format.toLowerCase() as any,
+            sha256: hash,
+          })
+        } else {
+          // If extension matches font types, try heuristic inclusion
+          const lowerName = fileName.toLowerCase()
+          if (lowerName.endsWith('.ttf') || lowerName.endsWith('.otf') || lowerName.endsWith('.woff') || lowerName.endsWith('.woff2')) {
+            const detectedFormat = lowerName.endsWith('.ttf') ? 'ttf' : lowerName.endsWith('.otf') ? 'otf' : lowerName.endsWith('.woff') ? 'woff' : 'woff2'
+            const hash = FontStorageService.calculateSha256(part.data)
+            fontEntries.push({
+              fileName,
+              buffer: part.data,
+              format: detectedFormat as any,
+              sha256: hash,
+            })
+          }
+        }
+      }
     }
   }
 
   // Fallback: read body as base64 or json payload
-  if (!zipBuffer) {
+  if (fontEntries.length === 0) {
     const body = await readBody(event).catch(() => null)
-    if (body?.zipBase64) {
-      zipBuffer = Buffer.from(body.zipBase64, 'base64')
-      if (body.fileName) zipFileName = body.fileName
+    if (body?.zipBase64 || body?.fontBase64 || body?.fileBase64) {
+      const rawB64 = body.zipBase64 || body.fontBase64 || body.fileBase64
+      const buf = Buffer.from(rawB64, 'base64')
+      const fileName = body.fileName || (body.zipBase64 ? 'import.zip' : 'font.ttf')
+      primaryFileName = fileName
+
+      const isZip = (buf.length >= 4 && buf[0] === 0x50 && buf[1] === 0x4b) || fileName.toLowerCase().endsWith('.zip')
+      if (isZip) {
+        const zipRes = await FontZipImportService.extractAndValidateZip(buf, fileName)
+        fontEntries.push(...zipRes.entries)
+      } else {
+        const magic = FontStorageService.inspectMagicBytes(buf)
+        const format = (magic.valid && magic.format ? magic.format.toLowerCase() : (fileName.toLowerCase().endsWith('.otf') ? 'otf' : 'ttf')) as any
+        const hash = FontStorageService.calculateSha256(buf)
+        fontEntries.push({
+          fileName,
+          buffer: buf,
+          format,
+          sha256: hash,
+        })
+      }
     }
   }
 
-  if (!zipBuffer || zipBuffer.length === 0) {
-    throw createError({ statusCode: 400, message: 'No ZIP file provided in upload request' })
+  if (fontEntries.length === 0) {
+    throw createError({
+      statusCode: 400,
+      message: 'لم يتم العثور على ملفات خطوط صالحة (.ttf, .otf, .woff, .woff2, .zip) في الطلب'
+    })
   }
 
   // 1. Initialize Import Batch
   const adminId = 'u1000000-0000-0000-0000-000000000001'
   const batch = await FontJobQueueService.createBatch({
-    originalFileName: zipFileName,
+    originalFileName: primaryFileName,
     uploadedBy: adminId,
-    totalFiles: 0,
+    totalFiles: fontEntries.length,
   })
 
   // 2. Run Pipeline asynchronously or immediately
   try {
     await FontJobQueueService.updateBatchStatus(batch.id, 'extracting', {
       processedFiles: 0,
-      logMessage: 'Extracting and scanning ZIP archive safely...',
+      logMessage: `Scanned and prepared ${fontEntries.length} font files for metadata inspection...`,
     })
 
-    const zipInspection = await FontZipImportService.extractAndValidateZip(zipBuffer)
-
-    if (zipInspection.entries.length === 0) {
-      await FontJobQueueService.updateBatchStatus(batch.id, 'failed', {
-        errorMessage: 'ZIP archive contains no valid font files (.ttf, .otf, .woff, .woff2)',
-        logMessage: 'Validation failed: 0 font entries found.',
-      })
-      return { success: false, batchId: batch.id, message: 'No valid font files found in ZIP' }
-    }
-
     await FontJobQueueService.updateBatchStatus(batch.id, 'analyzing', {
-      totalFiles: zipInspection.totalFontFiles,
-      logMessage: `Extracted ${zipInspection.totalFontFiles} font files. Starting metadata inspection...`,
+      totalFiles: fontEntries.length,
+      logMessage: `Ready to inspect ${fontEntries.length} font files. Starting metadata inspection...`,
     })
 
     const processedFonts: ExtractedFontWithStorage[] = []
 
-    for (let i = 0; i < zipInspection.entries.length; i++) {
-      const entry = zipInspection.entries[i]
+    for (let i = 0; i < fontEntries.length; i++) {
+      const entry = fontEntries[i]
 
       try {
         // Parse metadata using opentype.js and fallback
@@ -99,7 +148,7 @@ export default defineEventHandler(async (event) => {
 
         await FontJobQueueService.updateBatchStatus(batch.id, 'analyzing', {
           processedFiles: i + 1,
-          logMessage: `Parsed (${i + 1}/${zipInspection.entries.length}): ${metadata.familyName} (${metadata.subfamilyName || metadata.weight})`,
+          logMessage: `Parsed (${i + 1}/${fontEntries.length}): ${metadata.familyName} (${metadata.subfamilyName || metadata.weight})`,
         })
       } catch (err: any) {
         console.error(`Error processing font entry ${entry.fileName}:`, err)

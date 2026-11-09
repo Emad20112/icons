@@ -81,5 +81,15 @@ describe('Font Storage & Bulk ZIP Import Security', () => {
       expect(result.entries[0].fileName).toBe('Cairo-Regular.ttf')
       expect(result.entries[0].format).toBe('ttf')
     })
+
+    it('gracefully accepts a direct TTF file buffer without a zip wrapper', async () => {
+      const directTtf = Buffer.from([0x00, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00])
+      const result = await FontZipImportService.extractAndValidateZip(directTtf, 'Amiri-Bold.ttf')
+
+      expect(result.totalFontFiles).toBe(1)
+      expect(result.entries[0].fileName).toBe('Amiri-Bold.ttf')
+      expect(result.entries[0].format).toBe('ttf')
+      expect(result.entries[0].buffer).toEqual(directTtf)
+    })
   })
 })

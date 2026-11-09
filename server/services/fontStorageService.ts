@@ -50,8 +50,8 @@ export class FontStorageService {
     const tagStr = tag.toString('ascii')
     const tagHex = buffer.readUInt32BE(0)
 
-    // TrueType: 0x00010000 or 'true' (Apple)
-    if (tagHex === 0x00010000 || tagStr === 'true') {
+    // TrueType: 0x00010000 (OpenType TrueType), 'true' (Apple), 0x00020000, or little-endian representation
+    if (tagHex === 0x00010000 || tagStr === 'true' || tagHex === 0x00020000 || buffer.readUInt32LE(0) === 0x00010000) {
       return { valid: true, format: 'TTF' }
     }
 
