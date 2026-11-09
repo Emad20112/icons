@@ -80,102 +80,7 @@
         </div>
 
         <!-- Interactive Specimen Playground -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-            <h2 class="text-lg font-bold flex items-center gap-2">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-              {{ $t('fonts.interactive_playground') || 'مختبر المعاينة التفاعلي' }}
-            </h2>
-
-            <!-- Quick Pangram Selectors -->
-            <div class="flex items-center gap-2 overflow-x-auto text-xs">
-              <button
-                @click="playgroundText = 'القاهرة عاصمة التاريخ والحضارة، ملتقى الفنون ومنارة الإبداع العربي عبر العصور.'"
-                class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-medium"
-              >
-                جملة عربية
-              </button>
-              <button
-                @click="playgroundText = 'أبجد هوز حطي كلمن صعفض قرشت ثخذ ضظغ • ٠١٢٣٤٥٦٧٨٩'"
-                class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-medium"
-              >
-                الحروف والأرقام
-              </button>
-              <button
-                @click="playgroundText = 'The quick brown fox jumps over the lazy dog • 0123456789'"
-                class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-medium font-sans"
-              >
-                Latin Pangram
-              </button>
-            </div>
-          </div>
-
-          <!-- Controls Bar -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-            <!-- Font Size -->
-            <div class="space-y-1">
-              <div class="flex justify-between text-xs text-slate-500 font-semibold">
-                <span>{{ $t('fonts.font_size') || 'حجم الخط' }}</span>
-                <span class="font-mono">{{ playgroundFontSize }}px</span>
-              </div>
-              <input
-                type="range"
-                min="14"
-                max="84"
-                step="2"
-                v-model.number="playgroundFontSize"
-                class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
-              />
-            </div>
-
-            <!-- Line Height -->
-            <div class="space-y-1">
-              <div class="flex justify-between text-xs text-slate-500 font-semibold">
-                <span>{{ $t('fonts.line_height') || 'ارتفاع السطر' }}</span>
-                <span class="font-mono">{{ playgroundLineHeight }}</span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="2.5"
-                step="0.1"
-                v-model.number="playgroundLineHeight"
-                class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
-              />
-            </div>
-
-            <!-- Weight Switcher -->
-            <div class="space-y-1">
-              <span class="block text-xs text-slate-500 font-semibold mb-1">{{ $t('fonts.preview_weight') || 'الوزن المعروض' }}</span>
-              <select
-                v-model.number="selectedWeight"
-                class="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-semibold"
-              >
-                <option v-for="w in family.weights" :key="w" :value="w">
-                  {{ getWeightLabel(w) }} ({{ w }})
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Canvas / Textarea -->
-          <div class="p-6 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 min-h-[160px]">
-            <textarea
-              v-model="playgroundText"
-              rows="3"
-              class="w-full bg-transparent border-none outline-none resize-none text-slate-900 dark:text-slate-100 placeholder-slate-400"
-              :style="{
-                fontSize: `${playgroundFontSize}px`,
-                lineHeight: playgroundLineHeight,
-                fontWeight: selectedWeight,
-                fontFamily: `'${family.name}', system-ui, sans-serif`
-              }"
-              :dir="family.language_support.includes('arabic') ? 'rtl' : 'ltr'"
-            ></textarea>
-          </div>
-        </div>
+        <InteractiveFontPlayground :family="family" />
 
         <!-- Available Weights & Variants List -->
         <div class="space-y-4">
@@ -286,6 +191,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import InteractiveFontPlayground from '../../components/fonts/InteractiveFontPlayground.vue'
 
 const route = useRoute()
 const slug = route.params.slug as string
