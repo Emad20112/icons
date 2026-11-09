@@ -16,7 +16,8 @@ import {
   PenTool,
   ShieldCheck,
   FileText,
-  Type
+  Type,
+  Globe
 } from 'lucide-vue-next'
 
 const { user, role, switchRole } = useAuth()
@@ -134,6 +135,16 @@ onUnmounted(() => {
             <span>{{ t('header.nav.fonts') }}</span>
             <span class="rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-bold px-1.5 py-0.5 whitespace-nowrap">
               AI
+            </span>
+          </NuxtLink>
+          <NuxtLink
+            to="/icons/explore"
+            class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors whitespace-nowrap flex items-center gap-1.5"
+            active-class="text-blue-600 dark:text-blue-400 font-semibold"
+          >
+            <span>{{ t('header.nav.iconify') }}</span>
+            <span class="rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-1.5 py-0.5 whitespace-nowrap">
+              200K+
             </span>
           </NuxtLink>
           <NuxtLink
@@ -306,6 +317,21 @@ onUnmounted(() => {
               </div>
               <span class="rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-bold px-1.5 py-0.5">
                 AI
+              </span>
+            </NuxtLink>
+
+            <NuxtLink
+              to="/icons/explore"
+              class="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[44px]"
+              active-class="bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-semibold"
+              @click="closeMobileMenu"
+            >
+              <div class="flex items-center gap-3">
+                <Globe class="h-4 w-4 text-emerald-500" />
+                <span>{{ t('header.nav.iconify') }}</span>
+              </div>
+              <span class="rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-1.5 py-0.5">
+                200K+
               </span>
             </NuxtLink>
           </div>
