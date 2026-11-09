@@ -87,13 +87,13 @@ async function quickSwitch(profileId: string) {
 
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">اسم المستخدم أو البريد الإلكتروني</label>
-          <Input v-model="identifier" type="text" placeholder="username أو example@mail.com" required />
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('auth.login.identifier') || 'اسم المستخدم أو البريد الإلكتروني' }}</label>
+          <Input v-model="identifier" type="text" :placeholder="t('auth.login.identifierPlaceholder')" required />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">كلمة المرور (اختيارية في الحسابات التجريبية)</label>
-          <Input v-model="password" type="password" placeholder="••••••••" />
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('auth.login.password') || 'كلمة المرور' }}</label>
+          <Input v-model="password" type="password" :placeholder="t('auth.login.passwordPlaceholder')" />
         </div>
 
         <Button type="submit" variant="primary" class="w-full" :loading="isSubmitting">

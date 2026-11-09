@@ -288,8 +288,10 @@
     "login": {
       "title": "Sign In to Platform",
       "subtitle": "Supabase Auth Session Persistence",
-      "email": "Email Address",
-      "emailPlaceholder": "name{'@'}example.com",
+      "identifier": "Username or Email",
+      "identifierPlaceholder": "username / email",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
       "submit": "Sign In",
       "noAccount": "Don't have an account?",
       "signUp": "Sign Up",
@@ -303,6 +305,10 @@
     "register": {
       "title": "Create Account",
       "subtitle": "Registers new auth user and 1:1 profile record",
+      "username": "Username",
+      "usernamePlaceholder": "username",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
       "displayName": "Display Name",
       "displayNamePlaceholder": "Sarah Connor",
       "email": "Email Address",

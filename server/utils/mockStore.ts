@@ -464,6 +464,9 @@ class InMemoryDatabaseStore {
     // 7. Seed Phase 6 Font Library Collections
     this.seedFontsDefaults()
 
+    // 8. Seed Default Repositories
+    this.seedRepositoriesDefaults()
+
     // Initial Audit Log
     this.auditLogs.push({
       id: 'aud-0000-0000-0000-0000-000000000001',
@@ -471,8 +474,82 @@ class InMemoryDatabaseStore {
       action: 'SYSTEM_BOOTSTRAP',
       entity_type: 'SYSTEM',
       entity_id: 'phase-0-foundation',
-      metadata: { version: '0.1.0', modules: ['RLS', 'Storage', 'Audit', 'Assets', 'Fonts'] },
+      metadata: { version: '0.1.0', modules: ['RLS', 'Storage', 'Audit', 'Assets', 'Fonts', 'Repositories'] },
       ip_address: '127.0.0.1',
+      created_at: new Date().toISOString()
+    })
+  }
+
+  private seedRepositoriesDefaults() {
+    const adminId = 'a0000000-0000-0000-0000-000000000001'
+    const regularUserId = 'u0000000-0000-0000-0000-000000000001'
+    const cairoId = 'f1000000-0000-0000-0000-000000000001'
+    const arefId = 'f1000000-0000-0000-0000-000000000005'
+
+    const repo1Id = 'r1000000-0000-0000-0000-000000000001'
+    const repo2Id = 'r1000000-0000-0000-0000-000000000002'
+    const repoPrivateId = 'r1000000-0000-0000-0000-000000000003'
+
+    this.repositories.set(repo1Id, {
+      id: repo1Id,
+      owner_id: regularUserId,
+      name: 'حزمة التجارة والتسوق',
+      slug: 'ecommerce-pack',
+      description: 'مجموعة متكاملة من أيقونات وخطوط واجهات الدفع والتسوق الإلكتروني',
+      visibility: 'PUBLIC',
+      created_at: new Date('2026-10-10T12:00:00Z').toISOString(),
+      updated_at: new Date('2026-10-10T12:00:00Z').toISOString()
+    })
+
+    this.repositories.set(repo2Id, {
+      id: repo2Id,
+      owner_id: adminId,
+      name: 'خطوط الرقعة والكوفي الرسمية',
+      slug: 'arabic-calligraphy-core',
+      description: 'مستودع يضم نخبة الخطوط العربية الكلاسيكية والرقمية المعتمدة',
+      visibility: 'PUBLIC',
+      created_at: new Date('2026-10-12T09:30:00Z').toISOString(),
+      updated_at: new Date('2026-10-12T09:30:00Z').toISOString()
+    })
+
+    this.repositories.set(repoPrivateId, {
+      id: repoPrivateId,
+      owner_id: regularUserId,
+      name: 'مسودة التصاميم الخاصة',
+      slug: 'private-drafts',
+      description: 'مستودع خاص لتجارب الخطوط والأيقونات غير الجاهزة للنشر العام',
+      visibility: 'PRIVATE',
+      created_at: new Date('2026-10-15T16:45:00Z').toISOString(),
+      updated_at: new Date('2026-10-15T16:45:00Z').toISOString()
+    })
+
+    // Seed Items into Repositories
+    this.repositoryItems.set('ri-1', {
+      id: 'ri-1',
+      repository_id: repo1Id,
+      item_type: 'ASSET',
+      item_id: 'a2000000-0000-0000-0000-000000000001', // shopping-cart
+      created_at: new Date().toISOString()
+    })
+    this.repositoryItems.set('ri-2', {
+      id: 'ri-2',
+      repository_id: repo1Id,
+      item_type: 'ASSET',
+      item_id: 'a2000000-0000-0000-0000-000000000002', // shopping-bag
+      created_at: new Date().toISOString()
+    })
+    this.repositoryItems.set('ri-3', {
+      id: 'ri-3',
+      repository_id: repo2Id,
+      item_type: 'FONT',
+      item_id: arefId,
+      created_at: new Date().toISOString()
+    })
+    this.repositoryItems.set('ri-4', {
+      id: 'ri-4',
+      repository_id: repo2Id,
+      item_type: 'FONT',
+      item_id: cairoId,
       created_at: new Date().toISOString()
     })
   }
@@ -760,73 +837,6 @@ class InMemoryDatabaseStore {
       reviewer_id: 'u1000000-0000-0000-0000-000000000001',
       reviewed_at: new Date('2026-10-01T10:15:00Z').toISOString(),
       created_at: new Date('2026-10-01T10:05:00Z').toISOString()
-    })
-    // 6. Seed Default Repositories
-    const repo1Id = 'r1000000-0000-0000-0000-000000000001'
-    const repo2Id = 'r1000000-0000-0000-0000-000000000002'
-    const repoPrivateId = 'r1000000-0000-0000-0000-000000000003'
-
-    this.repositories.set(repo1Id, {
-      id: repo1Id,
-      owner_id: regularUserId,
-      name: 'حزمة التجارة والتسوق',
-      slug: 'ecommerce-pack',
-      description: 'مجموعة متكاملة من أيقونات وخطوط واجهات الدفع والتسوق الإلكتروني',
-      visibility: 'PUBLIC',
-      created_at: new Date('2026-10-10T12:00:00Z').toISOString(),
-      updated_at: new Date('2026-10-10T12:00:00Z').toISOString()
-    })
-
-    this.repositories.set(repo2Id, {
-      id: repo2Id,
-      owner_id: adminId,
-      name: 'خطوط الرقعة والكوفي الرسمية',
-      slug: 'arabic-calligraphy-core',
-      description: 'مستودع يضم نخبة الخطوط العربية الكلاسيكية والرقمية المعتمدة',
-      visibility: 'PUBLIC',
-      created_at: new Date('2026-10-12T09:30:00Z').toISOString(),
-      updated_at: new Date('2026-10-12T09:30:00Z').toISOString()
-    })
-
-    this.repositories.set(repoPrivateId, {
-      id: repoPrivateId,
-      owner_id: regularUserId,
-      name: 'مسودة التصاميم الخاصة',
-      slug: 'private-drafts',
-      description: 'مستودع خاص لتجارب الخطوط والأيقونات غير الجاهزة للنشر العام',
-      visibility: 'PRIVATE',
-      created_at: new Date('2026-10-15T16:45:00Z').toISOString(),
-      updated_at: new Date('2026-10-15T16:45:00Z').toISOString()
-    })
-
-    // Seed Items into Repositories
-    this.repositoryItems.set('ri-1', {
-      id: 'ri-1',
-      repository_id: repo1Id,
-      item_type: 'ASSET',
-      item_id: 'a2000000-0000-0000-0000-000000000001', // shopping-cart
-      created_at: new Date().toISOString()
-    })
-    this.repositoryItems.set('ri-2', {
-      id: 'ri-2',
-      repository_id: repo1Id,
-      item_type: 'ASSET',
-      item_id: 'a2000000-0000-0000-0000-000000000002', // shopping-bag
-      created_at: new Date().toISOString()
-    })
-    this.repositoryItems.set('ri-3', {
-      id: 'ri-3',
-      repository_id: repo2Id,
-      item_type: 'FONT',
-      item_id: arefId,
-      created_at: new Date().toISOString()
-    })
-    this.repositoryItems.set('ri-4', {
-      id: 'ri-4',
-      repository_id: repo2Id,
-      item_type: 'FONT',
-      item_id: cairoId,
-      created_at: new Date().toISOString()
     })
   }
 

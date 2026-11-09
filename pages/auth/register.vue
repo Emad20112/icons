@@ -105,12 +105,12 @@ async function handleGoogleRegister() {
       <form @submit.prevent="handleRegister" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('auth.register.displayName') || 'الاسم الظاهر' }}</label>
-          <Input v-model="displayName" placeholder="مثال: يونس خالد" required />
+          <Input v-model="displayName" :placeholder="t('auth.register.displayNamePlaceholder')" required />
         </div>
 
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">اسم المستخدم الفريد (Username)</label>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">{{ t('auth.register.username') || 'اسم المستخدم الفريد (Username)' }}</label>
             <span v-if="isCheckingUsername" class="text-[10px] text-slate-400">جارٍ التحقق...</span>
             <span v-else-if="isUsernameAvailable === true" class="text-[10px] text-emerald-600 font-bold">✓ متاح</span>
             <span v-else-if="isUsernameAvailable === false" class="text-[10px] text-red-600 font-bold">✗ غير متاح</span>
@@ -120,7 +120,7 @@ async function handleGoogleRegister() {
             <input
               v-model="username"
               type="text"
-              placeholder="yunis_designer"
+              :placeholder="t('auth.register.usernamePlaceholder')"
               required
               class="w-full ps-7 pe-3 py-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 font-mono"
             />
@@ -130,12 +130,12 @@ async function handleGoogleRegister() {
 
         <div>
           <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('auth.register.email') || 'البريد الإلكتروني' }}</label>
-          <Input v-model="email" type="email" placeholder="example@mail.com" required />
+          <Input v-model="email" type="email" :placeholder="t('auth.register.emailPlaceholder')" required />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">كلمة المرور</label>
-          <Input v-model="password" type="password" placeholder="••••••••" required />
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{{ t('auth.register.password') || 'كلمة المرور' }}</label>
+          <Input v-model="password" type="password" :placeholder="t('auth.register.passwordPlaceholder')" required />
         </div>
 
         <Button type="submit" variant="primary" class="w-full" :loading="isSubmitting">

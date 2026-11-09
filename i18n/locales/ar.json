@@ -288,8 +288,10 @@
     "login": {
       "title": "تسجيل الدخول إلى المنصة",
       "subtitle": "استمرار الجلسة عبر نظام المصادقة Supabase",
-      "email": "البريد الإلكتروني",
-      "emailPlaceholder": "name{'@'}example.com",
+      "identifier": "اسم المستخدم أو البريد الإلكتروني",
+      "identifierPlaceholder": "username / email",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "••••••••",
       "submit": "تسجيل الدخول",
       "noAccount": "ليس لديك حساب؟",
       "signUp": "إنشاء حساب",
@@ -303,6 +305,10 @@
     "register": {
       "title": "إنشاء حساب جديد",
       "subtitle": "تسجيل مستخدم مصادقة جديد وملف شخصي مرتبط به",
+      "username": "اسم المستخدم",
+      "usernamePlaceholder": "username",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "••••••••",
       "displayName": "الاسم الظاهر",
       "displayNamePlaceholder": "سارة أحمد",
       "email": "البريد الإلكتروني",
