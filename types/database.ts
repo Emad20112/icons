@@ -9,8 +9,11 @@ export type AssetFileFormat = 'SVG' | 'PNG' | 'WEBP' | 'ICO' | 'TTF' | 'OTF' | '
 export interface Profile {
   id: string
   email: string
+  username?: string | null
   display_name: string | null
   avatar_url: string | null
+  bio?: string | null
+  password_hash?: string | null
   role: UserRole
   created_at: string
   updated_at: string
