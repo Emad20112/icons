@@ -62,7 +62,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   })
 
   // Centralized Structured Error Handler
-  server.setErrorHandler((error, req, reply) => {
+  server.setErrorHandler((error: any, req, reply) => {
     if (error instanceof AppError) {
       if (error.statusCode === 429) {
         reply.header('Retry-After', (error as any).retryAfterSeconds || 60)
