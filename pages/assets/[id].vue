@@ -12,6 +12,7 @@ import { useAuth } from '../../composables/useAuth'
 import { useToast } from '../../composables/useToast'
 import { useAssets } from '../../composables/useAssets'
 import { PenTool } from 'lucide-vue-next'
+import IconPreviewGrid from '../../components/assets/IconPreviewGrid.vue'
 import type { Asset, AssetStatus } from '../../types/database'
 
 const route = useRoute()
@@ -230,13 +231,11 @@ async function openFileInEditor(file: any) {
             </div>
 
             <!-- Preview Stage -->
-            <div class="flex h-64 w-full items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/60 p-8 border border-slate-100 dark:border-slate-800">
-              <div
-                v-if="asset.files?.[0]?.metadata?.rawContent"
-                class="h-32 w-32 text-slate-900 dark:text-white"
-                v-html="asset.files[0].metadata.rawContent"
-              />
-              <div v-else-if="asset.type === 'FONT'" class="text-6xl font-serif text-slate-800 dark:text-slate-100 font-bold">
+            <div v-if="asset.type === 'ICON' || hasSvgFile" class="mb-4">
+              <IconPreviewGrid :asset="asset" />
+            </div>
+            <div v-else class="flex h-64 w-full items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/60 p-8 border border-slate-100 dark:border-slate-800">
+              <div v-if="asset.type === 'FONT'" class="text-6xl font-serif text-slate-800 dark:text-slate-100 font-bold">
                 {{ t('assetDetail.fontSpecimen') }}
               </div>
               <div v-else class="text-4xl font-bold text-slate-400">

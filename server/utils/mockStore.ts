@@ -16,6 +16,7 @@ import type {
   FontImportBatch,
   FontAiJob
 } from '../../types/fonts'
+import type { Repository, RepositoryItem } from '../../types/repositories'
 import { ValidationError, AuthorizationError, NotFoundError } from '../../lib/errors/AppError'
 
 /**
@@ -40,6 +41,10 @@ class InMemoryDatabaseStore {
   public fontImportBatches: Map<string, FontImportBatch> = new Map()
   public fontAiJobs: Map<string, FontAiJob> = new Map()
 
+  // Repositories System Collections
+  public repositories: Map<string, Repository> = new Map()
+  public repositoryItems: Map<string, RepositoryItem> = new Map()
+
   constructor() {
     this.seedDefaults()
   }
@@ -57,8 +62,11 @@ class InMemoryDatabaseStore {
     this.profiles.set(adminId, {
       id: adminId,
       email: 'admin@platform.example',
+      username: 'admin',
       display_name: 'Lead System Admin',
       avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop',
+      bio: 'مدير المنصة ومشرف التصاميم والمستودعات الرقمية',
+      password_hash: 'admin123',
       role: 'ADMIN',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -67,8 +75,11 @@ class InMemoryDatabaseStore {
     this.profiles.set(regularUserId, {
       id: regularUserId,
       email: 'user@platform.example',
+      username: 'creator',
       display_name: 'Standard Creator',
       avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop',
+      bio: 'مصمم خطوط وأيقونات مستقل وشغوف بالتصميم الرقمي الحديث',
+      password_hash: 'creator123',
       role: 'USER',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -453,6 +464,9 @@ class InMemoryDatabaseStore {
     // 7. Seed Phase 6 Font Library Collections
     this.seedFontsDefaults()
 
+    // 8. Seed Default Repositories
+    this.seedRepositoriesDefaults()
+
     // Initial Audit Log
     this.auditLogs.push({
       id: 'aud-0000-0000-0000-0000-000000000001',
@@ -460,8 +474,82 @@ class InMemoryDatabaseStore {
       action: 'SYSTEM_BOOTSTRAP',
       entity_type: 'SYSTEM',
       entity_id: 'phase-0-foundation',
-      metadata: { version: '0.1.0', modules: ['RLS', 'Storage', 'Audit', 'Assets', 'Fonts'] },
+      metadata: { version: '0.1.0', modules: ['RLS', 'Storage', 'Audit', 'Assets', 'Fonts', 'Repositories'] },
       ip_address: '127.0.0.1',
+      created_at: new Date().toISOString()
+    })
+  }
+
+  private seedRepositoriesDefaults() {
+    const adminId = 'a0000000-0000-0000-0000-000000000001'
+    const regularUserId = 'u0000000-0000-0000-0000-000000000001'
+    const cairoId = 'f1000000-0000-0000-0000-000000000001'
+    const arefId = 'f1000000-0000-0000-0000-000000000005'
+
+    const repo1Id = 'r1000000-0000-0000-0000-000000000001'
+    const repo2Id = 'r1000000-0000-0000-0000-000000000002'
+    const repoPrivateId = 'r1000000-0000-0000-0000-000000000003'
+
+    this.repositories.set(repo1Id, {
+      id: repo1Id,
+      owner_id: regularUserId,
+      name: 'حزمة التجارة والتسوق',
+      slug: 'ecommerce-pack',
+      description: 'مجموعة متكاملة من أيقونات وخطوط واجهات الدفع والتسوق الإلكتروني',
+      visibility: 'PUBLIC',
+      created_at: new Date('2026-10-10T12:00:00Z').toISOString(),
+      updated_at: new Date('2026-10-10T12:00:00Z').toISOString()
+    })
+
+    this.repositories.set(repo2Id, {
+      id: repo2Id,
+      owner_id: adminId,
+      name: 'خطوط الرقعة والكوفي الرسمية',
+      slug: 'arabic-calligraphy-core',
+      description: 'مستودع يضم نخبة الخطوط العربية الكلاسيكية والرقمية المعتمدة',
+      visibility: 'PUBLIC',
+      created_at: new Date('2026-10-12T09:30:00Z').toISOString(),
+      updated_at: new Date('2026-10-12T09:30:00Z').toISOString()
+    })
+
+    this.repositories.set(repoPrivateId, {
+      id: repoPrivateId,
+      owner_id: regularUserId,
+      name: 'مسودة التصاميم الخاصة',
+      slug: 'private-drafts',
+      description: 'مستودع خاص لتجارب الخطوط والأيقونات غير الجاهزة للنشر العام',
+      visibility: 'PRIVATE',
+      created_at: new Date('2026-10-15T16:45:00Z').toISOString(),
+      updated_at: new Date('2026-10-15T16:45:00Z').toISOString()
+    })
+
+    // Seed Items into Repositories
+    this.repositoryItems.set('ri-1', {
+      id: 'ri-1',
+      repository_id: repo1Id,
+      item_type: 'ASSET',
+      item_id: 'a2000000-0000-0000-0000-000000000001', // shopping-cart
+      created_at: new Date().toISOString()
+    })
+    this.repositoryItems.set('ri-2', {
+      id: 'ri-2',
+      repository_id: repo1Id,
+      item_type: 'ASSET',
+      item_id: 'a2000000-0000-0000-0000-000000000002', // shopping-bag
+      created_at: new Date().toISOString()
+    })
+    this.repositoryItems.set('ri-3', {
+      id: 'ri-3',
+      repository_id: repo2Id,
+      item_type: 'FONT',
+      item_id: arefId,
+      created_at: new Date().toISOString()
+    })
+    this.repositoryItems.set('ri-4', {
+      id: 'ri-4',
+      repository_id: repo2Id,
+      item_type: 'FONT',
+      item_id: cairoId,
       created_at: new Date().toISOString()
     })
   }
@@ -752,7 +840,16 @@ class InMemoryDatabaseStore {
     })
   }
 
-  // Row Level Security Query Filter for Assets
+  // Row Level Security Query Filter for Repositories
+  public filterRepositoriesByRLS(currentUserId: string | null, currentUserRole: UserRole | null): Repository[] {
+    const list = Array.from(this.repositories.values())
+    return list.filter((repo) => {
+      if (currentUserRole === 'ADMIN') return true
+      if (repo.visibility === 'PUBLIC') return true
+      if (currentUserId && repo.owner_id === currentUserId) return true
+      return false
+    })
+  }
   public filterAssetsByRLS(currentUserId: string | null, currentUserRole: UserRole | null): Asset[] {
     const list = Array.from(this.assets.values())
     return list.filter((asset) => {
