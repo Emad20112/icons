@@ -121,5 +121,17 @@ describe('Font Metadata & Family Grouping Engine', () => {
       expect(grouped[0].filesCount).toBe(2)
       expect(grouped[0].isArabic).toBe(true)
     })
+
+    it('correctly parses real TTF binary metadata and platform-specific names', async () => {
+      const fs = await import('node:fs')
+      if (fs.existsSync('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')) {
+        const buf = fs.readFileSync('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
+        const meta = await FontMetadataService.extractFontMetadata(buf, 'DejaVuSans.ttf')
+        expect(meta.familyName).toBe('DejaVu Sans')
+        expect(meta.fullName).toContain('DejaVu Sans')
+        expect(meta.hasLatinCoverage).toBe(true)
+        expect(meta.characterCount).toBeGreaterThan(100)
+      }
+    })
   })
 })

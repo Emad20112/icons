@@ -211,14 +211,40 @@ export class FontZipImportService {
   }
 
   /**
-   * Alias helper method wrapping extractZipArchive
+   * Alias helper method wrapping extractZipArchive with support for direct font files
    */
-  public static async extractAndValidateZip(zipBuffer: Buffer): Promise<{
+  public static async extractAndValidateZip(
+    zipBuffer: Buffer,
+    hintFileName = 'fonts-import.zip'
+  ): Promise<{
     entries: Array<{ fileName: string; buffer: Buffer; format: 'ttf' | 'otf' | 'woff' | 'woff2'; sha256: string }>
     totalEntriesFound: number
     skippedNonFontEntries: number
     totalFontFiles: number
   }> {
+    // If input is a direct font binary rather than a ZIP archive
+    const isZip = zipBuffer && zipBuffer.length >= 4 && zipBuffer[0] === 0x50 && zipBuffer[1] === 0x4b
+    if (!isZip) {
+      const magic = FontStorageService.inspectMagicBytes(zipBuffer)
+      if (magic.valid && magic.format) {
+        const hash = FontStorageService.calculateSha256(zipBuffer)
+        const cleanName = hintFileName && !hintFileName.endsWith('.zip')
+          ? hintFileName
+          : `font.${magic.format.toLowerCase()}`
+        return {
+          entries: [{
+            fileName: cleanName,
+            buffer: zipBuffer,
+            format: magic.format.toLowerCase() as any,
+            sha256: hash,
+          }],
+          totalEntriesFound: 1,
+          skippedNonFontEntries: 0,
+          totalFontFiles: 1,
+        }
+      }
+    }
+
     const res = await this.extractZipArchive(zipBuffer)
     return {
       entries: res.validFonts.map(f => ({

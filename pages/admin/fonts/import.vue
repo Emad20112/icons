@@ -68,7 +68,8 @@
           <input
             type="file"
             ref="fileInput"
-            accept=".zip"
+            accept=".ttf,.otf,.woff,.woff2,.zip,font/ttf,font/otf,font/woff,font/woff2,application/x-font-ttf,application/x-font-opentype,application/font-woff,application/font-woff2,application/zip,application/x-zip-compressed"
+            multiple
             class="hidden"
             @change="handleFileSelect"
           />
@@ -82,15 +83,15 @@
 
             <div>
               <p class="text-sm font-bold text-slate-800 dark:text-slate-200">
-                {{ selectedFile ? selectedFile.name : ($t('fonts.dropzone_instruction') || 'اسحب وأفلت حزمة الخطوط ZIP هنا أو اضغط للاختيار') }}
+                {{ selectedFileDescription || ($t('fonts.dropzone_instruction') || 'اسحب وأفلت ملفات الخطوط TTF/OTF/WOFF أو حزمة ZIP هنا أو اضغط للاختيار') }}
               </p>
               <p class="text-xs text-slate-500 mt-1">
-                {{ selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : ($t('fonts.dropzone_constraints') || 'الصيغ المدعومة: TTF, OTF, WOFF, WOFF2 داخل ملف .zip (الحد الأقصى: 100 ميجابايت)') }}
+                {{ totalFilesSizeText || ($t('fonts.dropzone_constraints') || 'الصيغ المدعومة: TTF, OTF, WOFF, WOFF2 مباشرة أو داخل ملف .zip (الحد الأقصى: 100 ميجابايت)') }}
               </p>
             </div>
 
             <!-- Upload Action Button -->
-            <div v-if="selectedFile && !uploading">
+            <div v-if="selectedFiles.length > 0 && !uploading">
               <button
                 @click.stop="startUpload"
                 class="px-6 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-md"
@@ -195,14 +196,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
-const selectedFile = ref<File | null>(null)
+const selectedFiles = ref<File[]>([])
+const selectedFile = computed(() => selectedFiles.value[0] || null)
 const uploading = ref(false)
 const activeBatch = ref<any>(null)
 const batches = ref<any[]>([])
+
+const selectedFileDescription = computed(() => {
+  if (selectedFiles.value.length === 0) return ''
+  if (selectedFiles.value.length === 1) return selectedFiles.value[0].name
+  const names = selectedFiles.value.map(f => f.name).slice(0, 3).join(', ')
+  return `${selectedFiles.value.length} ملفات خطوط مختارة (${names}${selectedFiles.value.length > 3 ? '...' : ''})`
+})
+
+const totalFilesSizeText = computed(() => {
+  if (selectedFiles.value.length === 0) return ''
+  const total = selectedFiles.value.reduce((acc, f) => acc + f.size, 0)
+  return `${(total / (1024 * 1024)).toFixed(2)} MB (${selectedFiles.value.length} ${selectedFiles.value.length === 1 ? 'ملف' : 'ملفات'})`
+})
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -211,14 +226,14 @@ function triggerFileInput() {
 function handleFileSelect(e: Event) {
   const target = e.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
-    selectedFile.value = target.files[0]
+    selectedFiles.value = Array.from(target.files)
   }
 }
 
 function handleDrop(e: DragEvent) {
   isDragging.value = false
   if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
-    selectedFile.value = e.dataTransfer.files[0]
+    selectedFiles.value = Array.from(e.dataTransfer.files)
   }
 }
 
@@ -239,12 +254,15 @@ function formatDate(iso: string): string {
 }
 
 async function startUpload() {
-  if (!selectedFile.value) return
+  if (selectedFiles.value.length === 0) return
   uploading.value = true
 
   try {
     const formData = new FormData()
-    formData.append('file', selectedFile.value)
+    for (const f of selectedFiles.value) {
+      formData.append('files', f)
+      formData.append('file', f)
+    }
 
     const res = await $fetch<{ success: boolean; batchId: string }>('/api/v1/fonts/import/upload', {
       method: 'POST',

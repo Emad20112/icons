@@ -58,6 +58,18 @@ export class FontMetadataService {
   }
 
   /**
+   * Helper to retrieve a name property across opentype.js flat or platform-nested structures.
+   */
+  private static getNameRecord(names: any, key: string): any {
+    if (!names) return undefined
+    if (names[key] !== undefined) return names[key]
+    if (names.windows && names.windows[key] !== undefined) return names.windows[key]
+    if (names.macintosh && names.macintosh[key] !== undefined) return names.macintosh[key]
+    if (names.unicode && names.unicode[key] !== undefined) return names.unicode[key]
+    return undefined
+  }
+
+  /**
    * Extracts typed metadata from a parsed opentype.Font instance.
    */
   private static extractFromOpenType(
@@ -70,30 +82,30 @@ export class FontMetadataService {
 
     // Family Name: Prefer Typographic Family (16), then Font Family (1)
     const rawFamily =
-      this.getLocalizedName(names.typographicFamily) ||
-      this.getLocalizedName(names.fontFamily) ||
+      this.getLocalizedName(this.getNameRecord(names, 'typographicFamily')) ||
+      this.getLocalizedName(this.getNameRecord(names, 'fontFamily')) ||
       this.inferFamilyFromFilename(hintFileName)
 
     // Subfamily / Weight name: Prefer Typographic Subfamily (17), then Subfamily (2)
     const rawSubfamily =
-      this.getLocalizedName(names.typographicSubfamily) ||
-      this.getLocalizedName(names.fontSubfamily) ||
+      this.getLocalizedName(this.getNameRecord(names, 'typographicSubfamily')) ||
+      this.getLocalizedName(this.getNameRecord(names, 'fontSubfamily')) ||
       'Regular'
 
     const fullName =
-      this.getLocalizedName(names.fullName) ||
+      this.getLocalizedName(this.getNameRecord(names, 'fullName')) ||
       `${rawFamily} ${rawSubfamily}`.trim()
 
     const postscriptName =
-      this.getLocalizedName(names.postScriptName) ||
+      this.getLocalizedName(this.getNameRecord(names, 'postScriptName')) ||
       fullName.replace(/\s+/g, '-')
 
-    const designer = this.getLocalizedName(names.designer)
-    const foundry = this.getLocalizedName(names.manufacturer) || this.getLocalizedName(names.vendorId)
-    const copyright = this.getLocalizedName(names.copyright)
-    const license = this.getLocalizedName(names.license)
-    const licenseUrl = this.getLocalizedName(names.licenseURL)
-    const version = this.getLocalizedName(names.version)
+    const designer = this.getLocalizedName(this.getNameRecord(names, 'designer'))
+    const foundry = this.getLocalizedName(this.getNameRecord(names, 'manufacturer')) || this.getLocalizedName(this.getNameRecord(names, 'vendorId'))
+    const copyright = this.getLocalizedName(this.getNameRecord(names, 'copyright'))
+    const license = this.getLocalizedName(this.getNameRecord(names, 'license'))
+    const licenseUrl = this.getLocalizedName(this.getNameRecord(names, 'licenseURL'))
+    const version = this.getLocalizedName(this.getNameRecord(names, 'version'))
 
     // Weight extraction: Check OS/2 usWeightClass, fallback to subfamily name analysis
     let weight = 400
