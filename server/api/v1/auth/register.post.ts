@@ -1,12 +1,18 @@
 import { AuthService } from '../../../services/authService'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{ email?: string; displayName?: string }>(event)
+  const body = await readBody<{
+    email?: string
+    displayName?: string
+    username?: string
+    password?: string
+  }>(event)
+
   if (!body?.email) {
     throw createError({ statusCode: 400, statusMessage: 'Email is required' })
   }
 
-  const user = await AuthService.register(body.email, body.displayName)
+  const user = await AuthService.register(body.email, body.displayName, body.username, body.password)
   setCookie(event, 'session_user_id', user.id, {
     httpOnly: true,
     sameSite: 'lax',

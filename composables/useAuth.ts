@@ -28,12 +28,12 @@ export function useAuth() {
     }
   }
 
-  async function login(email: string) {
+  async function login(identifier: string, password?: string) {
     isLoading.value = true
     try {
       const res = await $fetch<{ success: boolean; data: Profile }>('/api/v1/auth/login', {
         method: 'POST',
-        body: { email }
+        body: { email: identifier.includes('@') ? identifier : undefined, username: !identifier.includes('@') ? identifier : undefined, password }
       })
       if (res.success) {
         currentUser.value = res.data
@@ -46,12 +46,17 @@ export function useAuth() {
     }
   }
 
-  async function register(email: string, displayName?: string) {
+  async function loginWithGoogle(mockGooglePayload?: { email?: string; name?: string; picture?: string }) {
     isLoading.value = true
     try {
-      const res = await $fetch<{ success: boolean; data: Profile }>('/api/v1/auth/register', {
+      const payload = mockGooglePayload || {
+        email: `google.user.${Date.now().toString(36)}@gmail.com`,
+        name: 'Google User',
+        picture: `https://api.dicebear.com/7.x/identicon/svg?seed=google_${Date.now()}`
+      }
+      const res = await $fetch<{ success: boolean; data: Profile }>('/api/v1/auth/google', {
         method: 'POST',
-        body: { email, displayName }
+        body: payload
       })
       if (res.success) {
         currentUser.value = res.data
@@ -61,6 +66,49 @@ export function useAuth() {
       return res.data
     } finally {
       isLoading.value = false
+    }
+  }
+
+  async function register(email: string, displayName?: string, username?: string, password?: string) {
+    isLoading.value = true
+    try {
+      const res = await $fetch<{ success: boolean; data: Profile }>('/api/v1/auth/register', {
+        method: 'POST',
+        body: { email, displayName, username, password }
+      })
+      if (res.success) {
+        currentUser.value = res.data
+        currentRole.value = res.data.role
+        await fetchUser()
+      }
+      return res.data
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function updateProfile(updates: { display_name?: string; avatar_url?: string; username?: string; bio?: string; password?: string }) {
+    isLoading.value = true
+    try {
+      const res = await $fetch<{ success: boolean; data: Profile }>('/api/v1/auth/profile', {
+        method: 'PUT',
+        body: updates
+      })
+      if (res.success) {
+        currentUser.value = res.data
+      }
+      return res.data
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function checkUsernameAvailability(username: string): Promise<boolean> {
+    try {
+      const res = await $fetch<{ success: boolean; available: boolean }>(`/api/v1/auth/username-check?username=${encodeURIComponent(username)}`)
+      return Boolean(res.available)
+    } catch {
+      return false
     }
   }
 
@@ -98,7 +146,10 @@ export function useAuth() {
     isLoading,
     fetchUser,
     login,
+    loginWithGoogle,
     register,
+    updateProfile,
+    checkUsernameAvailability,
     logout,
     switchRole,
     selectProfile
