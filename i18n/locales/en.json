@@ -832,6 +832,12 @@
     "collection": "Collection",
     "icon_name": "Icon Name",
     "dimensions": "Dimensions",
-    "close": "Close"
+    "close": "Close",
+    "open_in_editor": "Open in Icon Editor",
+    "save_to_repository": "Save to Repository",
+    "select_repository": "Select repository...",
+    "save_success": "Icon saved successfully!",
+    "save_failed": "Failed to save icon",
+    "saving": "Saving..."
   }
 }
