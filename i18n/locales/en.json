@@ -25,6 +25,7 @@
       "imageToSvg": "Image to SVG",
       "iconEditor": "Icon Editor",
       "fonts": "Fonts",
+      "iconify": "Public Icons",
       "repositories": "Repositories",
       "dashboard": "Dashboard",
       "toolBadge": "Tool",
@@ -807,5 +808,30 @@
     "formats": "Formats:",
     "not_found": "Font family not found",
     "back_to_library": "Back to Font Library"
+  },
+  "iconify": {
+    "title": "Iconify Public Icons Explorer",
+    "subtitle": "Search and explore over 200,000 open-source vector icons dynamically from the official Iconify API. Zero local storage overhead.",
+    "search_placeholder": "Search over 200,000 icons (e.g. home, user, settings, arrow)...",
+    "search_hint": "Type at least 2 characters to trigger debounced live search",
+    "collections_title": "Popular Icon Collections",
+    "all_collections": "All Collections",
+    "no_icons_title": "No icons found",
+    "no_icons_desc": "Try searching with different keywords or switch collection filters.",
+    "load_more": "Load More Icons",
+    "loading": "Searching Iconify API...",
+    "details_title": "Icon Details & Export",
+    "copy_identifier": "Copy Identifier",
+    "identifier_copied": "Identifier copied to clipboard!",
+    "copy_svg": "Copy SVG Code",
+    "svg_copied": "SVG code copied to clipboard!",
+    "download_svg": "Download SVG",
+    "color": "Color",
+    "size": "Size",
+    "preview": "Live Preview",
+    "collection": "Collection",
+    "icon_name": "Icon Name",
+    "dimensions": "Dimensions",
+    "close": "Close"
   }
 }
