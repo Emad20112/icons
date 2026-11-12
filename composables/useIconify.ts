@@ -20,8 +20,8 @@ export interface SelectedIconDetails {
 }
 
 export function useIconify() {
-  const searchQuery = ref('home')
-  const selectedCollection = ref<string>('')
+  const searchQuery = ref('')
+  const selectedCollection = ref<string>('lucide')
   const isSearching = ref(false)
   const searchError = ref<string | null>(null)
   const searchResults = ref<string[]>([])
@@ -30,7 +30,6 @@ export function useIconify() {
   const pageSize = 48
 
   const popularCollections = [
-    { prefix: '', label: 'الكل / All' },
     { prefix: 'lucide', label: 'Lucide' },
     { prefix: 'heroicons', label: 'Heroicons' },
     { prefix: 'tabler', label: 'Tabler' },
@@ -65,9 +64,10 @@ export function useIconify() {
   }
 
   async function executeSearch(offset = 0) {
-    if (!searchQuery.value || !searchQuery.value.trim()) {
-      searchResults.value = []
-      totalResults.value = 0
+    const trimmedQuery = searchQuery.value ? searchQuery.value.trim() : ''
+
+    // If query is 1 character, do not send to server to avoid 400 Bad Request
+    if (trimmedQuery.length === 1) {
       return
     }
 
@@ -83,10 +83,13 @@ export function useIconify() {
 
     try {
       const params = new URLSearchParams({
-        query: searchQuery.value.trim(),
         limit: String(pageSize),
         start: String(offset),
       })
+
+      if (trimmedQuery) {
+        params.append('query', trimmedQuery)
+      }
 
       if (selectedCollection.value) {
         params.append('prefix', selectedCollection.value)
@@ -119,6 +122,7 @@ export function useIconify() {
 
   function setCollection(prefix: string) {
     selectedCollection.value = prefix
+    currentOffset.value = 0
     executeSearch(0)
   }
 

@@ -117,6 +117,16 @@ describe('Iconify Frontend Integration', () => {
       expect(enKeys).toEqual(arKeys)
     })
 
+    it('contains essential integration action keys in iconify translations', () => {
+      const enIconify = (enLocale as any).iconify
+      const arIconify = (arLocale as any).iconify
+
+      expect(enIconify.open_in_editor).toBeDefined()
+      expect(arIconify.open_in_editor).toBeDefined()
+      expect(enIconify.save_to_repository).toBeDefined()
+      expect(arIconify.save_to_repository).toBeDefined()
+    })
+
     it('has iconify navigation link in header navigation for both locales', () => {
       expect((enLocale as any).header.nav.iconify).toBeDefined()
       expect((arLocale as any).header.nav.iconify).toBeDefined()

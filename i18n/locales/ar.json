@@ -832,6 +832,12 @@
     "collection": "المجموعة",
     "icon_name": "اسم الأيقونة",
     "dimensions": "الأبعاد",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "open_in_editor": "فتح في محرر الأيقونات",
+    "save_to_repository": "حفظ في المستودع",
+    "select_repository": "اختر المستودع...",
+    "save_success": "تم حفظ الأيقونة بنجاح!",
+    "save_failed": "فشل حفظ الأيقونة",
+    "saving": "جارٍ الحفظ..."
   }
 }

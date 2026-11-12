@@ -1,4 +1,12 @@
 import { defineEventHandler, getQuery, createError, setHeader, setResponseStatus } from 'h3'
+import dns from 'node:dns'
+
+// Force IPv4 first to avoid IPv6 timeout on Windows/Cloudflare environments
+try {
+  dns.setDefaultResultOrder('ipv4first')
+} catch {
+  // Ignore in environments where it's not supported
+}
 
 // Official Iconify API endpoint
 const ICONIFY_API_BASE = 'https://api.iconify.design'
@@ -80,17 +88,73 @@ export default defineEventHandler(async (event) => {
   // 1. Search icons: /api/v1/iconify/search
   if (path === 'search') {
     const rawQuery = String(query.q || query.query || '').trim()
-    if (!rawQuery || rawQuery.length < 2) {
-      throw createError({ statusCode: 400, statusMessage: 'Search query must be at least 2 characters' })
-    }
-    const cleanQuery = rawQuery.slice(0, 100)
-    const limit = Math.max(1, Math.min(100, parseInt(String(query.limit || '40'), 10) || 40))
-    const start = Math.max(0, parseInt(String(query.start || '0'), 10) || 0)
     const prefix = query.prefix || query.collection ? String(query.prefix || query.collection).trim().toLowerCase() : ''
 
     if (prefix && !PREFIX_REGEX.test(prefix)) {
       throw createError({ statusCode: 400, statusMessage: 'Invalid collection prefix' })
     }
+
+    // If query is empty or less than 2 characters
+    if (!rawQuery || rawQuery.length < 2) {
+      // If collection is selected, fetch collection icons list
+      if (prefix) {
+        const cacheKey = `collection_search_fallback:${prefix}`
+        const cached = getFromCache(cacheKey)
+        if (cached) {
+          setHeader(event, 'x-cache', 'HIT')
+          return cached
+        }
+
+        const result = await coalesce(cacheKey, async () => {
+          const upstreamRes = await fetch(`${ICONIFY_API_BASE}/collection?prefix=${encodeURIComponent(prefix)}`, {
+            headers: { 'Accept': 'application/json' },
+            signal: AbortSignal.timeout(8000),
+          })
+          if (!upstreamRes.ok) {
+            return { icons: [], total: 0, limit: 48, start: 0 }
+          }
+          const collData = await upstreamRes.json()
+          let iconNames: string[] = []
+          if (Array.isArray(collData.uncategorized)) {
+            iconNames.push(...collData.uncategorized)
+          }
+          if (collData.categories && typeof collData.categories === 'object') {
+            for (const catIcons of Object.values(collData.categories)) {
+              if (Array.isArray(catIcons)) {
+                iconNames.push(...catIcons)
+              }
+            }
+          }
+          const fullIcons = iconNames.map(name => `${prefix}:${name}`)
+          return {
+            icons: fullIcons.slice(0, 100),
+            total: fullIcons.length,
+            limit: 48,
+            start: 0,
+            allIcons: fullIcons
+          }
+        })
+
+        const limit = Math.max(1, Math.min(100, parseInt(String(query.limit || '48'), 10) || 48))
+        const start = Math.max(0, parseInt(String(query.start || '0'), 10) || 0)
+        const paginatedIcons = (result.allIcons || result.icons).slice(start, start + limit)
+
+        setInCache(cacheKey, result, 3600000)
+        return {
+          icons: paginatedIcons,
+          total: result.total,
+          limit,
+          start
+        }
+      }
+
+      // No query and no prefix -> return empty results cleanly without 400 error
+      return { icons: [], total: 0, limit: 48, start: 0 }
+    }
+
+    const cleanQuery = rawQuery.slice(0, 100)
+    const limit = Math.max(1, Math.min(100, parseInt(String(query.limit || '48'), 10) || 48))
+    const start = Math.max(0, parseInt(String(query.start || '0'), 10) || 0)
 
     const cacheKey = `search:${cleanQuery}:${prefix || 'all'}:${limit}:${start}`
     const cached = getFromCache(cacheKey)
