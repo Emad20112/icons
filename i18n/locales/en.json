@@ -338,7 +338,7 @@
       "hasAccount": "Already have an account?",
       "signIn": "Sign In",
       "accountCreated": "Account created successfully",
-      "welcomeUser": "Welcome @{username}",
+      "welcomeUser": "Welcome {'@'}{username}",
       "profileInitialized": "Your account is ready",
       "registrationFailed": "Failed to create account"
     }

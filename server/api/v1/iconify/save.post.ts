@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
   const uploadResult = await storageService.uploadFile({
     bucket: "assets",
     path: filePath,
-    file: body.svg,
+    file: Buffer.from(body.svg, "utf-8"),
     mimeType: "image/svg+xml",
   });
 

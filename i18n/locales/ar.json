@@ -338,7 +338,7 @@
       "hasAccount": "لديك حساب بالفعل؟",
       "signIn": "تسجيل الدخول",
       "accountCreated": "تم إنشاء الحساب بنجاح",
-      "welcomeUser": "مرحباً @{username}",
+      "welcomeUser": "مرحباً {'@'}{username}",
       "profileInitialized": "تم تجهيز حسابك بنجاح",
       "registrationFailed": "فشل إنشاء الحساب"
     }

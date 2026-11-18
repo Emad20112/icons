@@ -418,45 +418,6 @@ async function openFileInEditor(file: any) {
             </div>
           </div>
 
-          <!-- Admin Lifecycle Control -->
-          <div v-if="isAdmin" class="rounded-xl border border-blue-200 bg-blue-50/50 p-5 dark:border-blue-900 dark:bg-blue-950/30 space-y-3">
-            <h4 class="text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider">
-              {{ t('assetDetail.adminModeration') }}
-            </h4>
-            <p class="text-[11px] text-slate-600 dark:text-slate-400">
-              {{ t('assetDetail.adminDescription') }}
-            </p>
-
-            <div class="flex flex-col gap-2 pt-2">
-              <Button
-                v-if="asset.status !== 'PUBLISHED'"
-                size="sm"
-                variant="primary"
-                :disabled="!asset.license_id || isUpdatingStatus"
-                @click="handleStatusChange('PUBLISHED')"
-              >
-                {{ t('assetDetail.publish') }}
-              </Button>
-              <Button
-                v-if="asset.status !== 'ARCHIVED'"
-                size="sm"
-                variant="outline"
-                :disabled="isUpdatingStatus"
-                @click="handleStatusChange('ARCHIVED')"
-              >
-                {{ t('assetDetail.archive') }}
-              </Button>
-              <Button
-                v-if="asset.status !== 'DRAFT'"
-                size="sm"
-                variant="ghost"
-                :disabled="isUpdatingStatus"
-                @click="handleStatusChange('DRAFT')"
-              >
-                {{ t('assetDetail.revertToDraft') }}
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
 

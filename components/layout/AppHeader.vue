@@ -256,7 +256,7 @@ onUnmounted(() => {
             >
               <img
                 :src="user.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.username}`"
-                :alt="user.display_name || user.username"
+                :alt="user.display_name || user.username || ''"
                 class="h-7 w-7 rounded-md border border-slate-200 dark:border-slate-700 object-cover shrink-0"
               />
               <span class="max-w-[110px] truncate text-xs font-semibold">
@@ -473,7 +473,7 @@ onUnmounted(() => {
               <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                 <img
                   :src="user.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.username}`"
-                  :alt="user.display_name || user.username"
+                  :alt="user.display_name || user.username || ''"
                   class="h-10 w-10 rounded-lg border border-slate-200 dark:border-slate-700 object-cover shrink-0"
                 />
                 <div class="min-w-0 flex-1 text-start">
