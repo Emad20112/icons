@@ -1,4 +1,4 @@
-import { AuthService } from '../../../services/authService'
+import { AuthService, sanitizeProfile } from '../../../services/authService'
 import { getAuthContext } from '../../../utils/supabaseClient'
 
 export default defineEventHandler(async (event) => {
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      data: updated
+      data: sanitizeProfile(updated)
     }
   } catch (err: any) {
     throw createError({

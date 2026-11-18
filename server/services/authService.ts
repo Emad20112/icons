@@ -1,8 +1,34 @@
+import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import { dbStore } from '../utils/mockStore'
-import { getSupabaseAdminClient } from '../utils/supabaseClient'
 import { ValidationError, AuthenticationError, AuthorizationError, ConflictError } from '../../lib/errors/AppError'
 import { AuditService } from './auditService'
 import type { Profile, UserRole } from '../../types/database'
+
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString('hex')
+  const derived = scryptSync(password, salt, 64).toString('hex')
+  return `scrypt$${salt}$${derived}`
+}
+
+export function verifyPassword(password: string, storedHash: string): boolean {
+  if (!storedHash) return false
+  if (storedHash.startsWith('scrypt$')) {
+    const parts = storedHash.split('$')
+    if (parts.length !== 3) return false
+    const [, salt, keyHex] = parts
+    const keyBuf = Buffer.from(keyHex, 'hex')
+    const derivedBuf = scryptSync(password, salt, 64)
+    if (keyBuf.length !== derivedBuf.length) return false
+    return timingSafeEqual(keyBuf, derivedBuf)
+  }
+  return storedHash === `hash_${password}` || storedHash === password
+}
+
+export function sanitizeProfile(profile: Profile | null): Omit<Profile, 'password_hash'> | null {
+  if (!profile) return null
+  const { password_hash: _removed, ...safe } = profile
+  return safe
+}
 
 export class AuthService {
   public static async isUsernameAvailable(username: string, excludeUserId?: string): Promise<boolean> {
@@ -17,25 +43,33 @@ export class AuthService {
   }
 
   public static async register(
-    email: string,
+    email?: string | null,
     displayName?: string,
     username?: string,
     password?: string
   ): Promise<Profile> {
-    const existing = Array.from(dbStore.profiles.values()).find(p => p.email.toLowerCase() === email.toLowerCase().trim())
-    if (existing) {
-      throw new ConflictError('A user with this email address already exists')
+    const cleanEmailInput = email ? email.trim().toLowerCase() : ''
+
+    if (cleanEmailInput) {
+      const existing = Array.from(dbStore.profiles.values()).find(
+        p => p.email.toLowerCase() === cleanEmailInput
+      )
+      if (existing) {
+        throw new ConflictError('A user with this email address already exists')
+      }
     }
 
     let finalUsername = username ? username.trim().toLowerCase() : ''
     if (finalUsername) {
+      if (!/^[a-z0-9_-]{3,30}$/.test(finalUsername)) {
+        throw new ValidationError('Username must be 3-30 characters (letters, numbers, - or _)')
+      }
       const isAvailable = await this.isUsernameAvailable(finalUsername)
       if (!isAvailable) {
-        throw new ConflictError('Username is already taken or invalid')
+        throw new ConflictError('Username is already taken')
       }
-    } else {
-      // Generate a default available username from email prefix
-      const base = email.split('@')[0].replace(/[^a-z0-9_-]/gi, '').toLowerCase() || 'user'
+    } else if (cleanEmailInput) {
+      const base = cleanEmailInput.split('@')[0].replace(/[^a-z0-9_-]/gi, '').toLowerCase() || 'user'
       let candidate = base
       let counter = 1
       while (!(await this.isUsernameAvailable(candidate))) {
@@ -43,18 +77,21 @@ export class AuthService {
         counter++
       }
       finalUsername = candidate
+    } else {
+      throw new ValidationError('Username is required')
     }
 
+    const finalEmail = cleanEmailInput || `${finalUsername}@users.local`
     const userId = `u${Date.now()}-${Math.random().toString(36).substring(2, 7)}`
     const now = new Date().toISOString()
 
     const newProfile: Profile = {
       id: userId,
-      email: email.toLowerCase().trim(),
+      email: finalEmail,
       username: finalUsername,
-      display_name: displayName || finalUsername,
+      display_name: displayName?.trim() || finalUsername,
       avatar_url: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(finalUsername)}`,
-      password_hash: password ? `hash_${password}` : null,
+      password_hash: password ? hashPassword(password) : null,
       role: 'USER',
       created_at: now,
       updated_at: now
@@ -80,18 +117,12 @@ export class AuthService {
     )
 
     if (!user) {
-      if (clean.includes('@')) {
-        // Auto-register convenience for email logins if not found
-        return this.register(clean)
-      }
-      throw new AuthenticationError('Invalid username/email or password')
+      throw new AuthenticationError('Invalid username or password')
     }
 
-    // Verify password if user has password_hash and a password was supplied
-    if (user.password_hash && password) {
-      const isMatch = user.password_hash === `hash_${password}` || user.password_hash === password
-      if (!isMatch) {
-        throw new AuthenticationError('Invalid credentials')
+    if (user.password_hash) {
+      if (!password || !verifyPassword(password, user.password_hash)) {
+        throw new AuthenticationError('Invalid username or password')
       }
     }
 
@@ -168,12 +199,10 @@ export class AuthService {
       throw new AuthorizationError('You cannot edit other users profiles')
     }
 
-    // Role changes require Admin privileges
     if (updates.role && updates.role !== profile.role && !isAdmin) {
       throw new AuthorizationError('Only Administrators can modify user roles')
     }
 
-    // If username is changing, verify availability
     if (updates.username && updates.username.toLowerCase() !== profile.username?.toLowerCase()) {
       const available = await this.isUsernameAvailable(updates.username, userId)
       if (!available) {
@@ -187,7 +216,7 @@ export class AuthService {
       avatar_url: updates.avatar_url !== undefined ? updates.avatar_url : profile.avatar_url,
       username: updates.username !== undefined ? updates.username.trim().toLowerCase() : profile.username,
       bio: updates.bio !== undefined ? updates.bio : profile.bio,
-      password_hash: updates.password ? `hash_${updates.password}` : profile.password_hash,
+      password_hash: updates.password ? hashPassword(updates.password) : profile.password_hash,
       role: (isAdmin && updates.role) ? updates.role : profile.role,
       updated_at: new Date().toISOString()
     }

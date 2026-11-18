@@ -4,6 +4,7 @@ import { sanitizeSvg } from '../../lib/sanitizer/svgSanitizer'
 import { ValidationError, StorageError } from '../../lib/errors/AppError'
 import { getSupabaseAdminClient } from '../utils/supabaseClient'
 import { dbStore } from '../utils/mockStore'
+import { sqliteDb } from '../utils/sqliteDb'
 import { logger } from '../../lib/logger/logger'
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -95,6 +96,7 @@ export class StorageService implements IStorageService {
     const bucketMap = dbStore.storageBuckets.get(bucket)!
     const size = typeof payload === 'string' ? Buffer.byteLength(payload) : (payload as any).length || 0
     bucketMap.set(safePath, { buffer: payload, mimeType, size })
+    sqliteDb.upsertStorageBlob(bucket, safePath, payload, mimeType, size)
 
     return {
       path: safePath,
@@ -118,6 +120,7 @@ export class StorageService implements IStorageService {
     if (bucketMap) {
       bucketMap.delete(path)
     }
+    sqliteDb.deleteStorageBlob(bucket, path)
 
     return true
   }

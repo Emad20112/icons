@@ -18,35 +18,166 @@ import type {
 } from '../../types/fonts'
 import type { Repository, RepositoryItem } from '../../types/repositories'
 import { ValidationError, AuthorizationError, NotFoundError } from '../../lib/errors/AppError'
+import { sqliteDb } from './sqliteDb'
+
+class SyncedMap<K, V> extends Map<K, V> {
+  private syncEnabled = true
+
+  constructor(
+    private readonly onSet?: (key: K, value: V) => void,
+    private readonly onDelete?: (key: K) => void
+  ) {
+    super()
+  }
+
+  public setSilent(key: K, value: V): this {
+    return super.set(key, value)
+  }
+
+  public clearSilent(): void {
+    super.clear()
+  }
+
+  public setSyncEnabled(enabled: boolean) {
+    this.syncEnabled = enabled
+  }
+
+  override set(key: K, value: V): this {
+    super.set(key, value)
+    if (this.syncEnabled && this.onSet) {
+      this.onSet(key, value)
+    }
+    return this
+  }
+
+  override delete(key: K): boolean {
+    const existed = super.delete(key)
+    if (existed && this.syncEnabled && this.onDelete) {
+      this.onDelete(key)
+    }
+    return existed
+  }
+}
 
 /**
- * High-fidelity in-memory database store with PostgreSQL relational constraints,
- * RLS validation, and initial migration seed data.
- * Used for instant preview verification and unit/integration testing.
+ * High-fidelity database store backed by persistent SQLite (node:sqlite)
+ * with PostgreSQL relational constraints, RLS validation, and initial seed data.
  */
 class InMemoryDatabaseStore {
-  public profiles: Map<string, Profile> = new Map()
+  public profiles: SyncedMap<string, Profile> = new SyncedMap(
+    (_k, v) => sqliteDb.upsertProfile(v),
+    (k) => sqliteDb.deleteProfile(k)
+  )
   public categories: Map<string, Category> = new Map()
   public licenses: Map<string, License> = new Map()
   public tags: Map<string, Tag> = new Map()
-  public assets: Map<string, Asset> = new Map()
-  public assetFiles: Map<string, AssetFile> = new Map()
+  public assets: SyncedMap<string, Asset> = new SyncedMap(
+    (_k, v) => sqliteDb.upsertAsset(v),
+    (k) => sqliteDb.deleteAsset(k)
+  )
+  public assetFiles: SyncedMap<string, AssetFile> = new SyncedMap(
+    (_k, v) => sqliteDb.upsertAssetFile(v),
+    (k) => sqliteDb.deleteAssetFile(k)
+  )
   public assetTags: Array<{ asset_id: string; tag_id: string }> = []
   public auditLogs: AuditLog[] = []
   public storageBuckets: Map<string, Map<string, { buffer: Buffer | string; mimeType: string; size: number }>> = new Map()
 
   // Phase 6: Font Library Collections
-  public fontFamilies: Map<string, FontFamily> = new Map()
-  public fontFiles: Map<string, FontFile> = new Map()
+  public fontFamilies: SyncedMap<string, FontFamily> = new SyncedMap(
+    (_k, v) => sqliteDb.upsertFontFamily(v),
+    (k) => sqliteDb.deleteFontFamily(k)
+  )
+  public fontFiles: SyncedMap<string, FontFile> = new SyncedMap(
+    (_k, v) => sqliteDb.upsertFontFile(v),
+    (k) => sqliteDb.deleteFontFile(k)
+  )
   public fontImportBatches: Map<string, FontImportBatch> = new Map()
   public fontAiJobs: Map<string, FontAiJob> = new Map()
 
   // Repositories System Collections
-  public repositories: Map<string, Repository> = new Map()
-  public repositoryItems: Map<string, RepositoryItem> = new Map()
+  public repositories: SyncedMap<string, Repository> = new SyncedMap(
+    (_k, v) => sqliteDb.upsertRepository(v),
+    (k) => sqliteDb.deleteRepository(k)
+  )
+  public repositoryItems: SyncedMap<string, RepositoryItem> = new SyncedMap(
+    (_k, v) => sqliteDb.upsertRepositoryItem(v),
+    (k) => sqliteDb.deleteRepositoryItem(k)
+  )
 
   constructor() {
-    this.seedDefaults()
+    this.initializeStore()
+  }
+
+  private setMapsSync(enabled: boolean) {
+    this.profiles.setSyncEnabled(enabled)
+    this.assets.setSyncEnabled(enabled)
+    this.assetFiles.setSyncEnabled(enabled)
+    this.fontFamilies.setSyncEnabled(enabled)
+    this.fontFiles.setSyncEnabled(enabled)
+    this.repositories.setSyncEnabled(enabled)
+    this.repositoryItems.setSyncEnabled(enabled)
+  }
+
+  private initializeStore() {
+    if (sqliteDb.hasPersistedData()) {
+      // Seed static taxonomy tables (categories, licenses, tags, aiJobs) silently, then hydrate persisted tables from SQLite
+      this.setMapsSync(false)
+      this.seedDefaults()
+      this.hydrateFromSqlite()
+      this.setMapsSync(true)
+    } else {
+      // First run: seed defaults and persist them to SQLite
+      this.setMapsSync(true)
+      this.seedDefaults()
+      // Persist initial storage blobs too
+      for (const [bucketName, bucketMap] of this.storageBuckets.entries()) {
+        for (const [blobPath, blob] of bucketMap.entries()) {
+          sqliteDb.upsertStorageBlob(bucketName, blobPath, blob.buffer, blob.mimeType, blob.size)
+        }
+      }
+    }
+  }
+
+  private hydrateFromSqlite() {
+    this.profiles.clearSilent()
+    for (const p of sqliteDb.loadProfiles()) {
+      this.profiles.setSilent(p.id, p)
+    }
+    this.assets.clearSilent()
+    for (const a of sqliteDb.loadAssets()) {
+      this.assets.setSilent(a.id, a)
+    }
+    this.assetFiles.clearSilent()
+    for (const af of sqliteDb.loadAssetFiles()) {
+      this.assetFiles.setSilent(af.id, af)
+    }
+    this.fontFamilies.clearSilent()
+    for (const ff of sqliteDb.loadFontFamilies()) {
+      this.fontFamilies.setSilent(ff.id, ff)
+    }
+    this.fontFiles.clearSilent()
+    for (const ff of sqliteDb.loadFontFiles()) {
+      this.fontFiles.setSilent(ff.id, ff)
+    }
+    this.repositories.clearSilent()
+    for (const r of sqliteDb.loadRepositories()) {
+      this.repositories.setSilent(r.id, r)
+    }
+    this.repositoryItems.clearSilent()
+    for (const ri of sqliteDb.loadRepositoryItems()) {
+      this.repositoryItems.setSilent(ri.id, ri)
+    }
+    for (const blob of sqliteDb.loadStorageBlobs()) {
+      if (!this.storageBuckets.has(blob.bucket)) {
+        this.storageBuckets.set(blob.bucket, new Map())
+      }
+      this.storageBuckets.get(blob.bucket)!.set(blob.path, {
+        buffer: blob.buffer,
+        mimeType: blob.mimeType,
+        size: blob.size
+      })
+    }
   }
 
   private seedDefaults() {
@@ -497,6 +628,7 @@ class InMemoryDatabaseStore {
       slug: 'ecommerce-pack',
       description: 'مجموعة متكاملة من أيقونات وخطوط واجهات الدفع والتسوق الإلكتروني',
       visibility: 'PUBLIC',
+      allow_download: true,
       created_at: new Date('2026-10-10T12:00:00Z').toISOString(),
       updated_at: new Date('2026-10-10T12:00:00Z').toISOString()
     })
@@ -508,6 +640,7 @@ class InMemoryDatabaseStore {
       slug: 'arabic-calligraphy-core',
       description: 'مستودع يضم نخبة الخطوط العربية الكلاسيكية والرقمية المعتمدة',
       visibility: 'PUBLIC',
+      allow_download: true,
       created_at: new Date('2026-10-12T09:30:00Z').toISOString(),
       updated_at: new Date('2026-10-12T09:30:00Z').toISOString()
     })
@@ -519,6 +652,7 @@ class InMemoryDatabaseStore {
       slug: 'private-drafts',
       description: 'مستودع خاص لتجارب الخطوط والأيقونات غير الجاهزة للنشر العام',
       visibility: 'PRIVATE',
+      allow_download: true,
       created_at: new Date('2026-10-15T16:45:00Z').toISOString(),
       updated_at: new Date('2026-10-15T16:45:00Z').toISOString()
     })

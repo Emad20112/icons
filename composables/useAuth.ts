@@ -69,12 +69,24 @@ export function useAuth() {
     }
   }
 
-  async function register(email: string, displayName?: string, username?: string, password?: string) {
+  async function register(
+    emailOrOptions:
+      | string
+      | { username: string; password: string; displayName?: string; email?: string },
+    displayName?: string,
+    username?: string,
+    password?: string
+  ) {
     isLoading.value = true
     try {
+      const payload =
+        typeof emailOrOptions === 'object'
+          ? emailOrOptions
+          : { email: emailOrOptions, displayName, username, password }
+
       const res = await $fetch<{ success: boolean; data: Profile }>('/api/v1/auth/register', {
         method: 'POST',
-        body: { email, displayName, username, password }
+        body: payload
       })
       if (res.success) {
         currentUser.value = res.data

@@ -1,4 +1,4 @@
-import { AuthService } from '../../../services/authService'
+import { AuthService, sanitizeProfile } from '../../../services/authService'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<{
@@ -8,19 +8,34 @@ export default defineEventHandler(async (event) => {
     password?: string
   }>(event)
 
-  if (!body?.email) {
-    throw createError({ statusCode: 400, statusMessage: 'Email is required' })
+  const username = body?.username?.trim()
+  const password = body?.password
+
+  if (!username) {
+    throw createError({ statusCode: 400, statusMessage: 'Username is required' })
   }
 
-  const user = await AuthService.register(body.email, body.displayName, body.username, body.password)
-  setCookie(event, 'session_user_id', user.id, {
-    httpOnly: true,
-    sameSite: 'lax',
-    maxAge: 86400 * 7
-  })
+  if (!password || password.length < 6) {
+    throw createError({ statusCode: 400, statusMessage: 'Password must be at least 6 characters' })
+  }
 
-  return {
-    success: true,
-    data: user
+  try {
+    const user = await AuthService.register(body?.email || null, body?.displayName, username, password)
+
+    setCookie(event, 'session_user_id', user.id, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 86400 * 7
+    })
+
+    return {
+      success: true,
+      data: sanitizeProfile(user)
+    }
+  } catch (err: any) {
+    throw createError({
+      statusCode: err.statusCode || 400,
+      statusMessage: err.message
+    })
   }
 })

@@ -1,4 +1,4 @@
-import { AuthService } from '../../../services/authService'
+import { AuthService, sanitizeProfile } from '../../../services/authService'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<{
@@ -7,20 +7,32 @@ export default defineEventHandler(async (event) => {
     password?: string
   }>(event)
 
-  const identifier = body?.username || body?.email
+  const identifier = (body?.username || body?.email || '').trim()
   if (!identifier) {
-    throw createError({ statusCode: 400, statusMessage: 'Username or email is required' })
+    throw createError({ statusCode: 400, statusMessage: 'Username is required' })
   }
 
-  const user = await AuthService.login(identifier, body?.password)
-  setCookie(event, 'session_user_id', user.id, {
-    httpOnly: true,
-    sameSite: 'lax',
-    maxAge: 86400 * 7
-  })
+  if (!body?.password) {
+    throw createError({ statusCode: 400, statusMessage: 'Password is required' })
+  }
 
-  return {
-    success: true,
-    data: user
+  try {
+    const user = await AuthService.login(identifier, body.password)
+
+    setCookie(event, 'session_user_id', user.id, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 86400 * 7
+    })
+
+    return {
+      success: true,
+      data: sanitizeProfile(user)
+    }
+  } catch (err: any) {
+    throw createError({
+      statusCode: err.statusCode || 401,
+      statusMessage: err.message
+    })
   }
 })
