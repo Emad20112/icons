@@ -2,39 +2,22 @@
   <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto space-y-8">
       <!-- Hero Header -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-slate-200 dark:border-slate-800">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold mb-3">
-            <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-            {{ $t('fonts.hero_badge') || 'المكتبة الرقمية للخطوط العربية والعالمية' }}
-          </div>
-          <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
+          <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">
             {{ $t('fonts.library_title') || 'مكتبة الخطوط والتايبوغرافي' }}
           </h1>
-          <p class="text-base text-slate-600 dark:text-slate-400 mt-2 max-w-2xl">
-            {{ $t('fonts.library_subtitle') || 'اكتشف خطوطاً عربية وعالمية عالية الجودة، مصنفة بدقة بواسطة الذكاء الاصطناعي مع دعم المعاينة الحية والتنزيل الفوري.' }}
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-2 max-w-2xl">
+            {{ $t('fonts.library_subtitle') || 'اكتشف خطوطاً عربية وعالمية عالية الجودة، مع دعم المعاينة الحية والتنزيل الفوري.' }}
           </p>
         </div>
 
         <div class="flex items-center gap-3">
           <NuxtLink
-            to="/admin/fonts/ai-review"
-            class="px-4 py-2.5 rounded-2xl border border-purple-200 dark:border-purple-800/80 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 text-purple-700 dark:text-purple-300 text-xs font-bold transition flex items-center gap-2"
+            to="/repositories"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition flex items-center gap-2"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            {{ $t('fonts.ai_review') || 'تدقيق الذكاء الاصطناعي' }}
-          </NuxtLink>
-
-          <NuxtLink
-            to="/admin/fonts/import"
-            class="px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-sm flex items-center gap-2"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            {{ $t('fonts.bulk_import') || 'استيراد خطوط' }}
+            {{ $t('header.nav.repositories') }}
           </NuxtLink>
         </div>
       </div>

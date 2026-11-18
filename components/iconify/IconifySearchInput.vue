@@ -1,47 +1,69 @@
-<template>
-  <div class="relative w-full max-w-3xl mx-auto space-y-3">
-    <div class="relative flex items-center">
-      <!-- Search Icon -->
-      <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-slate-400">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </div>
-
-      <!-- Input -->
-      <input
-        type="text"
-        :value="modelValue"
-        @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value); $emit('search')"
-        :placeholder="$t('iconify.search_placeholder') || 'ابحث في أكثر من 200,000 أيقونة (مثال: home, user, search, check)...'"
-        class="w-full ps-11 pe-24 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition text-sm sm:text-base"
-      />
-
-      <!-- Clear / Loading -->
-      <div class="absolute inset-y-0 end-0 pe-3 flex items-center gap-2">
-        <span v-if="loading" class="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></span>
-        <button
-          v-if="modelValue && !loading"
-          @click="$emit('update:modelValue', ''); $emit('search')"
-          class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
+import { Search, X } from 'lucide-vue-next'
+
+const { t } = useI18n()
+
 defineProps<{
   modelValue: string
   loading?: boolean
+  suggestions?: string[]
 }>()
 
 defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'search'): void
+  (e: 'suggest', keyword: string): void
 }>()
 </script>
+
+<template>
+  <div class="w-full space-y-3">
+    <div class="relative flex items-center">
+      <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-4 text-slate-400">
+        <Search class="h-5 w-5" />
+      </div>
+
+      <input
+        type="text"
+        :value="modelValue"
+        :placeholder="t('iconify.search_placeholder')"
+        :aria-label="t('iconify.search_placeholder')"
+        class="w-full rounded-xl border border-slate-200 bg-white py-3.5 ps-12 pe-12 text-sm sm:text-base text-slate-900 placeholder-slate-400 shadow-xs transition-all focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
+        @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value); $emit('search')"
+      />
+
+      <div class="absolute inset-y-0 end-0 flex items-center pe-3.5">
+        <span
+          v-if="loading"
+          class="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"
+        />
+        <button
+          v-else-if="modelValue"
+          type="button"
+          :aria-label="t('filters.clearSearch')"
+          class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
+          @click="$emit('update:modelValue', ''); $emit('search')"
+        >
+          <X class="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick keyword suggestions -->
+    <div v-if="suggestions && suggestions.length > 0" class="flex flex-wrap items-center gap-1.5 text-xs">
+      <span class="text-slate-400 dark:text-slate-500 me-1">{{ t('iconify.quick_suggestions') }}</span>
+      <button
+        v-for="item in suggestions"
+        :key="item"
+        type="button"
+        class="rounded-md px-2 py-0.5 font-mono text-[11px] transition-colors"
+        :class="modelValue.trim().toLowerCase() === item
+          ? 'bg-blue-600 text-white font-semibold'
+          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'"
+        @click="$emit('suggest', item)"
+      >
+        {{ item }}
+      </button>
+    </div>
+  </div>
+</template>

@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 export interface IconifySearchResult {
   icons: string[]
@@ -30,6 +30,7 @@ export function useIconify() {
   const pageSize = 48
 
   const popularCollections = [
+    { prefix: 'all', labelKey: 'iconify.all_collections', label: 'All' },
     { prefix: 'lucide', label: 'Lucide' },
     { prefix: 'heroicons', label: 'Heroicons' },
     { prefix: 'tabler', label: 'Tabler' },
@@ -39,6 +40,8 @@ export function useIconify() {
     { prefix: 'bi', label: 'Bootstrap' },
   ]
 
+  const quickSuggestions = ['home', 'user', 'settings', 'search', 'mail', 'shield', 'arrow', 'folder']
+
   // Modal / Selection State
   const selectedIcon = ref<SelectedIconDetails | null>(null)
   const isModalOpen = ref(false)
@@ -46,14 +49,10 @@ export function useIconify() {
   const iconSize = ref(32)
   const isFetchingSvg = ref(false)
 
-  // Internal AbortController for debouncing
   let searchAbortController: AbortController | null = null
-  let debounceTimeout: NodeJS.Timeout | null = null
+  let debounceTimeout: ReturnType<typeof setTimeout> | null = null
 
-  /**
-   * Performs search with AbortController cancellation and debouncing
-   */
-  function triggerDebouncedSearch(delay = 350) {
+  function triggerDebouncedSearch(delay = 300) {
     if (debounceTimeout) {
       clearTimeout(debounceTimeout)
     }
@@ -66,12 +65,10 @@ export function useIconify() {
   async function executeSearch(offset = 0) {
     const trimmedQuery = searchQuery.value ? searchQuery.value.trim() : ''
 
-    // If query is 1 character, do not send to server to avoid 400 Bad Request
     if (trimmedQuery.length === 1) {
       return
     }
 
-    // Cancel in-flight request if user is still typing
     if (searchAbortController) {
       searchAbortController.abort()
     }
@@ -91,8 +88,12 @@ export function useIconify() {
         params.append('query', trimmedQuery)
       }
 
-      if (selectedCollection.value) {
+      if (selectedCollection.value && selectedCollection.value !== 'all') {
         params.append('prefix', selectedCollection.value)
+      } else if (!trimmedQuery) {
+        // When browsing "All Collections" with an empty search box,
+        // query a rich general keyword so the grid stays populated.
+        params.append('query', 'home')
       }
 
       const res = await $fetch<IconifySearchResult>(`/api/v1/iconify/search?${params.toString()}`, {
@@ -108,7 +109,7 @@ export function useIconify() {
     } catch (err: any) {
       if (err.name === 'AbortError') return
       console.error('[useIconify] Search failed:', err)
-      searchError.value = err?.data?.error?.message || err?.message || 'فشل البحث في مكتبة الأيقونات'
+      searchError.value = err?.data?.error?.message || err?.message || 'Failed to load icons'
     } finally {
       isSearching.value = false
     }
@@ -123,6 +124,11 @@ export function useIconify() {
   function setCollection(prefix: string) {
     selectedCollection.value = prefix
     currentOffset.value = 0
+    executeSearch(0)
+  }
+
+  function applySuggestion(keyword: string) {
+    searchQuery.value = keyword
     executeSearch(0)
   }
 
@@ -186,6 +192,7 @@ export function useIconify() {
     searchQuery,
     selectedCollection,
     popularCollections,
+    quickSuggestions,
     isSearching,
     searchError,
     searchResults,
@@ -200,6 +207,7 @@ export function useIconify() {
     executeSearch,
     loadMore,
     setCollection,
+    applySuggestion,
     openIconDetails,
     closeIconDetails,
     getDynamicSvgUrl,

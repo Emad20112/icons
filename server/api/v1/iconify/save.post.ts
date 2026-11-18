@@ -78,7 +78,7 @@ export default defineEventHandler(async (event) => {
       mime_type: "image/svg+xml",
       width: 24,
       height: 24,
-      metadata: { fullUrl: uploadResult.fullUrl },
+      metadata: { fullUrl: uploadResult.fullUrl, rawContent: body.svg },
     },
     auth.userId,
     auth.role,
