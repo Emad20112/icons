@@ -25,15 +25,20 @@
       "imageToSvg": "Image to SVG",
       "iconEditor": "Icon Editor",
       "fonts": "Fonts",
-      "iconify": "Public Icons",
+      "iconify": "Icons",
       "repositories": "Repositories",
       "dashboard": "Dashboard",
+      "tools": "Tools",
       "toolBadge": "Tool",
       "admin": "Admin & Governance",
       "audit": "Audit Logs"
     },
     "role": "Role:",
     "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "signOut": "Sign Out",
+    "myRepositories": "My Repositories",
+    "publicProfile": "Public Profile",
     "language": "Language",
     "selectLanguage": "Select language",
     "toggleTheme": "Toggle theme",
@@ -41,17 +46,20 @@
     "themeDark": "Dark Mode",
     "menu": "Navigation menu",
     "closeMenu": "Close menu",
+    "exploreSection": "Explore",
     "toolsSection": "Creation & Conversion Tools",
+    "accountSection": "Account & Preferences",
     "adminSection": "Management & Security",
     "switchRoleTo": "Switch role to"
   },
   "footer": {
-    "brand": "Digital Assets Platform",
-    "phase": "Phase 0: Foundation",
-    "database": "PostgreSQL 16 & Supabase RLS",
-    "schema": "Polymorphic Schema (Icons, Fonts, Illustrations, Logos, Templates)",
-    "storage": "Decoupled Storage",
-    "audit": "Full Audit Trail"
+    "brand": "DigitalAssets",
+    "tagline": "Curated vector icons, Arabic & Latin typography, and personal asset repositories.",
+    "phase": "Vector Icons & Fonts",
+    "database": "Personal Repositories",
+    "schema": "Icons, Fonts & SVG Tools",
+    "storage": "Private & Public Sharing",
+    "audit": "Instant Preview & Export"
   },
   "catalog": {
     "meta": {

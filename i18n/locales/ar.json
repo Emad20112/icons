@@ -25,15 +25,20 @@
       "imageToSvg": "تحويل إلى SVG",
       "iconEditor": "محرر الأيقونات",
       "fonts": "الخطوط",
-      "iconify": "الأيقونات العامة",
+      "iconify": "الأيقونات",
       "repositories": "المستودعات",
       "dashboard": "لوحة التحكم",
+      "tools": "الأدوات",
       "toolBadge": "أداة",
       "admin": "الإدارة والحوكمة",
       "audit": "سجلات التدقيق"
     },
     "role": "الدور:",
     "signIn": "تسجيل الدخول",
+    "createAccount": "إنشاء حساب",
+    "signOut": "تسجيل الخروج",
+    "myRepositories": "مستودعاتي",
+    "publicProfile": "الملف العام",
     "language": "اللغة",
     "selectLanguage": "اختر اللغة",
     "toggleTheme": "تبديل المظهر",
@@ -41,17 +46,20 @@
     "themeDark": "الوضع الداكن",
     "menu": "قائمة التصفح",
     "closeMenu": "إغلاق القائمة",
+    "exploreSection": "الاستكشاف",
     "toolsSection": "أدوات التصميم والتحويل",
+    "accountSection": "الحساب والتفضيلات",
     "adminSection": "الإدارة والأمان",
     "switchRoleTo": "التبديل إلى دور"
   },
   "footer": {
-    "brand": "منصة الأصول الرقمية",
-    "phase": "المرحلة 0: الأساس",
-    "database": "PostgreSQL 16 و Supabase RLS",
-    "schema": "مخطط متعدد الأنواع (أيقونات، خطوط، رسومات، شعارات، قوالب)",
-    "storage": "تخزين منفصل",
-    "audit": "سجل تدقيق كامل"
+    "brand": "الأصول الرقمية",
+    "tagline": "مكتبة أيقونات متجهة وخطوط عربية ولاتينية ومستودعات أصول خاصة وعامة.",
+    "phase": "أيقونات متجهة وخطوط",
+    "database": "مستودعات شخصية وعامة",
+    "schema": "أيقونات وخطوط وأدوات SVG",
+    "storage": "مشاركة خاصة وعامة",
+    "audit": "معاينة وتصدير فوري"
   },
   "catalog": {
     "meta": {
