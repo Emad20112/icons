@@ -11,3 +11,7 @@ supabase/.temp
 
 .aistudio
 public/assets/aistudio
+data/
+*.db
+*.db-wal
+*.db-shm
