@@ -138,4 +138,73 @@ describe('Unit Test: Repositories System & Privacy Isolation', () => {
     )
     expect(removed).toBe(true)
   })
+
+  it('enforces owner allow_download permission for public repository visitors', async () => {
+    const repo = await RepositoryService.createRepository(
+      {
+        name: 'Preview Only Showcase',
+        visibility: 'PUBLIC',
+        allow_download: false
+      },
+      creatorId,
+      'USER'
+    )
+
+    expect(repo.allow_download).toBe(false)
+
+    await RepositoryService.addItemToRepository(
+      repo.id,
+      'ASSET',
+      'a2000000-0000-0000-0000-000000000001',
+      creatorId,
+      'USER'
+    )
+
+    // Visitor can view repository metadata, but can_download is false
+    const visitorView = await RepositoryService.getRepositoryById(repo.id, strangerId, 'USER')
+    expect(visitorView.can_download).toBe(false)
+
+    // Owner still has can_download = true
+    const ownerView = await RepositoryService.getRepositoryById(repo.id, creatorId, 'USER')
+    expect(ownerView.can_download).toBe(true)
+
+    // Visitor download attempt must be rejected
+    await expect(
+      RepositoryService.assertCanDownload(
+        repo.id,
+        'ASSET',
+        'a2000000-0000-0000-0000-000000000001',
+        strangerId,
+        'USER'
+      )
+    ).rejects.toThrow(AuthorizationError)
+
+    // Owner download attempt succeeds
+    const ownerAccess = await RepositoryService.assertCanDownload(
+      repo.id,
+      'ASSET',
+      'a2000000-0000-0000-0000-000000000001',
+      creatorId,
+      'USER'
+    )
+    expect(ownerAccess.isOwner).toBe(true)
+
+    // Owner toggles allow_download to true -> visitor can now download
+    const updated = await RepositoryService.updateRepository(
+      repo.id,
+      { allow_download: true },
+      creatorId,
+      'USER'
+    )
+    expect(updated.allow_download).toBe(true)
+
+    const visitorAfterToggle = await RepositoryService.assertCanDownload(
+      repo.id,
+      'ASSET',
+      'a2000000-0000-0000-0000-000000000001',
+      strangerId,
+      'USER'
+    )
+    expect(visitorAfterToggle.repo.allow_download).toBe(true)
+  })
 })

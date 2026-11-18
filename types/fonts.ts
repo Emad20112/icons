@@ -38,6 +38,7 @@ export interface FontFile {
 
 export interface FontFamily {
   id: string
+  owner_id?: string
   name: string
   slug: string
   display_name: string

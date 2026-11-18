@@ -6,6 +6,7 @@
 import { createHash } from 'node:crypto'
 import { getSupabaseAdminClient } from '../utils/supabaseClient'
 import { dbStore } from '../utils/mockStore'
+import { sqliteDb } from '../utils/sqliteDb'
 import { ValidationError, StorageError } from '../../lib/errors/AppError'
 import { sanitizeFilename } from '../../lib/sanitizer/filenameSanitizer'
 import type { FontFileFormat } from '../../types/fonts'
@@ -198,6 +199,7 @@ export class FontStorageService {
       mimeType,
       size: buffer.length
     })
+    sqliteDb.upsertStorageBlob(bucket, storagePath, buffer, mimeType, buffer.length)
 
     return {
       storagePath,
@@ -223,6 +225,7 @@ export class FontStorageService {
     }
 
     const b = dbStore.storageBuckets.get(bucket)
+    sqliteDb.deleteStorageBlob(bucket, storagePath)
     if (b && b.has(storagePath)) {
       b.delete(storagePath)
       return true

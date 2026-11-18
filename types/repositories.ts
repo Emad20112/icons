@@ -10,6 +10,8 @@ export interface Repository {
   slug: string
   description: string | null
   visibility: RepositoryVisibility
+  allow_download: boolean
+  can_download?: boolean
   created_at: string
   updated_at: string
 

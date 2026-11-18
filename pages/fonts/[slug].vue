@@ -63,8 +63,26 @@
               </div>
             </div>
 
-            <!-- Primary Download Button -->
-            <div class="flex items-center gap-3">
+            <!-- Primary Download & Save to Repository Actions -->
+            <div class="flex flex-wrap items-center gap-3">
+              <div v-if="user" class="flex items-center gap-1.5">
+                <select
+                  v-model="selectedRepoId"
+                  class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">اختر مستودعاً لحفظ الخط...</option>
+                  <option v-for="repo in repositories" :key="repo.id" :value="repo.id">{{ repo.name }}</option>
+                </select>
+                <button
+                  type="button"
+                  :disabled="!selectedRepoId || isSavingRepo"
+                  class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold transition disabled:opacity-50"
+                  @click="saveFontToRepository"
+                >
+                  {{ isSavingRepo ? 'جارٍ الحفظ...' : 'حفظ في المستودع' }}
+                </button>
+              </div>
+
               <a
                 :href="`/api/v1/fonts/${family.slug}/download`"
                 download
@@ -192,9 +210,16 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import InteractiveFontPlayground from '../../components/fonts/InteractiveFontPlayground.vue'
+import { useAuth } from '../../composables/useAuth'
+import { useRepositories } from '../../composables/useRepositories'
+import { useToast } from '../../composables/useToast'
 
 const route = useRoute()
 const slug = route.params.slug as string
+
+const { user } = useAuth()
+const { repositories, fetchRepositories, addItem } = useRepositories()
+const { success, error } = useToast()
 
 const family = ref<any>(null)
 const loading = ref(true)
@@ -202,6 +227,8 @@ const playgroundText = ref('القاهرة عاصمة التاريخ والحض�
 const playgroundFontSize = ref(38)
 const playgroundLineHeight = ref(1.6)
 const selectedWeight = ref(400)
+const selectedRepoId = ref('')
+const isSavingRepo = ref(false)
 
 function getWeightLabel(w: number): string {
   switch (w) {
@@ -238,7 +265,23 @@ async function fetchFamily() {
   }
 }
 
-onMounted(() => {
-  fetchFamily()
+async function saveFontToRepository() {
+  if (!family.value?.id || !selectedRepoId.value) return
+  isSavingRepo.value = true
+  try {
+    await addItem(selectedRepoId.value, 'FONT', family.value.id)
+    success('تم حفظ الخط', 'تمت إضافة الخط إلى المستودع بنجاح.')
+  } catch (err: any) {
+    error('فشل الحفظ', err?.data?.statusMessage || err?.message)
+  } finally {
+    isSavingRepo.value = false
+  }
+}
+
+onMounted(async () => {
+  await fetchFamily()
+  if (user.value) {
+    await fetchRepositories({ ownerId: user.value.id })
+  }
 })
 </script>

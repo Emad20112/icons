@@ -44,7 +44,8 @@ const isSubmittingRepo = ref(false)
 const newRepo = ref({
   name: '',
   description: '',
-  visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE'
+  visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
+  allow_download: true
 })
 
 // Settings state
@@ -89,7 +90,7 @@ async function handleCreateRepo() {
     await createRepository(newRepo.value)
     success('تم إنشاء المستودع', `تم إنشاء مستودع "${newRepo.value.name}" بنجاح.`)
     isCreateRepoModalOpen.value = false
-    newRepo.value = { name: '', description: '', visibility: 'PUBLIC' }
+    newRepo.value = { name: '', description: '', visibility: 'PUBLIC', allow_download: true }
     await loadDashboard()
   } catch (err: any) {
     error('تعذر إنشاء المستودع', err.statusMessage || err.message)
@@ -478,6 +479,13 @@ onMounted(() => {
               <span>خاص (Private)</span>
             </label>
           </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50/70 dark:bg-slate-950/50">
+          <label class="flex items-center justify-between gap-3 cursor-pointer text-xs">
+            <span class="font-semibold text-slate-800 dark:text-slate-200">السماح للمستخدمين بتحميل واستخدام الأيقونات والخطوط</span>
+            <input v-model="newRepo.allow_download" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+          </label>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">

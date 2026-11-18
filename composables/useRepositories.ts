@@ -37,7 +37,13 @@ export function useRepositories() {
     }
   }
 
-  async function createRepository(payload: { name: string; slug?: string; description?: string; visibility?: RepositoryVisibility }) {
+  async function createRepository(payload: {
+    name: string
+    slug?: string
+    description?: string
+    visibility?: RepositoryVisibility
+    allow_download?: boolean
+  }) {
     isLoading.value = true
     try {
       const res = await $fetch<{ success: boolean; data: Repository }>('/api/v1/repositories', {
@@ -53,7 +59,16 @@ export function useRepositories() {
     }
   }
 
-  async function updateRepository(id: string, updates: { name?: string; slug?: string; description?: string; visibility?: RepositoryVisibility }) {
+  async function updateRepository(
+    id: string,
+    updates: {
+      name?: string
+      slug?: string
+      description?: string
+      visibility?: RepositoryVisibility
+      allow_download?: boolean
+    }
+  ) {
     isLoading.value = true
     try {
       const res = await $fetch<{ success: boolean; data: Repository }>(`/api/v1/repositories/${id}`, {
@@ -99,6 +114,22 @@ export function useRepositories() {
     return true
   }
 
+  async function uploadIcon(repositoryId: string, payload: FormData | { name: string; description?: string; svgContent: string }) {
+    const res = await $fetch<{ success: boolean; data: any }>(`/api/v1/repositories/${repositoryId}/upload-icon`, {
+      method: 'POST',
+      body: payload
+    })
+    return res.data
+  }
+
+  async function uploadFont(repositoryId: string, formData: FormData) {
+    const res = await $fetch<{ success: boolean; data: any }>(`/api/v1/repositories/${repositoryId}/upload-font`, {
+      method: 'POST',
+      body: formData
+    })
+    return res.data
+  }
+
   return {
     repositories,
     currentRepository,
@@ -109,6 +140,8 @@ export function useRepositories() {
     updateRepository,
     deleteRepository,
     addItem,
-    removeItem
+    removeItem,
+    uploadIcon,
+    uploadFont
   }
 }

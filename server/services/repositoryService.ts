@@ -1,8 +1,8 @@
 import { dbStore } from '../utils/mockStore'
-import { getSupabaseAdminClient } from '../utils/supabaseClient'
 import { slugify } from '../../lib/sanitizer/filenameSanitizer'
 import { ValidationError, AuthorizationError, NotFoundError } from '../../lib/errors/AppError'
 import { AuditService } from './auditService'
+import { sanitizeProfile } from './authService'
 import type { Repository, RepositoryItem, RepositoryVisibility } from '../../types/repositories'
 import type { Asset, UserRole } from '../../types/database'
 import type { FontFamily } from '../../types/fonts'
@@ -12,6 +12,7 @@ export interface CreateRepositoryDTO {
   slug?: string
   description?: string
   visibility?: RepositoryVisibility
+  allow_download?: boolean
 }
 
 export interface UpdateRepositoryDTO {
@@ -19,6 +20,7 @@ export interface UpdateRepositoryDTO {
   slug?: string
   description?: string
   visibility?: RepositoryVisibility
+  allow_download?: boolean
 }
 
 export class RepositoryService {
@@ -42,8 +44,7 @@ export class RepositoryService {
       )
     }
 
-    // Enrich with owner and counts
-    return list.map(repo => this.enrichRepository(repo))
+    return list.map(repo => this.enrichRepository(repo, currentUserId, currentUserRole))
   }
 
   public static async getRepositoryById(
@@ -56,21 +57,54 @@ export class RepositoryService {
       throw new NotFoundError('Repository not found')
     }
 
-    // Privacy Isolation check
-    const isOwner = currentUserId && repo.owner_id === currentUserId
+    const isOwner = Boolean(currentUserId && repo.owner_id === currentUserId)
     const isAdmin = currentUserRole === 'ADMIN'
 
     if (repo.visibility === 'PRIVATE' && !isOwner && !isAdmin) {
       throw new AuthorizationError('This repository is private. Access denied.')
     }
 
-    return this.enrichRepositoryWithDetails(repo)
+    return this.enrichRepositoryWithDetails(repo, currentUserId, currentUserRole)
+  }
+
+  public static async assertCanDownload(
+    repositoryId: string,
+    itemType: 'ASSET' | 'FONT',
+    itemId: string,
+    currentUserId: string | null,
+    currentUserRole: UserRole | null
+  ): Promise<{ repo: Repository; isOwner: boolean }> {
+    const repo = dbStore.repositories.get(repositoryId)
+    if (!repo) {
+      throw new NotFoundError('Repository not found')
+    }
+
+    const isOwner = Boolean(currentUserId && repo.owner_id === currentUserId)
+    const isAdmin = currentUserRole === 'ADMIN'
+
+    if (repo.visibility === 'PRIVATE' && !isOwner && !isAdmin) {
+      throw new AuthorizationError('This repository is private. Access denied.')
+    }
+
+    const belongsToRepo = Array.from(dbStore.repositoryItems.values()).some(
+      ri => ri.repository_id === repositoryId && ri.item_type === itemType && ri.item_id === itemId
+    )
+    if (!belongsToRepo) {
+      throw new NotFoundError('Item not found in this repository')
+    }
+
+    const canDownload = isOwner || isAdmin || repo.allow_download !== false
+    if (!canDownload) {
+      throw new AuthorizationError('Downloads are disabled by the repository owner')
+    }
+
+    return { repo, isOwner }
   }
 
   public static async createRepository(
     dto: CreateRepositoryDTO,
     actorId: string,
-    actorRole: UserRole
+    _actorRole: UserRole
   ): Promise<Repository> {
     if (!dto.name || dto.name.trim().length < 2) {
       throw new ValidationError('Repository name must be at least 2 characters')
@@ -79,7 +113,6 @@ export class RepositoryService {
     const cleanName = dto.name.trim()
     const baseSlug = dto.slug?.trim() ? slugify(dto.slug.trim()) : slugify(cleanName)
 
-    // Check unique slug per owner
     const existing = Array.from(dbStore.repositories.values()).find(
       r => r.owner_id === actorId && r.slug === baseSlug
     )
@@ -97,6 +130,7 @@ export class RepositoryService {
       slug: baseSlug,
       description: dto.description?.trim() || null,
       visibility: dto.visibility || 'PUBLIC',
+      allow_download: dto.allow_download !== undefined ? Boolean(dto.allow_download) : true,
       created_at: now,
       updated_at: now
     }
@@ -108,10 +142,14 @@ export class RepositoryService {
       action: 'CREATE_REPOSITORY',
       entityType: 'REPOSITORY',
       entityId: repoId,
-      metadata: { name: newRepo.name, visibility: newRepo.visibility }
+      metadata: {
+        name: newRepo.name,
+        visibility: newRepo.visibility,
+        allow_download: newRepo.allow_download
+      }
     })
 
-    return this.enrichRepository(newRepo)
+    return this.enrichRepository(newRepo, actorId, _actorRole)
   }
 
   public static async updateRepository(
@@ -150,6 +188,7 @@ export class RepositoryService {
       slug: finalSlug,
       description: dto.description !== undefined ? (dto.description ? dto.description.trim() : null) : repo.description,
       visibility: dto.visibility || repo.visibility,
+      allow_download: dto.allow_download !== undefined ? Boolean(dto.allow_download) : (repo.allow_download ?? true),
       updated_at: new Date().toISOString()
     }
 
@@ -163,7 +202,7 @@ export class RepositoryService {
       metadata: { changes: Object.keys(dto) }
     })
 
-    return this.enrichRepository(updated)
+    return this.enrichRepository(updated, actorId, actorRole)
   }
 
   public static async deleteRepository(
@@ -183,7 +222,6 @@ export class RepositoryService {
       throw new AuthorizationError('You do not have permission to delete this repository')
     }
 
-    // Cascade delete repository items
     const itemsToDelete = Array.from(dbStore.repositoryItems.entries())
       .filter(([_, item]) => item.repository_id === id)
       .map(([key]) => key)
@@ -224,7 +262,6 @@ export class RepositoryService {
       throw new AuthorizationError('You do not have permission to add items to this repository')
     }
 
-    // Verify item exists
     if (itemType === 'ASSET' && !dbStore.assets.has(itemId)) {
       throw new NotFoundError('Target asset not found')
     }
@@ -232,7 +269,6 @@ export class RepositoryService {
       throw new NotFoundError('Target font not found')
     }
 
-    // Check duplicate
     const existing = Array.from(dbStore.repositoryItems.values()).find(
       ri => ri.repository_id === repositoryId && ri.item_type === itemType && ri.item_id === itemId
     )
@@ -284,14 +320,26 @@ export class RepositoryService {
     return false
   }
 
-  private static enrichRepository(repo: Repository): Repository {
-    const owner = dbStore.profiles.get(repo.owner_id)
+  private static enrichRepository(
+    repo: Repository,
+    currentUserId: string | null = null,
+    currentUserRole: UserRole | null = null
+  ): Repository {
+    const rawOwner = dbStore.profiles.get(repo.owner_id)
+    const owner = rawOwner ? (sanitizeProfile(rawOwner) ?? undefined) : undefined
     const items = Array.from(dbStore.repositoryItems.values()).filter(ri => ri.repository_id === repo.id)
     const assetCount = items.filter(i => i.item_type === 'ASSET').length
     const fontCount = items.filter(i => i.item_type === 'FONT').length
 
+    const isOwner = Boolean(currentUserId && repo.owner_id === currentUserId)
+    const isAdmin = currentUserRole === 'ADMIN'
+    const allowDownload = repo.allow_download !== false
+    const canDownload = isOwner || isAdmin || allowDownload
+
     return {
       ...repo,
+      allow_download: allowDownload,
+      can_download: canDownload,
       owner,
       asset_count: assetCount,
       font_count: fontCount,
@@ -299,15 +347,52 @@ export class RepositoryService {
     }
   }
 
-  private static enrichRepositoryWithDetails(repo: Repository): Repository {
-    const base = this.enrichRepository(repo)
+  private static enrichRepositoryWithDetails(
+    repo: Repository,
+    currentUserId: string | null = null,
+    currentUserRole: UserRole | null = null
+  ): Repository {
+    const base = this.enrichRepository(repo, currentUserId, currentUserRole)
+    const canDownload = Boolean(base.can_download)
     const items = Array.from(dbStore.repositoryItems.values()).filter(ri => ri.repository_id === repo.id)
 
     const assetIds = items.filter(i => i.item_type === 'ASSET').map(i => i.item_id)
     const fontIds = items.filter(i => i.item_type === 'FONT').map(i => i.item_id)
 
-    const assets = assetIds.map(id => dbStore.assets.get(id)).filter(Boolean) as Asset[]
-    const fonts = fontIds.map(id => dbStore.fontFamilies.get(id)).filter(Boolean) as FontFamily[]
+    const assets = assetIds
+      .map(id => dbStore.assets.get(id))
+      .filter(Boolean)
+      .map(asset => {
+        const a = asset!
+        const attachedFiles = Array.from(dbStore.assetFiles.values()).filter(f => f.asset_id === a.id)
+        const files = attachedFiles.map(f => ({
+          ...f,
+          metadata: canDownload
+            ? f.metadata
+            : {
+                rawContent: f.metadata?.rawContent
+              }
+        }))
+        return {
+          ...a,
+          files
+        }
+      }) as Asset[]
+
+    const fonts = fontIds
+      .map(id => dbStore.fontFamilies.get(id))
+      .filter(Boolean)
+      .map(font => {
+        const f = font!
+        const attachedFiles = Array.from(dbStore.fontFiles.values()).filter(ff => ff.family_id === f.id)
+        return {
+          ...f,
+          files: attachedFiles.map(ff => ({
+            ...ff,
+            storage_path: canDownload ? ff.storage_path : ''
+          }))
+        }
+      }) as FontFamily[]
 
     return {
       ...base,
