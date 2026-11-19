@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     host: '0.0.0.0'
   },
   nitro: {
-    preset: 'node-server'
+    preset: process.env.VERCEL ? 'vercel' : 'node-server'
   },
 
   modules: [

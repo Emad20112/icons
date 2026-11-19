@@ -19,17 +19,36 @@ class SqlitePersistence {
     let dbPath = ':memory:'
 
     if (!isTest) {
-      const dataDir = path.resolve(process.cwd(), 'data')
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true })
+      const preferredDir = process.env.VERCEL
+        ? '/tmp/digital-assets-data'
+        : path.resolve(process.cwd(), 'data')
+      try {
+        if (!fs.existsSync(preferredDir)) {
+          fs.mkdirSync(preferredDir, { recursive: true })
+        }
+        dbPath = path.join(preferredDir, 'platform.db')
+      } catch {
+        dbPath = ':memory:'
       }
-      dbPath = path.join(dataDir, 'platform.db')
     }
 
-    const db = new DatabaseSync(dbPath)
-    db.exec('PRAGMA journal_mode = WAL;')
-    db.exec('PRAGMA foreign_keys = OFF;')
-    this.initSchema(db)
+    let db: DatabaseSyncType
+    try {
+      db = new DatabaseSync(dbPath)
+      if (dbPath !== ':memory:') {
+        try {
+          db.exec('PRAGMA journal_mode = WAL;')
+        } catch {
+          // Ignore WAL pragma errors on restricted filesystems
+        }
+      }
+      db.exec('PRAGMA foreign_keys = OFF;')
+      this.initSchema(db)
+    } catch {
+      db = new DatabaseSync(':memory:')
+      db.exec('PRAGMA foreign_keys = OFF;')
+      this.initSchema(db)
+    }
     this.db = db
     return db
   }
